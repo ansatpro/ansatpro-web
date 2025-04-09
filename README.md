@@ -1,3 +1,21 @@
+## Testing the functionalities
+
+1. `npm install`
+    
+    If you encounter error with shadcn/ui, try this command:
+    `npx shadcn@latest init`
+
+2. Edit the appwrite.js file
+
+    File Path: src/app/appwrite.js
+
+3.  Login Page Path: src/app/auth/login/page.js <br>
+
+Signup Page Path: src/app/auth/register/page.js
+
+
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
