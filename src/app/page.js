@@ -1,5 +1,7 @@
 import Image from "next/image";
 import styles from "./page.module.css";
+import { Button } from "@/components/ui/button"
+
 
 export default function Home() {
   return (
@@ -18,7 +20,7 @@ export default function Home() {
             Get started by editing <code>src/app/page.js</code>.
           </li>
           <li>Save and see your changes instantly.</li>
-          <li>test Deploy.</li>
+          <li>test Deploy.<Button>Click me</Button></li>
 
         </ol>
 
