@@ -10,7 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from 'sonner';
+import { Client, Functions } from 'appwrite';
 
+const client = new Client()
+    .setEndpoint('https://cloud.appwrite.io/v1')
+    .setProject('67ebc2ec000c0837dbf2'); // Replace with your project ID
+
+const functions = new Functions(client);
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -97,18 +103,60 @@ export default function RegisterPage() {
         try {
             // Create a name field by combining first and last name
             const name = `${formData.firstName} ${formData.lastName}`;
-
+            console.log('Name:', name); // log the name to the console
             // Register the user with Appwrite
-            const newUser = await account.create(
-                ID.unique(),
-                formData.email,
-                formData.password,
-                name
-            );
+            let newUser;
+            try {
+                newUser = await account.create(ID.unique(), formData.email, formData.password, name);
+                console.log("✅ User created:", newUser);
+            } catch (err) {
+                console.error("❌ User creation failed:", err.message);
+                return; // stop everything if user creation fails
+            }
 
-            // Create session immediately after registration
-            await account.createEmailPasswordSession(formData.email, formData.password);
+            // await new Promise((resolve) => setTimeout(resolve, 1000));
 
+            try {
+                await account.deleteSession("current");
+                console.log("✅ Deleted previous session");
+            } catch (err) {
+                console.warn("⚠️ No session to delete or already deleted:", err.message);
+            }
+
+            try {
+                await account.createEmailPasswordSession(formData.email, formData.password);
+                console.log("✅ Session created");
+            } catch (err) {
+                console.error("❌ Failed to login after creation:", err.message);
+            }
+
+            console.log('This is createEmailPasswordSession')
+            await account.get();
+            console.log('This is get')
+            const jwt = (await account.createJWT()).jwt;
+            // Optional: save in memory, localStorage, or pass to context/state
+            localStorage.setItem('jwt', jwt);
+
+            const payload = {
+                first_name: formData.firstName,
+                last_name: formData.lastName,
+                email: formData.email,
+                role: formData.role,
+                affiliation_id: formData.healthService || formData.university,
+                nmba_confirmed: formData.isRegisteredNurse
+            };
+
+            // const user_jwt = localStorage.getItem('jwt'); // read it
+            console.log('JWT:', jwt); // log it to the console
+
+
+            const resp = await functions.createExecution('function_jwt_require', JSON.stringify({
+                jwt,
+                action: 'addMetadata',
+                payload
+            }));
+
+            console.log(resp); // handle the response as needed
             toast({
                 title: "Registration Successful",
                 description: "Your account has been created.",

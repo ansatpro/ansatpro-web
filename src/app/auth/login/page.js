@@ -32,6 +32,8 @@ const LoginPage = () => {
 
       // create a new session
       await account.createEmailPasswordSession(email, password);
+      const jwt = (await account.createJWT()).jwt;
+      localStorage.setItem('jwt', jwt);
       const user = await account.get();
 
       setLoggedInUser(user);
