@@ -64,7 +64,7 @@ export default function RegisterPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!formData.isRegisteredNurse) {
             toast({
                 title: "Registration Error",
@@ -97,7 +97,7 @@ export default function RegisterPage() {
         try {
             // Create a name field by combining first and last name
             const name = `${formData.firstName} ${formData.lastName}`;
-            
+
             // Register the user with Appwrite
             const newUser = await account.create(
                 ID.unique(),
@@ -105,23 +105,18 @@ export default function RegisterPage() {
                 formData.password,
                 name
             );
-            
-            // You can store additional user data (like role and organization) in a database or Appwrite collection
-            // const userData = {
-            //     userId: newUser.$id,
-            //     role: formData.role,
-            //     organization: formData.role === "preceptor" ? formData.healthService : formData.university
-            // };
-            // await database.createDocument('users', ID.unique(), userData);
-            
+
+            // Create session immediately after registration
+            await account.createEmailPasswordSession(formData.email, formData.password);
+
             toast({
                 title: "Registration Successful",
-                description: "Your account has been created. Please log in.",
+                description: "Your account has been created.",
                 duration: 3000,
             });
-            
-            // Redirect to login page after successful registration
-            router.push('/auth/login');
+
+            // Redirect to success page after successful registration
+            window.location.href = '/auth/success';
         } catch (error) {
             toast({
                 title: "Registration Failed",
@@ -261,8 +256,8 @@ export default function RegisterPage() {
                                 id="isRegisteredNurse"
                                 name="isRegisteredNurse"
                                 checked={formData.isRegisteredNurse}
-                                onCheckedChange={(checked) => 
-                                    setFormData({...formData, isRegisteredNurse: checked})
+                                onCheckedChange={(checked) =>
+                                    setFormData({ ...formData, isRegisteredNurse: checked })
                                 }
                             />
                             <div className="grid gap-1.5 leading-none">

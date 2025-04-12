@@ -33,7 +33,10 @@ const LoginPage = () => {
       // create a new session
       await account.createEmailPasswordSession(email, password);
       const user = await account.get();
+
       setLoggedInUser(user);
+      // Redirect to success page after successful login
+      window.location.href = '/auth/success';
     } catch (err) {
       console.error("Login failed:", err);
       setError(err.message || "Failed to login. Please check your credentials.");
