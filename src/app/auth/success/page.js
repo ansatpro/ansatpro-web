@@ -28,7 +28,7 @@ export default function SuccessPage() {
                     console.log(currentUser.$id)
                     const requestBody = JSON.stringify({
                         jwt: token.jwt,
-                        action: 'getStudentsList',
+                        action: 'getPreceptorFeedbackWithStudent',
                     });
 
                     const response = await functions.createExecution('function_jwt_require', requestBody);

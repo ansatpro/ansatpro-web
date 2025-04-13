@@ -1,6 +1,6 @@
 "use client";
 import { useState } from 'react';
-import { account, ID } from "../../appwrite";
+import { account, ID, functions } from "../../appwrite";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,6 @@ const client = new Client()
     .setEndpoint('https://cloud.appwrite.io/v1')
     .setProject('67ebc2ec000c0837dbf2'); // Replace with your project ID
 
-const functions = new Functions(client);
 
 export default function RegisterPage() {
     const router = useRouter();
