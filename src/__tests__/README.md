@@ -2,6 +2,13 @@
 
 This file serves as a guide for writing test cases using Vitest, a JavaScript and TypeScript testing framework. It also outlines the naming conventions for test files in this project.
 
+## Run all the unit tests
+```bash
+npm run test
+# or
+npm test
+```
+
 ## Writing Tests
 - Import the necessary functions from Vitest, such as `test` and `expect`.
 - Define the function or module you want to test.

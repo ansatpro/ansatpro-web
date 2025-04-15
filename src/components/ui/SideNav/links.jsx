@@ -1,0 +1,28 @@
+/**
+ * Navigation links configuration for the SideNav component
+ * Each link includes a path, label and icon
+ */
+import {
+  Home,
+  MessageSquareText,
+  Settings,
+  Users,
+  Download,
+} from "lucide-react";
+
+/**
+ * Array of navigation link objects
+ *
+ * @type {Array<{
+ *   href: string,
+ *   label: string,
+ *   icon: React.ReactElement
+ * }>}
+ */
+export const links = [
+  { href: "/", label: "Home", icon: <Home /> },
+  { href: "/students", label: "Students", icon: <Users /> },
+  { href: "/feedback", label: "Feedback", icon: <MessageSquareText /> },
+  { href: "/report", label: "Report", icon: <Download /> },
+  { href: "/settings", label: "Settings", icon: <Settings /> },
+];
