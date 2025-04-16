@@ -163,7 +163,7 @@ export default function RegisterPage() {
             });
 
             // Redirect to success page after successful registration
-            window.location.href = '/auth/success';
+            // window.location.href = '/auth/success';
         } catch (error) {
             toast({
                 title: "Registration Failed",
