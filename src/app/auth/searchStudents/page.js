@@ -39,7 +39,7 @@ export default function SuccessPage() {
         setIsLoading(true);
         try {
             const res = await functions.createExecution(
-                'function_jwt_require',
+                '67ffd00400174f76be85',
                 JSON.stringify({
                     jwt: jwtToken,
                     action: 'searchStudents',
@@ -75,40 +75,40 @@ export default function SuccessPage() {
     if (!user) return null;
 
     return (
-        <div className= "flex flex-col items-center justify-start min-h-screen bg-gray-50 p-4" >
-        <Card className="w-full max-w-md mt-10" >
-            <CardHeader>
-            <CardTitle className="text-center" > Welcome, { user.name || "User" }! </CardTitle>
+        <div className="flex flex-col items-center justify-start min-h-screen bg-gray-50 p-4" >
+            <Card className="w-full max-w-md mt-10" >
+                <CardHeader>
+                    <CardTitle className="text-center" > Welcome, {user.name || "User"}! </CardTitle>
                 </CardHeader>
                 < CardContent >
-                <input
+                    <input
                         type="text"
-    value = { query }
-    onChange = {(e) => setQuery(e.target.value)
-}
-placeholder = "Search students by first name"
-className = "w-full border rounded p-2 mb-4"
-    />
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)
+                        }
+                        placeholder="Search students by first name"
+                        className="w-full border rounded p-2 mb-4"
+                    />
 
-    { isLoading && <p className="text-gray-500 text-sm" > Searching...</p>}
+                    {isLoading && <p className="text-gray-500 text-sm" > Searching...</p>}
 
-<ul className="bg-white rounded shadow divide-y" >
-{
-    students.map(student => (
-        <li key= { student.$id } className = "p-2" >
-        { student.first_name } { student.last_name }
-    </li>
-    ))
-}
-    </ul>
+                    <ul className="bg-white rounded shadow divide-y" >
+                        {
+                            students.map(student => (
+                                <li key={student.$id} className="p-2" >
+                                    {student.first_name} {student.last_name}
+                                </li>
+                            ))
+                        }
+                    </ul>
 
-{
-    !isLoading && query.length >= 2 && students.length === 0 && (
-        <p className="text-sm text-gray-500 mt-4" > No students found.</p>
-                    )
-}
-</CardContent>
-    </Card>
-    </div>
+                    {
+                        !isLoading && query.length >= 2 && students.length === 0 && (
+                            <p className="text-sm text-gray-500 mt-4" > No students found.</p>
+                        )
+                    }
+                </CardContent>
+            </Card>
+        </div>
     );
 }

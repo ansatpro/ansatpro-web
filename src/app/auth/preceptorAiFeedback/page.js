@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { account, client, functions } from "../../appwrite";
+import { account, functions } from "../../appwrite";
 
 export default function FeedbackAnalyzer() {
     const [input, setInput] = useState("");
@@ -11,22 +11,34 @@ export default function FeedbackAnalyzer() {
     async function handleAnalyze() {
         setLoading(true);
         setResult(null);
+
         try {
+            // Step 1: ensure user is logged in
+            await account.get();
+
+            // Step 2: get JWT
+            const jwt = (await account.createJWT()).jwt;
+
+            // Step 3: call function with action
             const execution = await functions.createExecution(
-                "preceptor_ai_feedback",
-                JSON.stringify({ text: input })
+                "67ffd00400174f76be85", // 👈 your unified function ID
+                JSON.stringify({
+                    jwt,
+                    action: "getAiFeedbackPreceptor",
+                    payload: { text: input }
+                })
             );
 
-            console.log("Execution:", execution); // ✅ this should contain `$id`
-            const json_result = execution.responseBody
+            // Step 4: parse result
+            const json_result = execution.responseBody;
             const parsed = typeof json_result === "string" ? JSON.parse(json_result) : json_result;
 
-            setResult(parsed.matched_ids);
-
+            setResult(parsed.matched_ids || ["No matches found"]);
         } catch (err) {
-            console.error(err);
-            setResult({ error: "Something went wrong" });
+            console.error("❌ AI match error:", err);
+            setResult(["Something went wrong"]);
         }
+
         setLoading(false);
     }
 
@@ -50,7 +62,16 @@ export default function FeedbackAnalyzer() {
                 {loading ? "Analyzing..." : "Analyze"}
             </button>
 
-            {result}
+            {result && (
+                <div className="bg-gray-100 p-3 rounded mt-4">
+                    <strong>Matched IDs:</strong>
+                    <ul className="list-disc pl-6">
+                        {result.map((id, idx) => (
+                            <li key={idx}>{id}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </div>
     );
 }
