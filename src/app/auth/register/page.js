@@ -149,7 +149,7 @@ export default function RegisterPage() {
             console.log('JWT:', jwt); // log it to the console
 
 
-            const resp = await functions.createExecution('function_jwt_require', JSON.stringify({
+            const resp = await functions.createExecution('67ffd78c00338787f104', JSON.stringify({
                 jwt,
                 action: 'addMetadata',
                 payload
