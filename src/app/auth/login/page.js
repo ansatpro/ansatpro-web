@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { GetAllStudents } from "../../../../lib/HowToConnectToFunction";
 
 const LoginPage = () => {
   const [loggedInUser, setLoggedInUser] = useState(null);
@@ -58,7 +59,10 @@ const LoginPage = () => {
 
   if (loggedInUser) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+      <>
+      
+              <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+        
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-center">Welcome!</CardTitle>
@@ -80,11 +84,15 @@ const LoginPage = () => {
           </CardFooter>
         </Card>
       </div>
+      </>
+
     );
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+    <>
+        <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+      
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center">Log in</CardTitle>
@@ -147,8 +155,8 @@ const LoginPage = () => {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 };
 
 export default LoginPage;
-
