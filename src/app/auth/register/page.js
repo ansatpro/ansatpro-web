@@ -176,16 +176,17 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-            <Card className="w-full max-w-md">
-                <CardHeader>
-                    <CardTitle className="text-center">Create an Account</CardTitle>
-                </CardHeader>
+        <div className="flex items-center justify-center min-h-screen bg-white p-4">
+            <Card className="w-full max-w-md border-none shadow-none">
                 <CardContent>
-                    <form className="space-y-4" onSubmit={handleSubmit}>
+                    <div className="mb-8 text-center">
+                        <h1 className="text-2xl font-bold mb-2">Welcome to ANSAT Pro.</h1>
+                        <p className="text-gray-500">Create your account</p>
+                    </div>
+                    <form className="space-y-6" onSubmit={handleSubmit}>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="firstName">First Name</Label>
+                                <Label htmlFor="firstName" className="text-sm font-medium">First Name</Label>
                                 <Input
                                     id="firstName"
                                     name="firstName"
@@ -193,10 +194,11 @@ export default function RegisterPage() {
                                     value={formData.firstName}
                                     onChange={handleInputChange}
                                     required
+                                    className="py-6 bg-gray-50"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="lastName">Last Name</Label>
+                                <Label htmlFor="lastName" className="text-sm font-medium">Last Name</Label>
                                 <Input
                                     id="lastName"
                                     name="lastName"
@@ -204,25 +206,27 @@ export default function RegisterPage() {
                                     value={formData.lastName}
                                     onChange={handleInputChange}
                                     required
+                                    className="py-6 bg-gray-50"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="email">Email Address</Label>
+                            <Label htmlFor="email" className="text-sm font-medium">Email</Label>
                             <Input
                                 id="email"
                                 name="email"
                                 type="email"
-                                placeholder="your.email@example.com"
+                                placeholder="Enter your email"
                                 value={formData.email}
                                 onChange={handleInputChange}
                                 required
+                                className="py-6 bg-gray-50"
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password" className="text-sm font-medium">Password</Label>
                             <Input
                                 id="password"
                                 name="password"
@@ -231,18 +235,14 @@ export default function RegisterPage() {
                                 value={formData.password}
                                 onChange={handleInputChange}
                                 required
-                                minLength={8}
+                                className="py-6 bg-gray-50"
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="role">Role Selection</Label>
-                            <Select
-                                value={formData.role}
-                                onValueChange={(value) => handleSelectChange(value, 'role')}
-                                required
-                            >
-                                <SelectTrigger id="role">
+                            <Label htmlFor="role" className="text-sm font-medium">Role</Label>
+                            <Select name="role" onValueChange={(value) => handleSelectChange(value, 'role')} required>
+                                <SelectTrigger className="py-6 bg-gray-50">
                                     <SelectValue placeholder="Select your role" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -252,16 +252,11 @@ export default function RegisterPage() {
                             </Select>
                         </div>
 
-                        {/* Show Health Service dropdown if preceptor is selected */}
-                        {formData.role === "preceptor" && (
+                        {formData.role === 'preceptor' && (
                             <div className="space-y-2">
-                                <Label htmlFor="healthService">Health Service</Label>
-                                <Select
-                                    value={formData.healthService}
-                                    onValueChange={(value) => handleSelectChange(value, 'healthService')}
-                                    required
-                                >
-                                    <SelectTrigger id="healthService">
+                                <Label htmlFor="healthService" className="text-sm font-medium">Health Service</Label>
+                                <Select name="healthService" onValueChange={(value) => handleSelectChange(value, 'healthService')}>
+                                    <SelectTrigger className="py-6 bg-gray-50">
                                         <SelectValue placeholder="Select your health service" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -275,16 +270,11 @@ export default function RegisterPage() {
                             </div>
                         )}
 
-                        {/* Show University dropdown if facilitator is selected */}
-                        {formData.role === "facilitator" && (
+                        {formData.role === 'facilitator' && (
                             <div className="space-y-2">
-                                <Label htmlFor="university">University</Label>
-                                <Select
-                                    value={formData.university}
-                                    onValueChange={(value) => handleSelectChange(value, 'university')}
-                                    required
-                                >
-                                    <SelectTrigger id="university">
+                                <Label htmlFor="university" className="text-sm font-medium">University</Label>
+                                <Select name="university" onValueChange={(value) => handleSelectChange(value, 'university')}>
+                                    <SelectTrigger className="py-6 bg-gray-50">
                                         <SelectValue placeholder="Select your university" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -298,37 +288,36 @@ export default function RegisterPage() {
                             </div>
                         )}
 
-                        <div className="flex items-start space-x-2 pt-2">
+                        <div className="flex items-center space-x-2">
                             <Checkbox
                                 id="isRegisteredNurse"
                                 name="isRegisteredNurse"
                                 checked={formData.isRegisteredNurse}
-                                onCheckedChange={(checked) =>
-                                    setFormData({ ...formData, isRegisteredNurse: checked })
-                                }
+                                onCheckedChange={(checked) => handleInputChange({
+                                    target: { name: 'isRegisteredNurse', type: 'checkbox', checked }
+                                })}
                             />
-                            <div className="grid gap-1.5 leading-none">
-                                <Label
-                                    htmlFor="isRegisteredNurse"
-                                    className="text-sm font-medium text-justify leading-normal peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                >
-                                    I declare that I am a registered nurse, holding current nursing registration with Nursing and Midwifery Board of Australia (NMBA).
-                                </Label>
-                            </div>
-                        </div>
-
-                        <div className="text-center text-sm my-2">
-                            Already have an account? <Link href="/auth/login" className="text-blue-600 hover:text-blue-800">Log in</Link>
-                        </div>
-
-                        <div className="pt-2">
-                            <Button
-                                type="submit"
-                                className="w-full"
-                                disabled={isLoading}
+                            <label
+                                htmlFor="isRegisteredNurse"
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                             >
-                                {isLoading ? "Creating Account..." : "Sign Up"}
-                            </Button>
+                                I am a registered nurse
+                            </label>
+                        </div>
+
+                        <Button
+                            type="submit"
+                            className="w-full py-6 bg-[#3A6784] hover:bg-[#2d5268] text-white font-semibold text-base"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "Creating account..." : "Create Account"}
+                        </Button>
+
+                        <div className="flex items-center justify-center space-x-1 text-sm">
+                            <span className="text-gray-500">Already have an account?</span>
+                            <Link href="/auth/login" className="text-[#3A6784] hover:text-[#2d5268] font-medium">
+                                Sign In
+                            </Link>
                         </div>
                     </form>
                 </CardContent>
