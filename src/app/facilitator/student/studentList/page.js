@@ -12,7 +12,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { GetAllStudents } from "../../../../../lib/HowToConnectToFunction";
+import {
+  GetAllStudents,
+  DeleteStudent,
+} from "../../../../../lib/HowToConnectToFunction";
 
 export default function StudentList() {
   const [students, setStudents] = useState([]);
@@ -25,8 +28,6 @@ export default function StudentList() {
       try {
         const studentsData = await GetAllStudents();
         setStudents(studentsData);
-        console.log("hi");
-        console.log(studentsData);
       } catch (err) {
         console.error(err);
       } finally {
@@ -47,13 +48,13 @@ export default function StudentList() {
 
   const universities = [
     ...new Set(students.map((student) => student.university)),
-  ];
+  ].filter(Boolean);
   const healthServices = [
     ...new Set(students.map((student) => student.healthService)),
-  ];
+  ].filter(Boolean);
   const clinicAreas = [
     ...new Set(students.map((student) => student.clinicArea)),
-  ];
+  ].filter(Boolean);
 
   // Apply filters whenever any filter changes
   useEffect(() => {
@@ -168,8 +169,13 @@ export default function StudentList() {
     setFilteredResults(students);
   };
 
-  const handleDelete = (studentId) => {
+  const handleDelete = async (studentId) => {
     // In a real application, this would make an API call to delete the student
+    const studentToDelete = students.find(
+      (student) => student.studentId === studentId
+    );
+    const documentID = studentToDelete.documentID;
+    const deleteStudent = await DeleteStudent(documentID);
     console.log(`Delete student with ID: ${studentId}`);
     // Remove the student from filtered results
     setFilteredResults((prevResults) =>
@@ -273,11 +279,14 @@ export default function StudentList() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Universities</SelectItem>
-                      {universities.map((uni) => (
-                        <SelectItem key={uni} value={uni}>
-                          {uni}
-                        </SelectItem>
-                      ))}
+                      {universities.map(
+                        (uni) =>
+                          uni && (
+                            <SelectItem key={uni} value={uni}>
+                              {uni}
+                            </SelectItem>
+                          )
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -391,7 +400,6 @@ export default function StudentList() {
                 </tr>
               </thead>
               <tbody>
-                {" "}
                 {isLoading === true ? (
                   <tr>
                     <td
