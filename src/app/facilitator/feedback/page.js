@@ -25,99 +25,15 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export default function FeedbackList() {
+export default function AllFeedback() {
   const router = useRouter();
 
   // 预设的示例反馈数据
   const sampleFeedbacks = [
     {
-      id: "F12345",
-      studentName: "John Smith",
-      course: "Mathematics 101",
-      university: "University of California",
-      healthService: "General Hospital",
-      clinicArea: "Pediatrics",
-      date: "2023-10-15",
-      feedbackType: "Assignment Feedback",
-      content: "John has shown significant improvement in algebraic equations. His problem-solving approach demonstrates good analytical skills. Need to work more on geometry concepts.",
-      preceptor: "Dr. Williams"
-    },
-    {
-      id: "F23456",
-      studentName: "Emily Johnson",
-      course: "Literature Studies",
-      university: "Stanford University",
-      healthService: "Community Health Center",
-      clinicArea: "Psychiatry",
-      date: "2023-10-12",
-      feedbackType: "Term Paper Feedback",
-      content: "Emily's analysis of the text was insightful and well-structured. Her arguments were supported with relevant quotes and references. Grammar and citations need more attention.",
-      preceptor: "Prof. Garcia"
-    },
-    {
-      id: "F34567",
-      studentName: "Michael Chen",
-      course: "Computer Science 202",
-      university: "MIT",
-      healthService: "Tech Medical Center",
-      clinicArea: "Neurology",
-      date: "2023-10-10",
-      feedbackType: "Project Feedback",
-      content: "Michael's code was well-organized and efficiently implemented. Documentation was thorough and clear. For future projects, consider adding more error handling and unit tests.",
-      preceptor: "Dr. Thompson"
-    },
-    {
-      id: "F45678",
-      studentName: "Sarah Wilson",
-      course: "Biology 301",
-      university: "Harvard University",
-      healthService: "Research Hospital",
-      clinicArea: "Cardiology",
-      date: "2023-10-08",
-      feedbackType: "Lab Report Feedback",
-      content: "Sarah's experimental methodology was sound and her observations were detailed. The analysis section showed good understanding of the concepts. Recommendation: include more relevant literature in the discussion section.",
-      preceptor: "Prof. Martinez"
-    },
-    {
-      id: "F56789",
-      studentName: "David Lee",
-      course: "Physics 202",
-      university: "California Institute of Technology",
-      healthService: "University Hospital",
-      clinicArea: "Orthopedics",
-      date: "2023-10-05",
-      feedbackType: "Exam Feedback",
-      content: "David demonstrated strong understanding of core concepts. Calculations were accurate but needs to show more detailed work. Overall performance was above average.",
-      preceptor: "Dr. Robinson"
-    },
-    {
-      id: "F67890",
-      studentName: "Jessica Brown",
-      course: "Psychology 101",
-      university: "University of Michigan",
-      healthService: "Mental Health Clinic",
-      clinicArea: "Psychology",
-      date: "2023-09-25",
-      feedbackType: "Presentation Feedback",
-      content: "Jessica's presentation was well-organized and engaging. Her research on cognitive development was thorough. Recommendation: Work on pacing and eye contact with audience.",
-      preceptor: "Prof. Anderson"
-    },
-    {
-      id: "F78901",
-      studentName: "Ryan Taylor",
-      course: "Chemistry 202",
-      university: "University of Washington",
-      healthService: "Medical Research Center",
-      clinicArea: "Oncology",
-      date: "2023-08-15",
-      feedbackType: "Lab Evaluation",
-      content: "Ryan's lab work was methodical and precise. His analysis of chemical compounds showed deep understanding of the reactions. Could improve on documentation of experimental procedures.",
-      preceptor: "Dr. Patel"
-    },
-    {
       id: "F89012",
       studentName: "Olivia Martinez",
-      course: "Nursing 301",
+      ismarked: "Marked",
       university: "Johns Hopkins University",
       healthService: "Community Clinic",
       clinicArea: "Family Medicine",
@@ -268,8 +184,7 @@ export default function FeedbackList() {
     const results = filteredResults.filter(
       (feedback) =>
         feedback.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        feedback.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        feedback.feedbackType.toLowerCase().includes(searchTerm.toLowerCase())
+        feedback.content.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     setFilteredResults(results);
@@ -363,7 +278,7 @@ export default function FeedbackList() {
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     type="search"
-                    placeholder="Search for feedback content or student name"
+                    placeholder="Search for student name or feedback content"
                     className="pl-10 pr-10"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -498,14 +413,13 @@ export default function FeedbackList() {
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-lg group-hover:text-primary transition-colors duration-300">{feedback.studentName}</CardTitle>
-                    <Badge variant="outline" className="group-hover:bg-primary/10 transition-colors duration-300">{feedback.course}</Badge>
+                    <Badge variant="outline" className="group-hover:bg-primary/10 transition-colors duration-300">{feedback.ismarked}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {formatDate(feedback.date)}
                   </p>
                 </CardHeader>
                 <CardContent className="flex-grow">
-                  <h3 className="font-medium mb-2 group-hover:text-primary/80 transition-colors duration-300">{feedback.feedbackType}</h3>
                   <p className="text-sm text-muted-foreground line-clamp-4">{feedback.content}</p>
                 </CardContent>
                 <CardFooter className="border-t pt-3 text-xs text-muted-foreground group-hover:border-primary/20 transition-colors duration-300">
