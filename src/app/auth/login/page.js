@@ -134,6 +134,11 @@ const LoginPage = () => {
                 Sign Up
               </Link>
             </div>
+            <div className="flex items-center justify-center space-x-1 text-sm">
+              <Link href="/auth/forgot-password" className="text-[#3A6784] hover:text-[#2d5268] font-medium">
+                Forgot Password?
+              </Link>
+            </div>
           </form>
         </CardContent>
       </Card>

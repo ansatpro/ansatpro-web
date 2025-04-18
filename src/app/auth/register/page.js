@@ -1,25 +1,28 @@
 "use client";
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { account, ID, functions } from "../../appwrite";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from 'sonner';
-import { Client, Functions } from 'appwrite';
+import { Client } from 'appwrite';
 
 const client = new Client()
     .setEndpoint('https://cloud.appwrite.io/v1')
-    .setProject('67ebc2ec000c0837dbf2'); // Replace with your project ID
-
+    .setProject('67ebc2ec000c0837dbf2');
 
 export default function RegisterPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const [healthServices, setHealthServices] = useState([]);
+    const [universities, setUniversities] = useState([]);
+
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -31,26 +34,23 @@ export default function RegisterPage() {
         isRegisteredNurse: false
     });
 
-    // Example data - replace with your actual data
-    const healthServices = [
-        "Alfred Health",
-        "Austin Health",
-        "Eastern Health",
-        "Monash Health",
-        "Royal Children's Hospital",
-        "Royal Melbourne Hospital",
-        "St Vincent's Hospital"
-    ];
+    useEffect(() => {
+        const fetchAffiliations = async () => {
+            try {
+                const res = await functions.createExecution('guest_request', JSON.stringify({
+                    action: 'getAffiliations'
+                }));
+                const parsed = JSON.parse(res.responseBody);
+                const all = parsed.affiliations || [];
 
-    const universities = [
-        "Australian Catholic University",
-        "Deakin University",
-        "La Trobe University",
-        "Monash University",
-        "RMIT University",
-        "University of Melbourne",
-        "Victoria University"
-    ];
+                setHealthServices(all.filter(item => item.affiliation_type === 'health_service'));
+                setUniversities(all.filter(item => item.affiliation_type === 'university'));
+            } catch (err) {
+                console.error("❌ Failed to fetch affiliations:", err.message);
+            }
+        };
+        fetchAffiliations();
+    }, []);
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -79,7 +79,6 @@ export default function RegisterPage() {
             return;
         }
 
-        // Check if the appropriate organization field is filled based on role
         if (formData.role === "preceptor" && !formData.healthService) {
             toast({
                 title: "Registration Error",
@@ -100,40 +99,29 @@ export default function RegisterPage() {
 
         setIsLoading(true);
         try {
-            // Create a name field by combining first and last name
             const name = `${formData.firstName} ${formData.lastName}`;
-            console.log('Name:', name); // log the name to the console
-            // Register the user with Appwrite
             let newUser;
             try {
                 newUser = await account.create(ID.unique(), formData.email, formData.password, name);
-                console.log("✅ User created:", newUser);
             } catch (err) {
                 console.error("❌ User creation failed:", err.message);
-                return; // stop everything if user creation fails
+                return;
             }
-
-            // await new Promise((resolve) => setTimeout(resolve, 1000));
 
             try {
                 await account.deleteSession("current");
-                console.log("✅ Deleted previous session");
             } catch (err) {
                 console.warn("⚠️ No session to delete or already deleted:", err.message);
             }
 
             try {
                 await account.createEmailPasswordSession(formData.email, formData.password);
-                console.log("✅ Session created");
             } catch (err) {
                 console.error("❌ Failed to login after creation:", err.message);
             }
 
-            console.log('This is createEmailPasswordSession')
             await account.get();
-            console.log('This is get')
             const jwt = (await account.createJWT()).jwt;
-            // Optional: save in memory, localStorage, or pass to context/state
             localStorage.setItem('jwt', jwt);
 
             const payload = {
@@ -145,25 +133,17 @@ export default function RegisterPage() {
                 nmba_confirmed: formData.isRegisteredNurse
             };
 
-            // const user_jwt = localStorage.getItem('jwt'); // read it
-            console.log('JWT:', jwt); // log it to the console
-
-
-            const resp = await functions.createExecution('67ffd78c00338787f104', JSON.stringify({
+            await functions.createExecution('67ffd78c00338787f104', JSON.stringify({
                 jwt,
                 action: 'addMetadata',
                 payload
             }));
 
-            console.log(resp); // handle the response as needed
             toast({
                 title: "Registration Successful",
                 description: "Your account has been created.",
                 duration: 3000,
             });
-
-            // Redirect to success page after successful registration
-            // window.location.href = '/auth/success';
         } catch (error) {
             toast({
                 title: "Registration Failed",
@@ -186,61 +166,27 @@ export default function RegisterPage() {
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="firstName" className="text-sm font-medium">First Name</Label>
-                                <Input
-                                    id="firstName"
-                                    name="firstName"
-                                    placeholder="First name"
-                                    value={formData.firstName}
-                                    onChange={handleInputChange}
-                                    required
-                                    className="py-6 bg-gray-50"
-                                />
+                                <Label htmlFor="firstName">First Name</Label>
+                                <Input id="firstName" name="firstName" placeholder="First name" value={formData.firstName} onChange={handleInputChange} required className="py-6 bg-gray-50" />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="lastName" className="text-sm font-medium">Last Name</Label>
-                                <Input
-                                    id="lastName"
-                                    name="lastName"
-                                    placeholder="Last name"
-                                    value={formData.lastName}
-                                    onChange={handleInputChange}
-                                    required
-                                    className="py-6 bg-gray-50"
-                                />
+                                <Label htmlFor="lastName">Last Name</Label>
+                                <Input id="lastName" name="lastName" placeholder="Last name" value={formData.lastName} onChange={handleInputChange} required className="py-6 bg-gray-50" />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="email" className="text-sm font-medium">Email</Label>
-                            <Input
-                                id="email"
-                                name="email"
-                                type="email"
-                                placeholder="Enter your email"
-                                value={formData.email}
-                                onChange={handleInputChange}
-                                required
-                                className="py-6 bg-gray-50"
-                            />
+                            <Label htmlFor="email">Email</Label>
+                            <Input id="email" name="email" type="email" placeholder="Enter your email" value={formData.email} onChange={handleInputChange} required className="py-6 bg-gray-50" />
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-                            <Input
-                                id="password"
-                                name="password"
-                                type="password"
-                                placeholder="Create a password"
-                                value={formData.password}
-                                onChange={handleInputChange}
-                                required
-                                className="py-6 bg-gray-50"
-                            />
+                            <Label htmlFor="password">Password</Label>
+                            <Input id="password" name="password" type="password" placeholder="Create a password" value={formData.password} onChange={handleInputChange} required className="py-6 bg-gray-50" />
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="role" className="text-sm font-medium">Role</Label>
+                            <Label htmlFor="role">Role</Label>
                             <Select name="role" onValueChange={(value) => handleSelectChange(value, 'role')} required>
                                 <SelectTrigger className="py-6 bg-gray-50">
                                     <SelectValue placeholder="Select your role" />
@@ -254,15 +200,15 @@ export default function RegisterPage() {
 
                         {formData.role === 'preceptor' && (
                             <div className="space-y-2">
-                                <Label htmlFor="healthService" className="text-sm font-medium">Health Service</Label>
+                                <Label htmlFor="healthService">Health Service</Label>
                                 <Select name="healthService" onValueChange={(value) => handleSelectChange(value, 'healthService')}>
                                     <SelectTrigger className="py-6 bg-gray-50">
                                         <SelectValue placeholder="Select your health service" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {healthServices.map((service) => (
-                                            <SelectItem key={service} value={service}>
-                                                {service}
+                                            <SelectItem key={service.$id} value={service.$id}>
+                                                {service.affiliation_name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -272,15 +218,15 @@ export default function RegisterPage() {
 
                         {formData.role === 'facilitator' && (
                             <div className="space-y-2">
-                                <Label htmlFor="university" className="text-sm font-medium">University</Label>
+                                <Label htmlFor="university">University</Label>
                                 <Select name="university" onValueChange={(value) => handleSelectChange(value, 'university')}>
                                     <SelectTrigger className="py-6 bg-gray-50">
                                         <SelectValue placeholder="Select your university" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {universities.map((uni) => (
-                                            <SelectItem key={uni} value={uni}>
-                                                {uni}
+                                            <SelectItem key={uni.$id} value={uni.$id}>
+                                                {uni.affiliation_name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -289,35 +235,17 @@ export default function RegisterPage() {
                         )}
 
                         <div className="flex items-center space-x-2">
-                            <Checkbox
-                                id="isRegisteredNurse"
-                                name="isRegisteredNurse"
-                                checked={formData.isRegisteredNurse}
-                                onCheckedChange={(checked) => handleInputChange({
-                                    target: { name: 'isRegisteredNurse', type: 'checkbox', checked }
-                                })}
-                            />
-                            <label
-                                htmlFor="isRegisteredNurse"
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                                I am a registered nurse
-                            </label>
+                            <Checkbox id="isRegisteredNurse" name="isRegisteredNurse" checked={formData.isRegisteredNurse} onCheckedChange={(checked) => handleInputChange({ target: { name: 'isRegisteredNurse', type: 'checkbox', checked } })} />
+                            <label htmlFor="isRegisteredNurse" className="text-sm font-medium">I am a registered nurse</label>
                         </div>
 
-                        <Button
-                            type="submit"
-                            className="w-full py-6 bg-[#3A6784] hover:bg-[#2d5268] text-white font-semibold text-base"
-                            disabled={isLoading}
-                        >
+                        <Button type="submit" className="w-full py-6 bg-[#3A6784] hover:bg-[#2d5268] text-white font-semibold text-base" disabled={isLoading}>
                             {isLoading ? "Creating account..." : "Create Account"}
                         </Button>
 
                         <div className="flex items-center justify-center space-x-1 text-sm">
                             <span className="text-gray-500">Already have an account?</span>
-                            <Link href="/auth/login" className="text-[#3A6784] hover:text-[#2d5268] font-medium">
-                                Sign In
-                            </Link>
+                            <Link href="/auth/login" className="text-[#3A6784] hover:text-[#2d5268] font-medium">Sign In</Link>
                         </div>
                     </form>
                 </CardContent>

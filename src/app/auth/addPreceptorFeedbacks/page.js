@@ -76,7 +76,7 @@ export default function PreceptorFeedbackForm() {
 
         try {
             const payload = {
-                student_id: selectedStudent.student_id,
+                student_id: selectedStudent.$id,
                 preceptor_id: user.$id,
                 content,
                 flag_discuss_with_facilitator: flagFacilitator === 'yes',
