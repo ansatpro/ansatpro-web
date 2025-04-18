@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Bell, User, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 
-// ANSAT items data
+// 23 ANSAT 项目
 const ansatItems = [
     { code: "1.1", text: "Accurately completes comprehensive & systematic assessments" },
     { code: "1.2", text: "Interprets client data accurately" },
@@ -43,10 +43,10 @@ export default function FeedbackAnalyzer() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedItems, setSelectedItems] = useState([]);
+    const [isNegativeMap, setIsNegativeMap] = useState({});
     const [selectedStudent, setSelectedStudent] = useState(null);
 
     useEffect(() => {
-        // Load selected student from localStorage
         const storedStudent = localStorage.getItem('selectedStudent');
         if (storedStudent) {
             setSelectedStudent(JSON.parse(storedStudent));
@@ -74,9 +74,7 @@ export default function FeedbackAnalyzer() {
                 );
 
                 const json_result = execution.responseBody;
-                console.log("Raw AI response:", json_result);
                 const parsed = typeof json_result === "string" ? JSON.parse(json_result) : json_result;
-                console.log("Parsed AI result:", parsed);
                 const matchedIds = parsed.matched_ids || [];
                 setResult(matchedIds);
                 setSelectedItems(matchedIds);
@@ -99,19 +97,25 @@ export default function FeedbackAnalyzer() {
         );
     };
 
+    const toggleNegative = (code) => {
+        setIsNegativeMap(prev => ({
+            ...prev,
+            [code]: !prev[code]
+        }));
+    };
+
     const handleConfirm = () => {
-        if (selectedItems.length > 0) {
-            // TODO: Save the selected items and proceed to the next step
-            console.log('Selected items:', selectedItems);
-            // Clear localStorage and redirect to home
-            localStorage.removeItem('selectedStudent');
-            router.push('/preceptor/home');
-        }
+        const finalSelection = selectedItems.map(code => ({
+            code,
+            is_negative: !!isNegativeMap[code]
+        }));
+        console.log("✅ Final selection:", finalSelection);
+        localStorage.removeItem('selectedStudent');
+        router.push('/preceptor/home');
     };
 
     return (
         <div className="min-h-screen bg-white">
-            {/* Top Bar */}
             <header className="fixed top-0 left-0 right-0 h-14 bg-white z-50 border-b">
                 <div className="h-full px-6 flex justify-between items-center">
                     <Link href="/preceptor/home" className="flex items-center">
@@ -128,7 +132,6 @@ export default function FeedbackAnalyzer() {
                 </div>
             </header>
 
-            {/* Main Content */}
             <main className="pt-20 px-6 max-w-4xl mx-auto">
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold mb-2">FEEDBACK ANALYSIS</h1>
@@ -139,7 +142,6 @@ export default function FeedbackAnalyzer() {
                     )}
                 </div>
 
-                {/* Original Feedback */}
                 <Card className="mb-8">
                     <CardContent className="pt-6">
                         <h2 className="text-xl font-semibold mb-4">Original Feedback</h2>
@@ -149,7 +151,6 @@ export default function FeedbackAnalyzer() {
                     </CardContent>
                 </Card>
 
-                {/* ANSAT Items Selection */}
                 <Card className="mb-8">
                     <CardContent className="pt-6">
                         <h2 className="text-xl font-semibold mb-4">ANSAT Items</h2>
@@ -159,9 +160,7 @@ export default function FeedbackAnalyzer() {
                                 <p className="mt-4 text-gray-600">Analyzing feedback...</p>
                             </div>
                         ) : error ? (
-                            <div className="bg-red-50 text-red-600 p-4 rounded-md">
-                                {error}
-                            </div>
+                            <div className="bg-red-50 text-red-600 p-4 rounded-md">{error}</div>
                         ) : (
                             <div>
                                 <div className="bg-blue-50 p-4 rounded-lg mb-6">
@@ -170,45 +169,50 @@ export default function FeedbackAnalyzer() {
                                         Based on your feedback, the AI has identified {result.length} relevant ANSAT items:
                                     </p>
                                     <div className="flex flex-wrap gap-2">
-                                        {result.map((code) => (
+                                        {result.map(code => (
                                             <span key={code} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                                 {code}
                                             </span>
                                         ))}
                                     </div>
                                 </div>
-                                <p className="text-gray-600 mb-6">
-                                    Please review the AI suggestions below. You can adjust the selections as needed:
-                                </p>
+                                <p className="text-gray-600 mb-6">Please review the AI suggestions below. You can adjust the selections as needed:</p>
                                 <div className="space-y-4">
-                                    {ansatItems.map((item) => {
+                                    {ansatItems.map(item => {
                                         const isAiSuggested = result.includes(item.code);
                                         return (
-                                            <div key={item.code} 
-                                                 className={`flex items-start space-x-3 p-3 rounded-lg transition-colors relative
-                                                    ${selectedItems.includes(item.code) ? 'bg-blue-50' : 'hover:bg-gray-50'}`}>
-                                                <Checkbox
-                                                    id={`item-${item.code}`}
-                                                    checked={selectedItems.includes(item.code)}
-                                                    onCheckedChange={() => toggleItem(item.code)}
-                                                    className="mt-1"
-                                                />
-                                                <label
-                                                    htmlFor={`item-${item.code}`}
-                                                    className="text-sm leading-relaxed cursor-pointer flex-grow"
-                                                >
-                                                    <span className="font-medium">{item.code}</span> - {item.text}
-                                                </label>
-                                                {isAiSuggested && (
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                        AI Suggested
-                                                    </span>
+                                            <div key={item.code} className={`flex flex-col sm:flex-row sm:items-start sm:space-x-3 p-3 rounded-lg transition-colors relative ${selectedItems.includes(item.code) ? 'bg-blue-50' : 'hover:bg-gray-50'}`}>
+                                                <div className="flex items-start space-x-3">
+                                                    <Checkbox
+                                                        id={`item-${item.code}`}
+                                                        checked={selectedItems.includes(item.code)}
+                                                        onCheckedChange={() => toggleItem(item.code)}
+                                                        className="mt-1"
+                                                    />
+                                                    <label htmlFor={`item-${item.code}`} className="text-sm leading-relaxed cursor-pointer flex-grow">
+                                                        <span className="font-medium">{item.code}</span> - {item.text}
+                                                    </label>
+                                                    {isAiSuggested && (
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            AI Suggested
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                {selectedItems.includes(item.code) && (
+                                                    <div className="ml-7 mt-2 sm:mt-0 text-sm text-gray-600 flex items-center gap-2">
+                                                        <Checkbox
+                                                            id={`neg-${item.code}`}
+                                                            checked={isNegativeMap[item.code] || false}
+                                                            onCheckedChange={() => toggleNegative(item.code)}
+                                                        />
+                                                        <label htmlFor={`neg-${item.code}`}>Mark as negative feedback</label>
+                                                    </div>
                                                 )}
                                             </div>
                                         );
                                     })}
                                 </div>
-                                
+
                                 <div className="mt-8 flex justify-end">
                                     <Button
                                         onClick={handleConfirm}
