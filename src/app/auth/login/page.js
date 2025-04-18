@@ -91,7 +91,6 @@ const LoginPage = () => {
 
   return (
     <>
-    <GetAllStudents />
         <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
       
       <Card className="w-full max-w-md">
@@ -157,9 +156,7 @@ const LoginPage = () => {
       </Card>
     </div>
     </>
-
   );
 };
 
 export default LoginPage;
-

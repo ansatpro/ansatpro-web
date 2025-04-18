@@ -21,7 +21,7 @@ import {
  */
 export const links = [
   { href: "/facilitator/home", label: "Home", icon: <Home /> },
-  { href: "/facilitator/student/studentList", label: "Students", icon: <Users /> },
+  { href: "/facilitator/student", label: "Students", icon: <Users /> },
   { href: "/facilitator/feedback", label: "Feedback", icon: <MessageSquareText /> },
   { href: "/facilitator/report", label: "Report", icon: <Download /> },
   { href: "/facilitator/settings", label: "Settings", icon: <Settings /> },
