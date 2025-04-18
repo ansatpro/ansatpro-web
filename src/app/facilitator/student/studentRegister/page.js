@@ -96,7 +96,8 @@ export default function RegisterStudentPage() {
     try {
       // 这里可以添加提交表单的逻辑
       console.log("Form submitted:", formData);
-      CreateStudent(formData);
+      const res = await CreateStudent(formData);
+      console.log(res);
 
       toast({
         title: "Registration Successful",
