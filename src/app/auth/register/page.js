@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from 'react';
 import { account, ID } from "../../appwrite";
 import Link from "next/link";
@@ -10,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from 'sonner';
-
+import { GetAllStudents } from '../../../../lib/HowToConnectToFunction';
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -26,7 +27,6 @@ export default function RegisterPage() {
         isRegisteredNurse: false
     });
 
-    // Example data - replace with your actual data
     const healthServices = [
         "Alfred Health",
         "Austin Health",
@@ -74,7 +74,6 @@ export default function RegisterPage() {
             return;
         }
 
-        // Check if the appropriate organization field is filled based on role
         if (formData.role === "preceptor" && !formData.healthService) {
             toast({
                 title: "Registration Error",
@@ -95,10 +94,8 @@ export default function RegisterPage() {
 
         setIsLoading(true);
         try {
-            // Create a name field by combining first and last name
             const name = `${formData.firstName} ${formData.lastName}`;
             
-            // Register the user with Appwrite
             const newUser = await account.create(
                 ID.unique(),
                 formData.email,
@@ -106,21 +103,12 @@ export default function RegisterPage() {
                 name
             );
             
-            // You can store additional user data (like role and organization) in a database or Appwrite collection
-            // const userData = {
-            //     userId: newUser.$id,
-            //     role: formData.role,
-            //     organization: formData.role === "preceptor" ? formData.healthService : formData.university
-            // };
-            // await database.createDocument('users', ID.unique(), userData);
-            
             toast({
                 title: "Registration Successful",
                 description: "Your account has been created. Please log in.",
                 duration: 3000,
             });
             
-            // Redirect to login page after successful registration
             router.push('/auth/login');
         } catch (error) {
             toast({
@@ -134,7 +122,10 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+      <>
+      <GetAllStudents />
+           <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+            
             <Card className="w-full max-w-md">
                 <CardHeader>
                     <CardTitle className="text-center">Create an Account</CardTitle>
@@ -210,7 +201,6 @@ export default function RegisterPage() {
                             </Select>
                         </div>
 
-                        {/* Show Health Service dropdown if preceptor is selected */}
                         {formData.role === "preceptor" && (
                             <div className="space-y-2">
                                 <Label htmlFor="healthService">Health Service</Label>
@@ -233,7 +223,6 @@ export default function RegisterPage() {
                             </div>
                         )}
 
-                        {/* Show University dropdown if facilitator is selected */}
                         {formData.role === "facilitator" && (
                             <div className="space-y-2">
                                 <Label htmlFor="university">University</Label>
@@ -292,5 +281,7 @@ export default function RegisterPage() {
                 </CardContent>
             </Card>
         </div>
+      </>
+   
     );
 }
