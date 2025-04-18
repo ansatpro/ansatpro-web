@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +17,7 @@ import { toast } from "sonner";
 import { CreateStudent } from "../../../../../lib/HowToConnectToFunction";
 
 export default function RegisterStudentPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -94,7 +96,7 @@ export default function RegisterStudentPage() {
     setIsLoading(true);
 
     try {
-      // 这里可以添加提交表单的逻辑
+      // 提交表单数据到后端
       console.log("Form submitted:", formData);
       const res = await CreateStudent(formData);
       console.log(res);
@@ -105,29 +107,19 @@ export default function RegisterStudentPage() {
         duration: 3000,
       });
 
-      // 重置表单
-      setFormData({
-        firstName: "",
-        lastName: "",
-        studentId: "",
-        university: "",
-        healthService: "",
-        clinicArea: "",
-        additionalFacilitator: "",
-        startDate: "",
-        endDate: "",
-        csvFile: null,
-      });
-      setFileName("No file chosen");
+      // 成功后跳转到成功页面
+      router.push("/facilitator/student/success");
+      
     } catch (error) {
       toast({
         title: "Registration Failed",
         description: error.message || "An error occurred during registration.",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
+    
+    // 注意：不需要在这里重置表单，因为我们会跳转到成功页面
   };
 
   return (
