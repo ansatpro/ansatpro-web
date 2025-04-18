@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 
 const LoginPage = () => {
   const [loggedInUser, setLoggedInUser] = useState(null);
@@ -15,6 +16,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Handle login
   const handleLogin = async (e) => {
@@ -37,8 +39,8 @@ const LoginPage = () => {
       const user = await account.get();
 
       setLoggedInUser(user);
-      // Redirect to success page after successful login
-      window.location.href = '/auth/success';
+      // Redirect directly to preceptor home page
+      window.location.href = '/preceptor/home';
     } catch (err) {
       console.error("Login failed:", err);
       setError(err.message || "Failed to login. Please check your credentials.");
@@ -61,92 +63,76 @@ const LoginPage = () => {
     }
   };
 
-  if (loggedInUser) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center">Welcome!</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-center text-gray-600 mb-4">You are successfully logged in.</p>
-            {loggedInUser.name && (
-              <p className="text-center font-medium">Hello, {loggedInUser.name}!</p>
-            )}
-          </CardContent>
-          <CardFooter className="flex justify-center">
-            <Button
-              variant="destructive"
-              onClick={logout}
-              disabled={isLoading}
-            >
-              {isLoading ? "Logging out..." : "Logout"}
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-    );
-  }
+
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-center">Log in</CardTitle>
-        </CardHeader>
+    <div className="flex items-center justify-center min-h-screen bg-white p-4">
+      <Card className="w-full max-w-md border-none shadow-none">
         <CardContent>
+          <div className="mb-8 text-center">
+            <h1 className="text-2xl font-bold mb-2">Welcome to ANSAT Pro.</h1>
+            <p className="text-gray-500">Sign in to your account</p>
+          </div>
           {error && (
             <Alert variant="destructive" className="mb-4">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          <form className="space-y-4" onSubmit={handleLogin}>
+          <form className="space-y-6" onSubmit={handleLogin}>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isLoading}
-              />
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  className="pl-10 py-6 bg-gray-50"
+                />
+              </div>
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link href="/auth/forgot-password" className="text-xs text-blue-600 hover:text-blue-800">
-                  Forgot your password?
-                </Link>
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  className="pl-10 pr-10 py-6 bg-gray-50"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={isLoading}
-              />
             </div>
 
-            <div className="text-center text-sm my-2">
-              Don&apos;t have an account?&nbsp;&nbsp;
-              <Link href="/auth/register" className="text-blue-600 hover:text-blue-800">
-                Sign up
+            <Button
+              variant="default"
+              className="w-full py-6 bg-[#3A6784] hover:bg-[#2d5268] text-white font-semibold text-base"
+              type="submit"
+              disabled={isLoading}
+            >
+              {isLoading ? "Signing in..." : "Sign In"}
+            </Button>
+
+            <div className="flex items-center justify-center space-x-1 text-sm">
+              <span className="text-gray-500">No account ?</span>
+              <Link href="/auth/register" className="text-[#3A6784] hover:text-[#2d5268] font-medium">
+                Sign Up
               </Link>
-            </div>
-
-            <div className="pt-2">
-              <Button
-                variant="default"
-                className="w-full"
-                type="submit"
-                disabled={isLoading}
-              >
-                {isLoading ? "Logging in..." : "Login"}
-              </Button>
             </div>
           </form>
         </CardContent>
