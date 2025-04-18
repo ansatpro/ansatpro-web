@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,27 +28,96 @@ export default function StudentList() {
   const [universityFilter, setUniversityFilter] = useState("all");
   const [healthServiceFilter, setHealthServiceFilter] = useState("all");
   const [clinicAreaFilter, setClinicAreaFilter] = useState("all");
+  const [startDateFilter, setStartDateFilter] = useState("");
+  const [endDateFilter, setEndDateFilter] = useState("");
   const [filteredResults, setFilteredResults] = useState(students);
   
   const universities = [...new Set(students.map(student => student.university))];
   const healthServices = [...new Set(students.map(student => student.healthService))];
   const clinicAreas = [...new Set(students.map(student => student.clinicArea))];
 
-  // Search for an individual student
-  const searchStudent = () => {
-    const results = students.filter(student => {
-      const matchesSearch = 
-        searchTerm === "" || 
-        student.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.studentId.includes(searchTerm);
+  // Apply filters whenever any filter changes
+  useEffect(() => {
+    applyFilters();
+  }, [universityFilter, healthServiceFilter, clinicAreaFilter, startDateFilter, endDateFilter]);
+
+  // Function to handle university filter change
+  const handleUniversityChange = (value) => {
+    setUniversityFilter(value);
+  };
+
+  // Function to handle health service filter change
+  const handleHealthServiceChange = (value) => {
+    setHealthServiceFilter(value);
+  };
+
+  // Function to handle clinic area filter change
+  const handleClinicAreaChange = (value) => {
+    setClinicAreaFilter(value);
+  };
+
+  // Function to handle start date change
+  const handleStartDateChange = (e) => {
+    setStartDateFilter(e.target.value);
+  };
+
+  // Function to handle end date change
+  const handleEndDateChange = (e) => {
+    setEndDateFilter(e.target.value);
+  };
+
+  // Check if date is within range
+  const isWithinDateRange = (studentStartDate, studentEndDate) => {
+    if (!startDateFilter && !endDateFilter) return true;
+    
+    const studentStart = new Date(studentStartDate);
+    const studentEnd = new Date(studentEndDate);
+    
+    if (startDateFilter && endDateFilter) {
+      const filterStart = new Date(startDateFilter);
+      const filterEnd = new Date(endDateFilter);
       
+      // Check if the student's period overlaps with the filter period
+      return (
+        (studentStart <= filterEnd && studentEnd >= filterStart)
+      );
+    } else if (startDateFilter) {
+      const filterStart = new Date(startDateFilter);
+      return studentEnd >= filterStart;
+    } else if (endDateFilter) {
+      const filterEnd = new Date(endDateFilter);
+      return studentStart <= filterEnd;
+    }
+    
+    return true;
+  };
+
+  // Apply all filters
+  const applyFilters = () => {
+    const results = students.filter(student => {
       const matchesUniversity = universityFilter === "all" || student.university === universityFilter;
       const matchesHealthService = healthServiceFilter === "all" || student.healthService === healthServiceFilter;
       const matchesClinicArea = clinicAreaFilter === "all" || student.clinicArea === clinicAreaFilter;
+      const matchesDateRange = isWithinDateRange(student.startDate, student.endDate);
       
-      return matchesSearch && matchesUniversity && matchesHealthService && matchesClinicArea;
+      return matchesUniversity && matchesHealthService && matchesClinicArea && matchesDateRange;
     });
+    
+    setFilteredResults(results);
+  };
+
+  // Search for an individual student
+  const searchStudent = () => {
+    if (searchTerm.trim() === "") {
+      applyFilters();
+      return;
+    }
+
+    const results = filteredResults.filter(student => 
+      student.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.studentId.includes(searchTerm)
+    );
     
     setFilteredResults(results);
   };
@@ -58,6 +127,8 @@ export default function StudentList() {
     setUniversityFilter("all");
     setHealthServiceFilter("all");
     setClinicAreaFilter("all");
+    setStartDateFilter("");
+    setEndDateFilter("");
     setFilteredResults(students);
   };
 
@@ -149,7 +220,7 @@ export default function StudentList() {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
                 <div>
                   <label className="mb-2 block text-sm font-medium">University</label>
-                  <Select value={universityFilter} onValueChange={setUniversityFilter}>
+                  <Select value={universityFilter} onValueChange={handleUniversityChange}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="All Universities" />
                     </SelectTrigger>
@@ -166,7 +237,7 @@ export default function StudentList() {
                 
                 <div>
                   <label className="mb-2 block text-sm font-medium">Health Service</label>
-                  <Select value={healthServiceFilter} onValueChange={setHealthServiceFilter}>
+                  <Select value={healthServiceFilter} onValueChange={handleHealthServiceChange}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="All Health Services" />
                     </SelectTrigger>
@@ -183,7 +254,7 @@ export default function StudentList() {
                 
                 <div>
                   <label className="mb-2 block text-sm font-medium">Clinic Area</label>
-                  <Select value={clinicAreaFilter} onValueChange={setClinicAreaFilter}>
+                  <Select value={clinicAreaFilter} onValueChange={handleClinicAreaChange}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="All Clinic Areas" />
                     </SelectTrigger>
@@ -201,8 +272,20 @@ export default function StudentList() {
                 <div>
                   <label className="mb-2 block text-sm font-medium">Date Range</label>
                   <div className="flex gap-2">
-                    <Input type="date" placeholder="Start Date" className="w-full" />
-                    <Input type="date" placeholder="End Date" className="w-full" />
+                    <Input 
+                      type="date" 
+                      placeholder="Start Date" 
+                      className="w-full"
+                      value={startDateFilter}
+                      onChange={handleStartDateChange}
+                    />
+                    <Input 
+                      type="date" 
+                      placeholder="End Date" 
+                      className="w-full"
+                      value={endDateFilter}
+                      onChange={handleEndDateChange}
+                    />
                   </div>
                 </div>
               </div>
