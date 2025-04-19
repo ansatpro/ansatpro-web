@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { account } from "../../appwrite";
+import { account, functions } from "../../appwrite";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,7 +38,7 @@ const LoginPage = () => {
       localStorage.setItem('jwt', jwt);
       const user = await account.get();
 
-      const res = await functions.createExecution(
+      const execution = await functions.createExecution(
         '67ffd78c00338787f104',
         JSON.stringify({
           jwt,
@@ -46,17 +46,13 @@ const LoginPage = () => {
         })
       );
 
-      if (!res.responseBody) {
-        throw new Error("Empty response from function.");
-      }
+      const res = JSON.parse(execution.responseBody); // <-- crashes if not valid JSON
 
-      const result = JSON.parse(res.responseBody);
-
-      if (result.status !== 'success') {
+      if (res.status !== 'success') {
         throw new Error("Failed to retrieve user role");
       }
 
-      const role = result.data?.role;
+      const role = res.data?.role;
 
       if (role === 'preceptor') {
         window.location.href = '/preceptor/home';
@@ -65,6 +61,16 @@ const LoginPage = () => {
       } else {
         throw new Error("Unknown role or role missing");
       }
+
+      console.log("🪵 Raw response body:", execution.responseBody);
+
+      // const result = JSON.parse(execution.responseBody);
+
+
+
+      // setLoggedInUser(user);
+      // // Redirect directly to preceptor home page
+      // window.location.href = '/preceptor/home';
     } catch (err) {
       console.error("Login failed:", err);
       setError(err.message || "Failed to login. Please check your credentials.");
