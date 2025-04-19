@@ -34,13 +34,25 @@ export default function AllFeedback() {
       id: "F89012",
       studentName: "Olivia Martinez",
       ismarked: "Marked",
+      is_marked: true,
       university: "Johns Hopkins University",
       healthService: "Community Clinic",
       clinicArea: "Family Medicine",
       date: "2023-07-10",
-
       content: "Olivia demonstrated excellent patient care skills and empathy. Her clinical notes were thorough and well-organized. Need to work on time management during busy clinic hours.",
       preceptor: "Dr. Johnson"
+    },
+    {
+      id: "F89013",
+      studentName: "Michael Brown",
+      ismarked: "Unmarked",
+      is_marked: false,
+      university: "Stanford University",
+      healthService: "Memorial Hospital",
+      clinicArea: "Cardiology",
+      date: "2023-08-05",
+      content: "Michael shows promising clinical reasoning skills. He effectively communicates with patients and staff. Needs to improve documentation completeness and timeliness.",
+      preceptor: "Dr. Williams"
     }
   ];
 
@@ -200,10 +212,15 @@ export default function AllFeedback() {
     setFilteredResults(feedbacks);
   };
 
-  // 处理点击反馈详情
-  const handleFeedbackClick = (feedbackId) => {
-    // 使用router.push方法导航到详情页面
-    router.push(`/facilitator/feedback/${feedbackId}`);
+  // 处理点击反馈详情 - 根据is_marked状态决定跳转目标
+  const handleFeedbackClick = (feedback) => {
+    if (feedback.is_marked) {
+      // 已标记，跳转到查看反馈详情页面
+      router.push(`/facilitator/feedback/${feedback.id}/view`);
+    } else {
+      // 未标记，跳转到创建反馈页面
+      router.push(`/facilitator/feedback/${feedback.id}/studentDetail`);
+    }
   };
 
   return (
@@ -408,7 +425,7 @@ export default function AllFeedback() {
               <Card 
                 key={feedback.id} 
                 className="flex flex-col h-full cursor-pointer transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1 hover:border-primary/20 group"
-                onClick={() => handleFeedbackClick(feedback.id)}
+                onClick={() => handleFeedbackClick(feedback)}
               >
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
