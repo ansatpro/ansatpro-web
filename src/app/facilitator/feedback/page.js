@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardFooter, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";   
 import { 
   Home, 
   MessageSquareText, 
@@ -38,7 +38,7 @@ export default function AllFeedback() {
       healthService: "Community Clinic",
       clinicArea: "Family Medicine",
       date: "2023-07-10",
-      feedbackType: "Clinical Assessment",
+
       content: "Olivia demonstrated excellent patient care skills and empathy. Her clinical notes were thorough and well-organized. Need to work on time management during busy clinic hours.",
       preceptor: "Dr. Johnson"
     }
