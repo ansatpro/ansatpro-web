@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { 
+import {
     Home,
     PlusCircle,
     FileText,
@@ -19,7 +19,7 @@ export default function PreceptorHome() {
     const router = useRouter();
 
     const handleAddFeedback = () => {
-        router.push('/preceptor/add-feedback');
+        router.push('/preceptor/searchStudents');
     };
 
     return (
@@ -45,26 +45,26 @@ export default function PreceptorHome() {
             <aside className="fixed left-0 top-14 bottom-0 w-16 bg-white">
                 <nav className="h-full flex items-center justify-center">
                     <div className="flex flex-col items-center gap-12">
-                        <Link 
-                            href="/preceptor/home" 
+                        <Link
+                            href="/preceptor/home"
                             className="p-2 rounded-lg bg-blue-50"
                         >
                             <Home className="h-6 w-6 text-[#3A6784]" />
                         </Link>
-                        <button 
+                        <button
                             onClick={handleAddFeedback}
                             className="p-2 rounded-lg hover:bg-gray-50 transition-colors"
                         >
                             <PlusCircle className="h-6 w-6 text-gray-600" />
                         </button>
-                        <Link 
-                            href="/preceptor/view-feedback" 
+                        <Link
+                            href="/preceptor/view-feedback"
                             className="p-2 rounded-lg hover:bg-gray-50 transition-colors"
                         >
                             <FileText className="h-6 w-6 text-gray-600" />
                         </Link>
-                        <Link 
-                            href="/preceptor/settings" 
+                        <Link
+                            href="/preceptor/settings"
                             className="p-2 rounded-lg hover:bg-gray-50 transition-colors"
                         >
                             <Settings className="h-6 w-6 text-gray-600" />
@@ -92,7 +92,7 @@ export default function PreceptorHome() {
                             className="h-auto py-4 px-8 bg-[#3A6784] hover:bg-[#2d5268] text-white text-lg"
                             asChild
                         >
-                            <Link href="/preceptor/view-feedback">View Previous Feedback</Link>
+                            <Link href="/preceptor/previousFeedbacks">View Previous Feedback</Link>
                         </Button>
                     </div>
                 </div>

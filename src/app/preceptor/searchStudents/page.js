@@ -21,13 +21,14 @@ export default function SearchStudent() {
         const fetchData = async () => {
             try {
                 const currentUser = await account.get(); // 验证用户登录状态
-                const token = await account.createJWT();
-                
+                const jwt = localStorage.getItem("jwt");
+
+
                 // 获取学生数据
                 const res = await functions.createExecution(
                     '67ffd00400174f76be85',
                     JSON.stringify({
-                        jwt: token.jwt,
+                        jwt,
                         action: 'searchStudents',
                         payload: { query: searchQuery }
                     })
@@ -61,13 +62,6 @@ export default function SearchStudent() {
         setIsConfirmed(false);
     };
 
-    if (loading && searchQuery.length >= 2) {
-        return (
-            <div className="min-h-screen bg-white flex items-center justify-center">
-                <p className="text-gray-600">Loading students...</p>
-            </div>
-        );
-    }
 
     if (error) {
         return (
@@ -182,7 +176,7 @@ export default function SearchStudent() {
                                     onClick={() => {
                                         if (selectedStudent && isConfirmed) {
                                             localStorage.setItem('selectedStudent', JSON.stringify(selectedStudent));
-                                            window.location.href = '/auth/addPreceptorFeedbacks';
+                                            window.location.href = '/preceptor/addPreceptorFeedbacks';
                                         }
                                     }}
                                 >

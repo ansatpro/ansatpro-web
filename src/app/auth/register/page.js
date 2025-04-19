@@ -123,6 +123,7 @@ export default function RegisterPage() {
             await account.get();
             const jwt = (await account.createJWT()).jwt;
             localStorage.setItem('jwt', jwt);
+            console.log("JWT:", jwt);
 
             const payload = {
                 first_name: formData.firstName,

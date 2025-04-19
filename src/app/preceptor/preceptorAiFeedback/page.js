@@ -1,158 +1,181 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Bell, User, LayoutDashboard } from "lucide-react";
-import AnsatItemsReview from "@/components/AnsatItemsReview";
-import { account, functions } from "@/app/appwrite";
+import { useEffect, useState } from 'react';
+import { account, functions } from "../../appwrite";
 
-export default function PreceptorAiFeedback() {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const [selectedStudent, setSelectedStudent] = useState(null);
-    const [aiResults, setAiResults] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+
+export default function PreceptorAiFeedbackPage() {
+    const [payload, setPayload] = useState(null);
+    const [assessmentItems, setAssessmentItems] = useState([]);
+    const [selectedIds, setSelectedIds] = useState([]);
+    const [matchedIds, setMatchedIds] = useState([]);
+    const [itemPositivity, setItemPositivity] = useState({});
+
 
     useEffect(() => {
-        const analyzeText = async () => {
-            const feedbackText = searchParams.get('text');
-            if (!feedbackText) {
-                setError('No feedback text provided');
-                setIsLoading(false);
-                return;
-            }
+        const stored = localStorage.getItem("preceptorPayload");
 
+        if (stored) {
             try {
-                // Get JWT token
-                const jwt = (await account.createJWT()).jwt;
+                const parsed = JSON.parse(stored);
+                setPayload(parsed);
 
-                // Call AI analysis function
-                const execution = await functions.createExecution(
-                    "function_jwt_require",
-                    JSON.stringify({
-                        jwt,
-                        action: "getAiFeedbackPreceptor",
-                        payload: { text: feedbackText }
-                    })
-                );
+                const fetchData = async () => {
+                    try {
+                        // 1. Get assessment items
+                        const res = await functions.createExecution(
+                            'guest_request',
+                            JSON.stringify({ action: 'getAssessmentItems' })
+                        );
+                        const result = JSON.parse(res.responseBody);
+                        setAssessmentItems(result.standardItems || []);
 
-                // Parse result
-                const result = JSON.parse(execution.responseBody);
-                setAiResults(result.matched_ids || []);
+                        // 2. Get JWT
+                        const jwt = localStorage.getItem("jwt");
+
+                        // 3. AI analysis based on payload.content
+                        const aiExecution = await functions.createExecution(
+                            '67ffd00400174f76be85',
+                            JSON.stringify({
+                                jwt,
+                                action: "getAiFeedbackPreceptor",
+                                payload: { text: parsed.content }
+                            })
+                        );
+
+                        console.log("AI Execution Result:", aiExecution);
+
+                        const aiResult = JSON.parse(aiExecution.responseBody);
+                        const matched = aiResult.matched_ids || [];
+
+                        setMatchedIds(matched);
+                        setSelectedIds(matched); // ✅ Auto-select matched checkboxes
+
+                    } catch (err) {
+                        console.error("❌ Error in fetching data:", err);
+                    }
+                };
+
+                fetchData();
+
             } catch (err) {
-                console.error("❌ AI analysis error:", err);
-                setError("Failed to analyze feedback");
-            } finally {
-                setIsLoading(false);
+                console.error("❌ Failed to parse stored payload:", err);
             }
-        };
-
-        // 从localStorage获取学生信息
-        const storedStudent = localStorage.getItem('selectedStudent');
-        if (storedStudent) {
-            setSelectedStudent(JSON.parse(storedStudent));
         }
+    }, []);
 
-        analyzeText();
-    }, [searchParams]);
+    const toggleSelection = (itemId) => {
+        setSelectedIds((prev) => {
+            const isSelected = prev.includes(itemId);
+            const newSelected = isSelected
+                ? prev.filter((id) => id !== itemId)
+                : [...prev, itemId];
 
-    const handleConfirm = (selectedItems) => {
-        // TODO: 处理确认逻辑
-        console.log('Selected items:', selectedItems);
-        // 可以跳转到下一步或保存结果
+            // If adding item, set default is_positive to true
+            setItemPositivity((prevPositivity) => {
+                const updated = { ...prevPositivity };
+                if (!isSelected) {
+                    updated[itemId] = true; // default to true
+                } else {
+                    delete updated[itemId]; // clean up if unselected
+                }
+                return updated;
+            });
+
+            return newSelected;
+        });
+    };
+
+    const handleSubmit = async () => {
+        if (!payload) return;
+
+        try {
+            const jwt = localStorage.getItem("jwt");
+
+            const fullPayload = {
+                ...payload,
+                ai_item_list: itemPositivity
+            };
+
+            const res = await functions.createExecution(
+                '67ffd00400174f76be85',
+                JSON.stringify({
+                    jwt,
+                    action: "addPreceptorFeedback",
+                    payload: fullPayload
+                })
+            );
+
+            const result = JSON.parse(res.responseBody);
+            if (result.status === 'success') {
+                alert("✅ Feedback submitted successfully!");
+                localStorage.removeItem("preceptorPayload");
+                // optional: router.push("/preceptor/success");
+            } else {
+                alert("❌ Submission failed: " + result.message);
+            }
+
+        } catch (err) {
+            console.error("❌ Submission error:", err);
+            alert("Something went wrong while submitting.");
+        }
     };
 
     return (
-        <div className="min-h-screen bg-white">
-            {/* Top Bar */}
-            <header className="fixed top-0 left-0 right-0 h-14 bg-white z-50 border-b">
-                <div className="h-full px-6 flex justify-between items-center">
-                    <Link href="/preceptor/home" className="flex items-center">
-                        <LayoutDashboard className="h-8 w-8 text-[#3A6784]" />
-                    </Link>
-                    <div className="flex items-center gap-6">
-                        <Link href="/preceptor/notifications" className="hover:bg-gray-50 p-2 rounded-full transition-colors">
-                            <Bell className="h-5 w-5 text-gray-600" />
-                        </Link>
-                        <Link href="/preceptor/settings" className="hover:bg-gray-50 p-2 rounded-full transition-colors">
-                            <User className="h-5 w-5 text-gray-600" />
-                        </Link>
-                    </div>
-                </div>
-            </header>
-
-            {/* Main Content */}
-            <main className="pt-20 px-6 max-w-4xl mx-auto pb-16">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold mb-2">FEEDBACK ANALYSIS</h1>
-                    {selectedStudent && (
-                        <p className="text-gray-600">
-                            Analyzing feedback for {selectedStudent.first_name} {selectedStudent.last_name}
-                        </p>
-                    )}
-                </div>
-
-                {selectedStudent ? (
-                    <div className="space-y-6">
-                        {/* Student Information Card */}
-                        <div className="bg-white rounded-lg shadow-sm border p-6">
-                            <h2 className="text-xl font-semibold mb-4">Student Information</h2>
-                            <div className="space-y-2 text-gray-600">
-                                <p>Student ID: {selectedStudent.student_id}</p>
-                                <p>Institution: {selectedStudent.institution || 'Not assigned'}</p>
-                                <p>Clinic Area: {selectedStudent.clinic_area || 'Not assigned'}</p>
-                                <p>Start Date: {selectedStudent.start_date ? new Date(selectedStudent.start_date).toLocaleDateString() : 'Not set'}</p>
-                                <p>End Date: {selectedStudent.end_date ? new Date(selectedStudent.end_date).toLocaleDateString() : 'Not set'}</p>
+        <div className="mt-6">
+            <h2 className="text-lg font-semibold mb-2">Select Assessment Items</h2>
+            <div className="space-y-2">
+                {assessmentItems.map((item) => (
+                    <label
+                        key={item.item_id}
+                        className="flex flex-col sm:flex-row sm:items-center justify-between bg-white border rounded-md p-3 shadow-sm hover:bg-gray-50 transition"
+                    >
+                        <div className="flex items-start space-x-3">
+                            <input
+                                type="checkbox"
+                                checked={selectedIds.includes(item.item_id)}
+                                onChange={() => toggleSelection(item.item_id)}
+                                className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                            />
+                            <div>
+                                <span className="block font-medium text-gray-900">{item.item_id}</span>
+                                <span className="text-sm text-gray-600">{item.description}</span>
                             </div>
                         </div>
 
-                        {/* AI Analysis Results */}
-                        <div className="bg-white rounded-lg shadow-sm border p-6">
-                            <h2 className="text-xl font-semibold mb-4">AI Analysis Results</h2>
-                            {isLoading ? (
-                                <div className="text-center py-8">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-                                    <p className="mt-4 text-gray-600">Analyzing feedback...</p>
-                                </div>
-                            ) : error ? (
-                                <div className="bg-red-50 text-red-600 p-4 rounded-md">
-                                    {error}
-                                </div>
-                            ) : (
-                                <>
-                                    <p className="text-gray-600 mb-4">
-                                        Based on the provided feedback, the following ANSAT items have been identified:
-                                    </p>
-                                    <div className="space-y-2 mb-6">
-                                        {aiResults.map((code) => (
-                                            <p key={code} className="text-blue-600">Item {code}</p>
-                                        ))}
-                                    </div>
-                                    
-                                    {/* ANSAT Items Review Component */}
-                                    <AnsatItemsReview
-                                        aiResults={aiResults}
-                                        onConfirm={handleConfirm}
-                                    />
-                                </>
-                            )}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="text-center text-gray-600">
-                        <p>No student selected. Please select a student first.</p>
-                        <Button
-                            className="mt-4"
-                            onClick={() => router.back()}
-                        >
-                            Go Back
-                        </Button>
-                    </div>
-                )}
-            </main>
+                        {/* ✅ Show is_positive toggle if selected */}
+                        {selectedIds.includes(item.item_id) && (
+                            <div className="mt-2 sm:mt-0 flex items-center space-x-2">
+                                <label htmlFor={`positive-${item.item_id}`} className="text-sm text-gray-700">
+                                    Positive?
+                                </label>
+                                <input
+                                    id={`positive-${item.item_id}`}
+                                    type="checkbox"
+                                    checked={itemPositivity[item.item_id] ?? true}
+                                    onChange={(e) => {
+                                        const value = e.target.checked;
+                                        setItemPositivity((prev) => ({
+                                            ...prev,
+                                            [item.item_id]: value,
+                                        }));
+                                    }}
+                                    className="h-4 w-4 text-green-600 border-gray-300 rounded"
+                                />
+                            </div>
+                        )}
+                    </label>
+                ))}
+            </div>
+            <div className="mt-6">
+                <button
+                    onClick={handleSubmit}
+                    className="w-full sm:w-auto px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow transition"
+                >
+                    ✅ Submit Feedback
+                </button>
+            </div>
         </div>
+
     );
-} 
+}

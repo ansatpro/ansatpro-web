@@ -29,23 +29,23 @@ export default function PreceptorFeedbackForm() {
         const loadUser = async () => {
             try {
                 const currentUser = await account.get();
-                const jwtRes = await account.createJWT();
+                const jwt = localStorage.getItem("jwt");
                 setUser(currentUser);
-                setJwt(jwtRes.jwt);
+                setJwt(jwt);
 
                 // 从localStorage获取选中的学生信息
                 const storedStudent = localStorage.getItem('selectedStudent');
                 if (storedStudent) {
                     const parsedStudent = JSON.parse(storedStudent);
                     console.log('Loaded student data:', parsedStudent); // 添加日志
-                    
+
                     // 验证学生数据
                     if (!parsedStudent.student_id) {
                         console.error('Invalid student data - missing student_id:', parsedStudent);
                         setStatus('❌ Invalid student data. Please go back and select a student again.');
                         return;
                     }
-                    
+
                     setSelectedStudent(parsedStudent);
                 } else {
                     console.error('No student data found in localStorage');
@@ -61,12 +61,12 @@ export default function PreceptorFeedbackForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!selectedStudent) {
             setStatus('❌ No student selected. Please go back and select a student.');
             return;
         }
-        
+
         if (!content || !flagFacilitator || !flagStudent || (flagStudent === 'yes' && !discussionDate)) {
             setStatus('Please fill in all required fields');
             return;
@@ -76,7 +76,7 @@ export default function PreceptorFeedbackForm() {
 
         try {
             const payload = {
-                student_id: selectedStudent.$id,
+                student_document_id: selectedStudent.$id,
                 preceptor_id: user.$id,
                 content,
                 flag_discuss_with_facilitator: flagFacilitator === 'yes',
@@ -84,26 +84,14 @@ export default function PreceptorFeedbackForm() {
                 discussion_date: discussionDate ? format(discussionDate, 'yyyy-MM-dd') : null,
             };
 
-            const execution = await functions.createExecution(
-                'function_jwt_require',
-                JSON.stringify({
-                    jwt,
-                    action: 'addPreceptorFeedback',
-                    payload
-                })
+            // Store payload in localStorage
+            localStorage.setItem("preceptorPayload", JSON.stringify(payload));
+
+
+            router.push(
+                "/preceptor/preceptorAiFeedback"
             );
 
-            const result = JSON.parse(execution.responseBody);
-
-            if (result.status === 'success') {
-                setStatus('✅ Feedback submitted successfully.');
-                // 清除localStorage中的学生信息
-                localStorage.removeItem('selectedStudent');
-                // 跳转到 AI 分析页面并传递 feedback 内容
-                router.push(`/auth/preceptorAiFeedback?text=${encodeURIComponent(content)}`);
-            } else {
-                setStatus(`❌ Failed: ${result.message}`);
-            }
         } catch (err) {
             console.error(err);
             setStatus('❌ Submission failed.');
@@ -158,13 +146,12 @@ export default function PreceptorFeedbackForm() {
 
                     {/* Status Message */}
                     {status && (
-                        <div className={`p-4 mb-6 rounded-lg ${
-                            status.startsWith('❌') 
-                                ? 'bg-red-50 text-red-600' 
-                                : status.startsWith('✅') 
-                                    ? 'bg-green-50 text-green-600'
-                                    : 'bg-blue-50 text-blue-600'
-                        }`}>
+                        <div className={`p-4 mb-6 rounded-lg ${status.startsWith('❌')
+                            ? 'bg-red-50 text-red-600'
+                            : status.startsWith('✅')
+                                ? 'bg-green-50 text-green-600'
+                                : 'bg-blue-50 text-blue-600'
+                            }`}>
                             {status}
                         </div>
                     )}

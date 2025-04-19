@@ -38,9 +38,33 @@ const LoginPage = () => {
       localStorage.setItem('jwt', jwt);
       const user = await account.get();
 
-      setLoggedInUser(user);
-      // Redirect directly to preceptor home page
-      window.location.href = '/preceptor/home';
+      const res = await functions.createExecution(
+        '67ffd78c00338787f104',
+        JSON.stringify({
+          jwt,
+          action: 'getUserRole',
+        })
+      );
+
+      if (!res.responseBody) {
+        throw new Error("Empty response from function.");
+      }
+
+      const result = JSON.parse(res.responseBody);
+
+      if (result.status !== 'success') {
+        throw new Error("Failed to retrieve user role");
+      }
+
+      const role = result.data?.role;
+
+      if (role === 'preceptor') {
+        window.location.href = '/preceptor/home';
+      } else if (role === 'facilitator') {
+        window.location.href = '/facilitator/home';
+      } else {
+        throw new Error("Unknown role or role missing");
+      }
     } catch (err) {
       console.error("Login failed:", err);
       setError(err.message || "Failed to login. Please check your credentials.");
