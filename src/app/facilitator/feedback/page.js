@@ -33,26 +33,16 @@ export default function AllFeedback() {
     {
       id: "F89012",
       studentName: "Olivia Martinez",
-      ismarked: "Marked",
-      is_marked: true,
-      university: "Johns Hopkins University",
+      studentId: "12345678",
+      is_marked: false,
+      university: "University",
       healthService: "Community Clinic",
       clinicArea: "Family Medicine",
       date: "2023-07-10",
       content: "Olivia demonstrated excellent patient care skills and empathy. Her clinical notes were thorough and well-organized. Need to work on time management during busy clinic hours.",
-      preceptor: "Dr. Johnson"
-    },
-    {
-      id: "F89013",
-      studentName: "Michael Brown",
-      ismarked: "Unmarked",
-      is_marked: false,
-      university: "Stanford University",
-      healthService: "Memorial Hospital",
-      clinicArea: "Cardiology",
-      date: "2023-08-05",
-      content: "Michael shows promising clinical reasoning skills. He effectively communicates with patients and staff. Needs to improve documentation completeness and timeliness.",
-      preceptor: "Dr. Williams"
+      preceptor: "Dr. Johnson",
+      startDate: "2023-07-10",
+      endDate: "2023-07-12"
     }
   ];
 
@@ -76,6 +66,19 @@ export default function AllFeedback() {
   useEffect(() => {
     const initializeData = async () => {
       try {
+        // 检查localStorage中是否已有数据
+        const storedFeedbacks = localStorage.getItem('ansatpro_feedbacks');
+        
+        if (storedFeedbacks) {
+          // 如果localStorage中有数据，使用它
+          const parsedFeedbacks = JSON.parse(storedFeedbacks);
+          setFeedbacks(parsedFeedbacks);
+          setFilteredResults(parsedFeedbacks);
+          setIsLoading(false);
+          return;
+        }
+        
+        // 如果没有存储的数据，则使用示例数据
         // 模拟加载延迟
         await new Promise(resolve => setTimeout(resolve, 800));
         
@@ -84,10 +87,19 @@ export default function AllFeedback() {
           new Date(b.date) - new Date(a.date)
         );
         
+        // 存储到localStorage
+        localStorage.setItem('ansatpro_feedbacks', JSON.stringify(sortedFeedbacks));
+        
         setFeedbacks(sortedFeedbacks);
         setFilteredResults(sortedFeedbacks);
       } catch (err) {
         console.error("Error initializing data:", err);
+        // 如果发生错误，仍然尝试使用示例数据
+        const sortedFeedbacks = [...sampleFeedbacks].sort((a, b) => 
+          new Date(b.date) - new Date(a.date)
+        );
+        setFeedbacks(sortedFeedbacks);
+        setFilteredResults(sortedFeedbacks);
       } finally {
         setIsLoading(false);
       }
@@ -214,9 +226,12 @@ export default function AllFeedback() {
 
   // 处理点击反馈详情 - 根据is_marked状态决定跳转目标
   const handleFeedbackClick = (feedback) => {
+    // 存储当前点击的反馈详情到localStorage
+    localStorage.setItem('ansatpro_current_feedback', JSON.stringify(feedback));
+    
     if (feedback.is_marked) {
       // 已标记，跳转到查看反馈详情页面
-      router.push(`/facilitator/feedback/${feedback.id}/view`);
+      router.push(`/facilitator/feedback/${feedback.id}/feedbackDetail`);
     } else {
       // 未标记，跳转到创建反馈页面
       router.push(`/facilitator/feedback/${feedback.id}/studentDetail`);
@@ -282,8 +297,8 @@ export default function AllFeedback() {
             <Button variant="outline" size="sm">
               Log out
             </Button>
-          </div>
-        </header>
+        </div>
+    </header>
 
         {/* Search and filters */}
         <Card className="mb-6">
@@ -346,7 +361,7 @@ export default function AllFeedback() {
                   </Select>
                 </div>
 
-                <div>
+            <div>
                   <label className="mb-2 block text-sm font-medium">
                     Health Service
                   </label>
@@ -366,9 +381,9 @@ export default function AllFeedback() {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
+            </div>
 
-                <div>
+            <div>
                   <label className="mb-2 block text-sm font-medium">
                     Clinic Area
                   </label>
@@ -388,9 +403,9 @@ export default function AllFeedback() {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
+            </div>
 
-                <div>
+            <div>
                   <label className="mb-2 block text-sm font-medium">
                     Time Period
                   </label>
@@ -430,7 +445,9 @@ export default function AllFeedback() {
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-lg group-hover:text-primary transition-colors duration-300">{feedback.studentName}</CardTitle>
-                    <Badge variant="outline" className="group-hover:bg-primary/10 transition-colors duration-300">{feedback.ismarked}</Badge>
+                    <Badge variant="outline" className="group-hover:bg-primary/10 transition-colors duration-300">
+                      {feedback.is_marked ? "Marked" : "Unmarked"}
+                    </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {formatDate(feedback.date)}
@@ -455,7 +472,7 @@ export default function AllFeedback() {
             </div>
           </div>
         )}
-      </main>
+    </main>
     </div>
   );
 }

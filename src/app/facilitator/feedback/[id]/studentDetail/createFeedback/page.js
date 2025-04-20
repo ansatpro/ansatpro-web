@@ -64,7 +64,7 @@ export default function ReviewFeedback() {
   const params = useParams();
   const feedbackId = params.id;
   
-  // 状态管理
+  // State management
   const [comment, setComment] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
   const [itemRatings, setItemRatings] = useState({});
@@ -74,18 +74,73 @@ export default function ReviewFeedback() {
   const [loading, setLoading] = useState(true);
   const [feedbackData, setFeedbackData] = useState(null);
   
-  // 模拟的ANSAT评分项
+  // ANSAT assessment items
   const ansatItems = Array.from({ length: 23 }, (_, i) => ({
     id: i + 1,
-    title: `ANSAT评分项 ${i + 1}`,
-    description: `这是ANSAT评分项${i + 1}的描述内容`
+    title: `ANSAT Assessment Item ${i + 1}`,
+    description: `Description for ANSAT assessment item ${i + 1}`
   }));
   
-  // 模拟获取反馈数据
+  // Fetch feedback data
   useEffect(() => {
     const fetchFeedbackData = async () => {
       try {
-        // 实际应用中应该从API获取数据
+        // First try to get current feedback data from localStorage
+        const storedCurrentFeedback = localStorage.getItem('ansatpro_current_feedback');
+        
+        if (storedCurrentFeedback) {
+          const currentFeedback = JSON.parse(storedCurrentFeedback);
+          
+          // Check if ID matches
+          if (currentFeedback.id === feedbackId) {
+            console.log("Using feedback data from localStorage (current feedback)");
+            
+            setFeedbackData({
+              id: currentFeedback.id,
+              date: currentFeedback.date,
+              studentName: currentFeedback.studentName,
+              originalFeedback: currentFeedback.content,
+              mappedAnsatItems: [
+                // Example mapped items
+                { text: "clinical skills", status: "strength" },
+                { text: "documentation", status: "improvement" }
+              ]
+            });
+            
+            setLoading(false);
+            return;
+          }
+        }
+        
+        // If current feedback doesn't exist or ID doesn't match, search in feedback list
+        const storedFeedbacks = localStorage.getItem('ansatpro_feedbacks');
+        
+        if (storedFeedbacks) {
+          const feedbacks = JSON.parse(storedFeedbacks);
+          const feedback = feedbacks.find(f => f.id === feedbackId);
+          
+          if (feedback) {
+            console.log("Using feedback data from localStorage (feedbacks list)");
+            
+            setFeedbackData({
+              id: feedback.id,
+              date: feedback.date,
+              studentName: feedback.studentName,
+              originalFeedback: feedback.content,
+              mappedAnsatItems: [
+                // Example mapped items
+                { text: "clinical skills", status: "strength" },
+                { text: "documentation", status: "improvement" }
+              ]
+            });
+            
+            setLoading(false);
+            return;
+          }
+        }
+        
+        // If not found in localStorage, use mock data
+        console.log("Using fallback feedback data");
         await new Promise(resolve => setTimeout(resolve, 800));
         
         setFeedbackData({
@@ -98,6 +153,7 @@ export default function ReviewFeedback() {
             { text: "sterile technique", status: "improvement" }
           ]
         });
+        
       } catch (error) {
         console.error("Error fetching feedback data:", error);
       } finally {
@@ -108,11 +164,11 @@ export default function ReviewFeedback() {
     fetchFeedbackData();
   }, [feedbackId]);
   
-  // 处理选择ANSAT项目
+  // Handle ANSAT item selection
   const handleItemSelect = (itemId) => {
     setSelectedItems(prev => {
       if (prev.includes(itemId)) {
-        // 如果取消选中，也删除对应的评分
+        // If unchecked, also remove the rating
         const newRatings = { ...itemRatings };
         delete newRatings[itemId];
         setItemRatings(newRatings);
@@ -123,7 +179,7 @@ export default function ReviewFeedback() {
     });
   };
   
-  // 处理设置评分
+  // Handle rating selection
   const handleRatingSelect = (itemId, rating) => {
     setItemRatings(prev => ({
       ...prev,
@@ -131,9 +187,9 @@ export default function ReviewFeedback() {
     }));
   };
   
-  // 处理提交
+  // Handle submission
   const handleSubmit = async () => {
-    // 验证所有选中的项目都有评分
+    // Validate that all selected items have ratings
     const allItemsRated = selectedItems.every(itemId => itemRatings[itemId]);
     
     if (!allItemsRated) {
@@ -146,7 +202,7 @@ export default function ReviewFeedback() {
       return;
     }
     
-    // 构建提交数据
+    // Build submission data
     const submissionData = {
       feedbackId,
       selectedItems: selectedItems.map(itemId => ({
@@ -160,12 +216,51 @@ export default function ReviewFeedback() {
     
     console.log("提交数据:", submissionData);
     
-    // 在实际应用中，这里应该调用API提交数据
+    // In a real application, this would call an API
     try {
-      // 模拟API调用
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 800));
-      alert("提交成功");
-      router.push("/facilitator/feedback");
+      
+      // Update feedback status to marked in localStorage
+      const storedFeedbacks = localStorage.getItem('ansatpro_feedbacks');
+      
+      if (storedFeedbacks) {
+        const feedbacks = JSON.parse(storedFeedbacks);
+        const updatedFeedbacks = feedbacks.map(f => {
+          if (f.id === feedbackId) {
+            return {
+              ...f,
+              is_marked: true,
+              ismarked: "Marked",
+              reviewData: submissionData
+            };
+          }
+          return f;
+        });
+        
+        localStorage.setItem('ansatpro_feedbacks', JSON.stringify(updatedFeedbacks));
+      }
+      
+      // Also update current feedback if it exists
+      const storedCurrentFeedback = localStorage.getItem('ansatpro_current_feedback');
+      
+      if (storedCurrentFeedback) {
+        const currentFeedback = JSON.parse(storedCurrentFeedback);
+        
+        if (currentFeedback.id === feedbackId) {
+          const updatedCurrentFeedback = {
+            ...currentFeedback,
+            is_marked: true,
+            ismarked: "Marked",
+            reviewData: submissionData
+          };
+          
+          localStorage.setItem('ansatpro_current_feedback', JSON.stringify(updatedCurrentFeedback));
+        }
+      }
+      
+      // 跳转到成功页面
+      router.push(`/facilitator/feedback/${feedbackId}/studentDetail/createFeedback/success`);
     } catch (error) {
       console.error("提交失败:", error);
       alert("提交失败，请重试");
@@ -175,14 +270,14 @@ export default function ReviewFeedback() {
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <p className="text-lg">加载中...</p>
+        <p className="text-lg">Loading...</p>
       </div>
     );
   }
   
   return (
     <div className="flex min-h-screen bg-background">
-      {/* 侧边栏导航 */}
+      {/* Sidebar navigation */}
       <aside className="w-64 border-r bg-muted/40 p-6 hidden md:block">
         <div className="mb-8">
           <h1 className="text-xl font-bold">ANSAT Pro</h1>
@@ -226,48 +321,48 @@ export default function ReviewFeedback() {
         </nav>
       </aside>
 
-      {/* 主内容区 */}
+      {/* Main content area */}
       <main className="flex-1 p-6">
-        {/* 页面标题 */}
+        {/* Page title */}
         <header className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">评审反馈</h1>
+          <h1 className="text-3xl font-bold">Review Feedback</h1>
           <div className="flex items-center gap-4">
             <Button variant="outline" size="icon">
               <Bell className="h-4 w-4" />
-              <span className="sr-only">通知</span>
+              <span className="sr-only">Notifications</span>
             </Button>
             <Button variant="outline" size="sm">
               <LogOut className="mr-2 h-4 w-4" />
-              退出登录
+              Log out
             </Button>
           </div>
         </header>
 
-        {/* 反馈卡片 */}
+        {/* Student information card */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-xl">学生信息</CardTitle>
+            <CardTitle className="text-xl">Student Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">日期和时间</p>
+                <p className="text-sm text-muted-foreground">Date and Time</p>
                 <p className="font-medium">
-                  {format(new Date(feedbackData.date), "yyyy年MM月dd日 HH:mm")}
+                  {format(new Date(feedbackData.date), "yyyy-MM-dd HH:mm")}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">学生姓名</p>
+                <p className="text-sm text-muted-foreground">Student Name</p>
                 <p className="font-medium">{feedbackData.studentName}</p>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        {/* 原始反馈 */}
+        {/* Original feedback */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-xl">原始反馈</CardTitle>
+            <CardTitle className="text-xl">Original Feedback</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
@@ -276,10 +371,10 @@ export default function ReviewFeedback() {
           </CardContent>
         </Card>
         
-        {/* 映射的ANSAT项目 */}
+        {/* Mapped ANSAT items */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-xl">映射的ANSAT项目</CardTitle>
+            <CardTitle className="text-xl">Mapped ANSAT Items</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
@@ -287,31 +382,31 @@ export default function ReviewFeedback() {
                 <li key={index} className="flex items-center gap-2">
                   <div className={`h-2 w-2 rounded-full ${item.status === 'strength' ? 'bg-green-500' : 'bg-amber-500'}`}></div>
                   <span className="font-medium">"{item.text}":</span>
-                  <span>{item.status === 'strength' ? '优势' : '需要改进的地方'}</span>
+                  <span>{item.status === 'strength' ? 'Strength' : 'Area for improvement'}</span>
                 </li>
               ))}
             </ul>
           </CardContent>
         </Card>
         
-        {/* 评分部分 */}
+        {/* Assessment section */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-xl">评分</CardTitle>
+            <CardTitle className="text-xl">Assessment</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* 评分描述 */}
+            {/* Rating description */}
             <div className="bg-muted p-4 rounded-md space-y-2 text-sm">
-              <p>1 = 未执行预期的行为和实践</p>
-              <p>2 = 执行的预期行为和实践低于可接受/满意的标准</p>
-              <p>3 = 执行的预期行为和实践达到满意/通过标准</p>
-              <p>4 = 执行的预期行为和实践达到熟练标准</p>
-              <p>5 = 执行的预期行为和实践达到优秀标准</p>
-              <p>N/A = 未评估</p>
-              <p className="font-bold mt-2">*注意: 评分为1或2表示未达到标准</p>
+              <p>1 = Does not perform expected behaviors and practices</p>
+              <p>2 = Performs expected behaviors and practices below acceptable/satisfactory standard</p>
+              <p>3 = Performs expected behaviors and practices at satisfactory/pass standard</p>
+              <p>4 = Performs expected behaviors and practices at proficient standard</p>
+              <p>5 = Performs expected behaviors and practices at excellent standard</p>
+              <p>N/A = Not assessed</p>
+              <p className="font-bold mt-2">*Note: Ratings of 1 or 2 indicate below standard performance</p>
             </div>
             
-            {/* ANSAT项目选择 */}
+            {/* ANSAT item selection */}
             <Collapsible
               open={isCollapsibleOpen}
               onOpenChange={setIsCollapsibleOpen}
@@ -320,7 +415,7 @@ export default function ReviewFeedback() {
               <CollapsibleTrigger asChild>
                 <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50">
                   <span>
-                    ANSAT项目 ({selectedItems.length > 0 ? `已选择 ${selectedItems.length}` : "23 项"})
+                    ANSAT Items ({selectedItems.length > 0 ? `${selectedItems.length} selected` : "23 items"})
                   </span>
                   <ChevronDown className={`h-4 w-4 transition-transform ${isCollapsibleOpen ? "transform rotate-180" : ""}`} />
                 </div>
@@ -360,8 +455,8 @@ export default function ReviewFeedback() {
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>{rating === 'N/A' ? '未评估' : 
-                                       `评分 ${rating}: ${['', '未执行', '低于标准', '满足标准', '熟练水平', '优秀水平'][rating]}`}
+                                    <p>{rating === 'N/A' ? 'Not assessed' : 
+                                       `Rating ${rating}: ${['', 'Not performed', 'Below standard', 'Satisfactory', 'Proficient', 'Excellent'][rating]}`}
                                     </p>
                                   </TooltipContent>
                                 </Tooltip>
@@ -378,31 +473,31 @@ export default function ReviewFeedback() {
           </CardContent>
         </Card>
         
-        {/* 评论部分 */}
+        {/* Comments section */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-xl">评论</CardTitle>
+            <CardTitle className="text-xl">Comments</CardTitle>
           </CardHeader>
           <CardContent>
             <Textarea
-              placeholder="请输入评论"
+              placeholder="Enter your comments"
               className="min-h-[120px]"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
             <div className="text-right text-sm text-muted-foreground mt-2">
-              字符数: {comment.length}
+              Character count: {comment.length}
             </div>
           </CardContent>
         </Card>
         
-        {/* 讨论部分 */}
+        {/* Student discussion section */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-xl">学生讨论</CardTitle>
+            <CardTitle className="text-xl">Student Discussion</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p>此反馈是否已与学生讨论?</p>
+            <p>Has this feedback been discussed with the student?</p>
             
             <RadioGroup
               value={discussedWithStudent}
@@ -411,17 +506,17 @@ export default function ReviewFeedback() {
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="yes" id="discussed-yes" />
-                <Label htmlFor="discussed-yes">是</Label>
+                <Label htmlFor="discussed-yes">Yes</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="no" id="discussed-no" />
-                <Label htmlFor="discussed-no">否</Label>
+                <Label htmlFor="discussed-no">No</Label>
               </div>
             </RadioGroup>
             
             {discussedWithStudent === "yes" && (
               <div className="pt-2">
-                <p className="text-sm mb-2">请选择讨论日期</p>
+                <p className="text-sm mb-2">Please select the discussion date</p>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -432,7 +527,7 @@ export default function ReviewFeedback() {
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {discussionDate ? format(discussionDate, "PPP") : "选择日期"}
+                      {discussionDate ? format(discussionDate, "PPP") : "Select date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -449,10 +544,10 @@ export default function ReviewFeedback() {
           </CardContent>
         </Card>
         
-        {/* 操作按钮 */}
+        {/* Action buttons */}
         <div className="flex justify-end">
           <Button onClick={handleSubmit} className="min-w-[120px]">
-            提交
+            Submit
           </Button>
         </div>
       </main>
