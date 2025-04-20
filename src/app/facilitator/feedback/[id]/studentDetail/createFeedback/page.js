@@ -6,10 +6,6 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Checkbox,
-  CheckboxItem
-} from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { 
@@ -20,20 +16,8 @@ import {
   Download, 
   Bell, 
   LogOut,
-  ChevronDown
+  CalendarIcon
 } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   Popover,
   PopoverContent,
@@ -45,17 +29,7 @@ import {
   TooltipProvider,
   TooltipTrigger 
 } from "@/components/ui/tooltip";
-import { 
-  Table, 
-  TableBody, 
-  TableCaption, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -66,20 +40,12 @@ export default function ReviewFeedback() {
   
   // State management
   const [comment, setComment] = useState("");
-  const [selectedItems, setSelectedItems] = useState([]);
   const [itemRatings, setItemRatings] = useState({});
   const [discussedWithStudent, setDiscussedWithStudent] = useState(null);
   const [discussionDate, setDiscussionDate] = useState(null);
-  const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [feedbackData, setFeedbackData] = useState(null);
-  
-  // ANSAT assessment items
-  const ansatItems = Array.from({ length: 23 }, (_, i) => ({
-    id: i + 1,
-    title: `ANSAT Assessment Item ${i + 1}`,
-    description: `Description for ANSAT assessment item ${i + 1}`
-  }));
+  const [ansatItems, setAnsatItems] = useState([]);
   
   // Fetch feedback data
   useEffect(() => {
@@ -164,20 +130,29 @@ export default function ReviewFeedback() {
     fetchFeedbackData();
   }, [feedbackId]);
   
-  // Handle ANSAT item selection
-  const handleItemSelect = (itemId) => {
-    setSelectedItems(prev => {
-      if (prev.includes(itemId)) {
-        // If unchecked, also remove the rating
-        const newRatings = { ...itemRatings };
-        delete newRatings[itemId];
-        setItemRatings(newRatings);
-        return prev.filter(id => id !== itemId);
-      } else {
-        return [...prev, itemId];
+  // Fetch ANSAT items
+  useEffect(() => {
+    const fetchAnsatItems = async () => {
+      try {
+        // In a real application, this would be fetched from an API
+        // For demonstration purposes, we're using mock data
+        // Generate a random number of items between 10 and 25
+        const numberOfItems = Math.floor(Math.random() * 16) + 10;
+        
+        const mockAnsatItems = Array.from({ length: numberOfItems }, (_, i) => ({
+          item_id: i + 1,
+          title: `ANSAT Assessment Item ${i + 1}`,
+          is_positive: Math.random() > 0.5 // randomly assign positive/negative for demo
+        }));
+        
+        setAnsatItems(mockAnsatItems);
+      } catch (error) {
+        console.error("Error fetching ANSAT items:", error);
       }
-    });
-  };
+    };
+    
+    fetchAnsatItems();
+  }, []);
   
   // Handle rating selection
   const handleRatingSelect = (itemId, rating) => {
@@ -189,11 +164,11 @@ export default function ReviewFeedback() {
   
   // Handle submission
   const handleSubmit = async () => {
-    // Validate that all selected items have ratings
-    const allItemsRated = selectedItems.every(itemId => itemRatings[itemId]);
+    // Validate that required items have ratings
+    const hasRatings = Object.keys(itemRatings).length > 0;
     
-    if (!allItemsRated) {
-      alert("请为所有选中的ANSAT项目进行评分");
+    if (!hasRatings) {
+      alert("请至少为一个ANSAT项目进行评分");
       return;
     }
     
@@ -205,9 +180,9 @@ export default function ReviewFeedback() {
     // Build submission data
     const submissionData = {
       feedbackId,
-      selectedItems: selectedItems.map(itemId => ({
+      ratedItems: Object.entries(itemRatings).map(([itemId, rating]) => ({
         itemId,
-        rating: itemRatings[itemId]
+        rating
       })),
       comment,
       discussedWithStudent,
@@ -322,7 +297,7 @@ export default function ReviewFeedback() {
       </aside>
 
       {/* Main content area */}
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6 overflow-auto">
         {/* Page title */}
         <header className="mb-8 flex items-center justify-between">
           <h1 className="text-3xl font-bold">Review Feedback</h1>
@@ -370,29 +345,12 @@ export default function ReviewFeedback() {
             </p>
           </CardContent>
         </Card>
-        
-        {/* Mapped ANSAT items */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="text-xl">Mapped ANSAT Items</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {feedbackData.mappedAnsatItems.map((item, index) => (
-                <li key={index} className="flex items-center gap-2">
-                  <div className={`h-2 w-2 rounded-full ${item.status === 'strength' ? 'bg-green-500' : 'bg-amber-500'}`}></div>
-                  <span className="font-medium">"{item.text}":</span>
-                  <span>{item.status === 'strength' ? 'Strength' : 'Area for improvement'}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+
         
         {/* Assessment section */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-xl">Assessment</CardTitle>
+            <CardTitle className="text-xl">Assessment ({Object.keys(itemRatings).length > 0 ? `${Object.keys(itemRatings).length} items rated` : `${ansatItems.length} items total`})</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Rating description */}
@@ -406,70 +364,53 @@ export default function ReviewFeedback() {
               <p className="font-bold mt-2">*Note: Ratings of 1 or 2 indicate below standard performance</p>
             </div>
             
-            {/* ANSAT item selection */}
-            <Collapsible
-              open={isCollapsibleOpen}
-              onOpenChange={setIsCollapsibleOpen}
-              className="border rounded-md"
-            >
-              <CollapsibleTrigger asChild>
-                <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50">
-                  <span>
-                    ANSAT Items ({selectedItems.length > 0 ? `${selectedItems.length} selected` : "23 items"})
-                  </span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${isCollapsibleOpen ? "transform rotate-180" : ""}`} />
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="p-4 border-t space-y-4">
-                  {ansatItems.map((item) => (
-                    <div key={item.id} className="flex flex-col space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox 
-                          id={`item-${item.id}`} 
-                          checked={selectedItems.includes(item.id)}
-                          onCheckedChange={() => handleItemSelect(item.id)}
-                        />
-                        <Label 
-                          htmlFor={`item-${item.id}`}
-                          className="cursor-pointer font-medium"
-                        >
-                          {item.title}
-                        </Label>
-                      </div>
-                      
-                      {selectedItems.includes(item.id) && (
-                        <div className="ml-6 bg-muted/30 p-2 rounded-md">
-                          <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
-                          <div className="flex flex-wrap gap-2">
-                            {[1, 2, 3, 4, 5, 'N/A'].map((rating) => (
-                              <TooltipProvider key={rating}>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      variant={itemRatings[item.id] === rating ? "default" : "outline"}
-                                      size="sm"
-                                      onClick={() => handleRatingSelect(item.id, rating)}
-                                    >
-                                      {rating}
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{rating === 'N/A' ? 'Not assessed' : 
-                                       `Rating ${rating}: ${['', 'Not performed', 'Below standard', 'Satisfactory', 'Proficient', 'Excellent'][rating]}`}
-                                    </p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+            {/* ANSAT item list with ratings */}
+            <div className="space-y-6">
+              {ansatItems.map((item) => (
+                <div 
+                  key={item.item_id} 
+                  className="border rounded-md p-4 transition-all hover:border-primary/30 hover:bg-muted/10"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center">
+                      <h3 className="font-medium">{item.title}</h3>
+                      <span className={`text-sm ml-3 px-2 py-1 rounded ${item.is_positive ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'} font-medium`}>
+                        {item.is_positive ? 'Positive' : 'Improvement needed'}
+                      </span>
                     </div>
-                  ))}
+                    {itemRatings[item.item_id] && (
+                      <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
+                        Rated: {itemRatings[item.item_id]}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {[1, 2, 3, 4, 5, 'N/A'].map((rating) => (
+                      <TooltipProvider key={rating}>
+                        <Tooltip delayDuration={100}>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant={itemRatings[item.item_id] === rating ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handleRatingSelect(item.item_id, rating)}
+                              className={itemRatings[item.item_id] === rating ? "ring-2 ring-primary/30" : ""}
+                            >
+                              {rating}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{rating === 'N/A' ? 'Not assessed' : 
+                              `Rating ${rating}: ${['', 'Not performed', 'Below standard', 'Satisfactory', 'Proficient', 'Excellent'][rating]}`}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ))}
+                  </div>
                 </div>
-              </CollapsibleContent>
-            </Collapsible>
+              ))}
+            </div>
           </CardContent>
         </Card>
         
@@ -545,7 +486,7 @@ export default function ReviewFeedback() {
         </Card>
         
         {/* Action buttons */}
-        <div className="flex justify-end">
+        <div className="flex justify-end mb-12">
           <Button onClick={handleSubmit} className="min-w-[120px]">
             Submit
           </Button>
