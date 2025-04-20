@@ -35,24 +35,24 @@ import { GetAllStudentsWithDetails } from "../../../../lib/HowToConnectToFunctio
 export default function AllFeedback() {
   const router = useRouter();
 
-  // 预设的示例反馈数据
-  const sampleFeedbacks = [
-    {
-      id: "F89012",
-      studentName: "Olivia Martinez!",
-      studentId: "12345678",
-      is_marked: false,
-      university: "University",
-      healthService: "Community Clinic",
-      clinicArea: "Family Medicine",
-      date: "2023-07-10",
-      content:
-        "Olivia demonstrated excellent patient care skills and empathy. Her clinical notes were thorough and well-organized. Need to work on time management during busy clinic hours.",
-      preceptor: "Dr. Johnson",
-      startDate: "2023-07-10",
-      endDate: "2023-07-12",
-    },
-  ];
+  // // 预设的示例反馈数据
+  // const sampleFeedbacks = [
+  //   {
+  //     id: "F89012",
+  //     studentName: "Olivia Martinez!",
+  //     studentId: "12345678",
+  //     is_marked: false,
+  //     university: "University",
+  //     healthService: "Community Clinic",
+  //     clinicArea: "Family Medicine",
+  //     date: "2023-07-10",
+  //     content:
+  //       "Olivia demonstrated excellent patient care skills and empathy. Her clinical notes were thorough and well-organized. Need to work on time management during busy clinic hours.",
+  //     preceptor: "Dr. Johnson",
+  //     startDate: "2023-07-10",
+  //     endDate: "2023-07-12",
+  //   },
+  // ];
 
   const [feedbacks, setFeedbacks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
