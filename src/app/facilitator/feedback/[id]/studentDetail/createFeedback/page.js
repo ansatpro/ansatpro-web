@@ -396,7 +396,9 @@ export default function ReviewFeedback() {
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center">
-                      <h3 className="font-medium">{item.title}</h3>
+                      <h3 className="font-medium">
+                        Item {item.item_id}: {item.title}
+                      </h3>
                       <span
                         className={`text-sm ml-3 px-2 py-1 rounded ${
                           item.is_positive
