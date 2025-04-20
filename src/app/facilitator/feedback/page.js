@@ -11,19 +11,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardFooter, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";   
-import { 
-  Home, 
-  MessageSquareText, 
-  Settings, 
-  Users, 
-  Download, 
-  Bell, 
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Home,
+  MessageSquareText,
+  Settings,
+  Users,
+  Download,
+  Bell,
   Search,
-  X
+  X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { GetAllStudentsWithDetails } from "../../../../lib/HowToConnectToFunction";
 
 export default function AllFeedback() {
   const router = useRouter();
@@ -32,24 +39,25 @@ export default function AllFeedback() {
   const sampleFeedbacks = [
     {
       id: "F89012",
-      studentName: "Olivia Martinez",
+      studentName: "Olivia Martinez!",
       studentId: "12345678",
       is_marked: false,
       university: "University",
       healthService: "Community Clinic",
       clinicArea: "Family Medicine",
       date: "2023-07-10",
-      content: "Olivia demonstrated excellent patient care skills and empathy. Her clinical notes were thorough and well-organized. Need to work on time management during busy clinic hours.",
+      content:
+        "Olivia demonstrated excellent patient care skills and empathy. Her clinical notes were thorough and well-organized. Need to work on time management during busy clinic hours.",
       preceptor: "Dr. Johnson",
       startDate: "2023-07-10",
-      endDate: "2023-07-12"
-    }
+      endDate: "2023-07-12",
+    },
   ];
 
   const [feedbacks, setFeedbacks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filteredResults, setFilteredResults] = useState([]);
-  
+
   const [searchTerm, setSearchTerm] = useState("");
   const [universityFilter, setUniversityFilter] = useState("all");
   const [healthServiceFilter, setHealthServiceFilter] = useState("all");
@@ -58,7 +66,7 @@ export default function AllFeedback() {
 
   // 格式化日期的辅助函数
   const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    const options = { year: "numeric", month: "short", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
@@ -67,36 +75,106 @@ export default function AllFeedback() {
     const initializeData = async () => {
       try {
         // 检查localStorage中是否已有数据
-        const storedFeedbacks = localStorage.getItem('ansatpro_feedbacks');
-        
-        if (storedFeedbacks) {
-          // 如果localStorage中有数据，使用它
-          const parsedFeedbacks = JSON.parse(storedFeedbacks);
-          setFeedbacks(parsedFeedbacks);
-          setFilteredResults(parsedFeedbacks);
-          setIsLoading(false);
-          return;
-        }
-        
+        // const storedFeedbacks = localStorage.getItem("ansatpro_feedbacks");
+
+        // if (storedFeedbacks) {
+        //   // 如果localStorage中有数据，使用它
+        //   const parsedFeedbacks = JSON.parse(storedFeedbacks);
+        //   setFeedbacks(parsedFeedbacks);
+        //   setFilteredResults(parsedFeedbacks);
+        //   setIsLoading(false);
+        //   return;
+        // }
+
         // 如果没有存储的数据，则使用示例数据
-        // 模拟加载延迟
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
+
+        // Original response (e.g., from API)
+
+        const response = await GetAllStudentsWithDetails();
+
+        // Convert to sampleFeedbacks format
+        const sampleFeedbacks = [];
+
+        response.forEach((student) => {
+          const {
+            student_id: studentId,
+            first_name,
+            last_name,
+            university_id: university,
+            health_service_id: healthService,
+            clinic_area_id: clinicArea,
+            start_date: startDate,
+            end_date: endDate,
+            preceptorFeedbackList,
+          } = student;
+
+          preceptorFeedbackList.forEach((feedback) => {
+            const {
+              $id: id,
+              $createdAt: date,
+              preceptor_id,
+              preceptor_name: preceptor,
+              content,
+              review: is_marked,
+              ai_feedback_items,
+            } = feedback;
+
+            // Extract AI feedback descriptions
+            const aiFeedbackDescriptions = ai_feedback_items.map((item) => ({
+              item_id: item.item_id,
+              description: item.item_details.description,
+            }));
+
+            // Extract review scores and comments if review exists
+            const reviewComment = is_marked?.comment || null;
+            const reviewScore =
+              is_marked?.review_scores.map((score) => ({
+                item_id: score.item_id,
+                score: score.score,
+              })) || [];
+
+            // Push transformed feedback to sampleFeedbacks
+            sampleFeedbacks.push({
+              id,
+              date,
+              studentId,
+              studentName: `${first_name} ${last_name}`,
+              university,
+              healthService,
+              clinicArea,
+              startDate,
+              endDate,
+              preceptor_id,
+              preceptor,
+              content,
+              is_marked: !!is_marked,
+              reviewComment,
+              reviewScore,
+              aiFeedbackDescriptions,
+            });
+          });
+        });
+
+        console.log(sampleFeedbacks);
+
         // 按日期倒序排列
-        const sortedFeedbacks = [...sampleFeedbacks].sort((a, b) => 
-          new Date(b.date) - new Date(a.date)
+        const sortedFeedbacks = [...sampleFeedbacks].sort(
+          (a, b) => new Date(b.date) - new Date(a.date)
         );
-        
+
         // 存储到localStorage
-        localStorage.setItem('ansatpro_feedbacks', JSON.stringify(sortedFeedbacks));
-        
+        localStorage.setItem(
+          "ansatpro_feedbacks",
+          JSON.stringify(sortedFeedbacks)
+        );
+
         setFeedbacks(sortedFeedbacks);
         setFilteredResults(sortedFeedbacks);
       } catch (err) {
         console.error("Error initializing data:", err);
         // 如果发生错误，仍然尝试使用示例数据
-        const sortedFeedbacks = [...sampleFeedbacks].sort((a, b) => 
-          new Date(b.date) - new Date(a.date)
+        const sortedFeedbacks = [...sampleFeedbacks].sort(
+          (a, b) => new Date(b.date) - new Date(a.date)
         );
         setFeedbacks(sortedFeedbacks);
         setFilteredResults(sortedFeedbacks);
@@ -127,12 +205,7 @@ export default function AllFeedback() {
   // 应用筛选器当任何筛选条件变化时
   useEffect(() => {
     applyFilters();
-  }, [
-    universityFilter,
-    healthServiceFilter,
-    clinicAreaFilter,
-    dateFilter,
-  ]);
+  }, [universityFilter, healthServiceFilter, clinicAreaFilter, dateFilter]);
 
   // 处理大学筛选变化
   const handleUniversityChange = (value) => {
@@ -157,27 +230,33 @@ export default function AllFeedback() {
   // 应用所有筛选条件
   const applyFilters = () => {
     let results = feedbacks;
-    
+
     // 应用大学筛选
     if (universityFilter !== "all") {
-      results = results.filter((feedback) => feedback.university === universityFilter);
+      results = results.filter(
+        (feedback) => feedback.university === universityFilter
+      );
     }
-    
+
     // 应用医疗服务筛选
     if (healthServiceFilter !== "all") {
-      results = results.filter((feedback) => feedback.healthService === healthServiceFilter);
+      results = results.filter(
+        (feedback) => feedback.healthService === healthServiceFilter
+      );
     }
-    
+
     // 应用诊所区域筛选
     if (clinicAreaFilter !== "all") {
-      results = results.filter((feedback) => feedback.clinicArea === clinicAreaFilter);
+      results = results.filter(
+        (feedback) => feedback.clinicArea === clinicAreaFilter
+      );
     }
-    
+
     // 应用日期筛选
     if (dateFilter !== "all") {
       const now = new Date();
       let filterDate = new Date();
-      
+
       switch (dateFilter) {
         case "week":
           filterDate.setDate(now.getDate() - 7);
@@ -191,10 +270,12 @@ export default function AllFeedback() {
         default:
           break;
       }
-      
-      results = results.filter((feedback) => new Date(feedback.date) >= filterDate);
+
+      results = results.filter(
+        (feedback) => new Date(feedback.date) >= filterDate
+      );
     }
-    
+
     setFilteredResults(results);
   };
 
@@ -227,8 +308,8 @@ export default function AllFeedback() {
   // 处理点击反馈详情 - 根据is_marked状态决定跳转目标
   const handleFeedbackClick = (feedback) => {
     // 存储当前点击的反馈详情到localStorage
-    localStorage.setItem('ansatpro_current_feedback', JSON.stringify(feedback));
-    
+    localStorage.setItem("ansatpro_current_feedback", JSON.stringify(feedback));
+
     if (feedback.is_marked) {
       // 已标记，跳转到查看反馈详情页面
       router.push(`/facilitator/feedback/${feedback.id}/feedbackDetail`);
@@ -297,8 +378,8 @@ export default function AllFeedback() {
             <Button variant="outline" size="sm">
               Log out
             </Button>
-        </div>
-    </header>
+          </div>
+        </header>
 
         {/* Search and filters */}
         <Card className="mb-6">
@@ -317,7 +398,7 @@ export default function AllFeedback() {
                     onKeyDown={(e) => e.key === "Enter" && searchFeedback()}
                   />
                   {searchTerm && (
-                    <button 
+                    <button
                       className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
                       onClick={() => setSearchTerm("")}
                     >
@@ -361,7 +442,7 @@ export default function AllFeedback() {
                   </Select>
                 </div>
 
-            <div>
+                <div>
                   <label className="mb-2 block text-sm font-medium">
                     Health Service
                   </label>
@@ -381,9 +462,9 @@ export default function AllFeedback() {
                       ))}
                     </SelectContent>
                   </Select>
-            </div>
+                </div>
 
-            <div>
+                <div>
                   <label className="mb-2 block text-sm font-medium">
                     Clinic Area
                   </label>
@@ -403,14 +484,14 @@ export default function AllFeedback() {
                       ))}
                     </SelectContent>
                   </Select>
-            </div>
+                </div>
 
-            <div>
+                <div>
                   <label className="mb-2 block text-sm font-medium">
                     Time Period
                   </label>
-                  <Select 
-                    value={dateFilter} 
+                  <Select
+                    value={dateFilter}
                     onValueChange={handleDateFilterChange}
                   >
                     <SelectTrigger className="w-full">
@@ -437,15 +518,20 @@ export default function AllFeedback() {
         ) : filteredResults.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredResults.map((feedback) => (
-              <Card 
-                key={feedback.id} 
+              <Card
+                key={feedback.id}
                 className="flex flex-col h-full cursor-pointer transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1 hover:border-primary/20 group"
                 onClick={() => handleFeedbackClick(feedback)}
               >
                 <CardHeader className="pb-3">
                   <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg group-hover:text-primary transition-colors duration-300">{feedback.studentName}</CardTitle>
-                    <Badge variant="outline" className="group-hover:bg-primary/10 transition-colors duration-300">
+                    <CardTitle className="text-lg group-hover:text-primary transition-colors duration-300">
+                      {feedback.studentName}
+                    </CardTitle>
+                    <Badge
+                      variant="outline"
+                      className="group-hover:bg-primary/10 transition-colors duration-300"
+                    >
                       {feedback.is_marked ? "Marked" : "Unmarked"}
                     </Badge>
                   </div>
@@ -454,7 +540,9 @@ export default function AllFeedback() {
                   </p>
                 </CardHeader>
                 <CardContent className="flex-grow">
-                  <p className="text-sm text-muted-foreground line-clamp-4">{feedback.content}</p>
+                  <p className="text-sm text-muted-foreground line-clamp-4">
+                    {feedback.content}
+                  </p>
                 </CardContent>
                 <CardFooter className="border-t pt-3 text-xs text-muted-foreground group-hover:border-primary/20 transition-colors duration-300">
                   Preceptor: {feedback.preceptor}
@@ -465,14 +553,16 @@ export default function AllFeedback() {
         ) : (
           <div className="flex justify-center items-center py-20">
             <div className="text-center">
-              <p className="text-muted-foreground mb-4">No feedback found matching your filters.</p>
+              <p className="text-muted-foreground mb-4">
+                No feedback found matching your filters.
+              </p>
               <Button variant="outline" onClick={clearFilters}>
                 Clear all filters
               </Button>
             </div>
           </div>
         )}
-    </main>
+      </main>
     </div>
   );
 }
