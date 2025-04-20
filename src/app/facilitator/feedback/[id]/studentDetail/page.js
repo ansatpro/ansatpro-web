@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -19,53 +19,144 @@ import {
 
 export default function StudentDetail() {
   const router = useRouter();
+  const params = useParams();
+  const feedbackId = params.id; // 获取URL中的ID参数
+  
   const [confirmed, setConfirmed] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [feedbackData, setFeedbackData] = useState(null);
 
-  // 预设的学生数据
-  const studentData = [
+  // 预设的反馈数据（用作后备数据）
+  const sampleFeedbacks = [
     {
-      id: "S12345",
-      name: "John Smith",
-      studentId: "12345678",
-      university: "Northland University",
-      healthService: "Northland Health & Wellness Center",
-      clinicArea: "Pediatrics",
-      startDate: "2025-01-01",
-      endDate: "2025-03-01"
+      id: "F89012",
+      studentName: "Olivia Martinez",
+      ismarked: "Marked",
+      is_marked: true,
+      university: "Johns Hopkins University",
+      healthService: "Community Clinic",
+      clinicArea: "Family Medicine",
+      date: "2023-07-10",
+      content: "Olivia demonstrated excellent patient care skills and empathy. Her clinical notes were thorough and well-organized. Need to work on time management during busy clinic hours.",
+      preceptor: "Dr. Johnson",
+      studentId: "ST12345",
+      startDate: "2023-05-01",
+      endDate: "2023-08-30"
     },
     {
-      id: "S67890",
-      name: "Emily Johnson",
-      studentId: "67890123",
-      university: "Central Medical College",
-      healthService: "City General Hospital",
+      id: "F89013",
+      studentName: "Michael Brown",
+      ismarked: "Unmarked",
+      is_marked: false,
+      university: "Stanford University",
+      healthService: "Memorial Hospital",
       clinicArea: "Cardiology",
-      startDate: "2025-02-15",
-      endDate: "2025-05-15"
+      date: "2023-08-05",
+      content: "Michael shows promising clinical reasoning skills. He effectively communicates with patients and staff. Needs to improve documentation completeness and timeliness.",
+      preceptor: "Dr. Williams",
+      studentId: "ST67890",
+      startDate: "2023-06-15",
+      endDate: "2023-09-15"
     }
   ];
 
-  // 模拟获取学生数据
+  // 获取反馈和学生数据
   useEffect(() => {
-    const getStudentData = async () => {
+    const fetchFeedbackData = async () => {
       try {
-        // 模拟API调用延迟
+        // 尝试首先从localStorage获取当前反馈
+        const storedCurrentFeedback = localStorage.getItem('ansatpro_current_feedback');
+        
+        if (storedCurrentFeedback) {
+          const currentFeedback = JSON.parse(storedCurrentFeedback);
+          
+          // 检查是否是我们需要的反馈ID
+          if (currentFeedback.id === feedbackId) {
+            console.log("Using feedback data from localStorage");
+            setFeedbackData(currentFeedback);
+            
+            // 创建学生详情对象
+            const studentDetails = {
+              name: currentFeedback.studentName,
+              studentId: currentFeedback.studentId || `ID-${currentFeedback.id}`,
+              university: currentFeedback.university,
+              healthService: currentFeedback.healthService,
+              clinicArea: currentFeedback.clinicArea,
+              startDate: currentFeedback.startDate,
+              endDate: currentFeedback.endDate
+            };
+            
+            setSelectedStudent(studentDetails);
+            setLoading(false);
+            return;
+          }
+        }
+        
+        // 如果未找到当前反馈，尝试从所有反馈列表中获取
+        const storedFeedbacks = localStorage.getItem('ansatpro_feedbacks');
+        
+        if (storedFeedbacks) {
+          const feedbacks = JSON.parse(storedFeedbacks);
+          const feedback = feedbacks.find(f => f.id === feedbackId);
+          
+          if (feedback) {
+            console.log("Using feedback data from stored feedbacks list");
+            setFeedbackData(feedback);
+            
+            // 创建学生详情对象
+            const studentDetails = {
+              name: feedback.studentName,
+              studentId: feedback.studentId || `ID-${feedback.id}`,
+              university: feedback.university,
+              healthService: feedback.healthService,
+              clinicArea: feedback.clinicArea,
+              startDate: feedback.startDate,
+              endDate: feedback.endDate
+            };
+            
+            setSelectedStudent(studentDetails);
+            setLoading(false);
+            return;
+          }
+        }
+        
+        // 如果localStorage中没有数据，回退到模拟数据
+        console.log("Using fallback data");
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        // 在实际应用中，这里会从URL获取学生ID并从API获取数据
-        // 这里假设我们显示第一个学生的数据
-        setSelectedStudent(studentData[0]);
+        // 查找反馈
+        const feedback = sampleFeedbacks.find(f => f.id === feedbackId);
+        
+        if (feedback) {
+          setFeedbackData(feedback);
+          
+          // 创建学生详情对象
+          const studentDetails = {
+            name: feedback.studentName,
+            studentId: feedback.studentId || `ID-${feedback.id}`,
+            university: feedback.university,
+            healthService: feedback.healthService,
+            clinicArea: feedback.clinicArea,
+            startDate: feedback.startDate,
+            endDate: feedback.endDate
+          };
+          
+          setSelectedStudent(studentDetails);
+        } else {
+          console.error("Feedback not found with ID:", feedbackId);
+        }
       } catch (error) {
-        console.error("Error fetching student data:", error);
+        console.error("Error fetching feedback data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    getStudentData();
-  }, []);
+    if (feedbackId) {
+      fetchFeedbackData();
+    }
+  }, [feedbackId]);
 
   // 处理复选框状态变化
   const handleConfirmChange = (checked) => {
@@ -74,22 +165,48 @@ export default function StudentDetail() {
 
   // 处理下一步按钮点击
   const handleNextClick = () => {
-    if (confirmed && selectedStudent) {
-      // 在实际应用中，这里会导航到反馈表单页面
-      router.push(`/facilitator/feedback/createFeedback/${selectedStudent.id}`);
+    if (confirmed && feedbackData) {
+      // 根据反馈标记状态决定下一步去向
+      if (feedbackData.is_marked) {
+        // 已标记，跳转到查看页面
+        router.push(`/facilitator/feedback/${feedbackId}/studentDetail/reviewFeedback`);
+      } else {
+        // 未标记，跳转到创建页面
+        router.push(`/facilitator/feedback/${feedbackId}/studentDetail/createFeedback`);
+      }
     }
   };
 
   // 格式化日期显示
   const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    try {
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString || "N/A";
+    }
   };
 
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-lg">Loading...</p>
+      </div>
+    );
+  }
+
+  // 如果未找到反馈数据
+  if (!feedbackData || !selectedStudent) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Feedback Not Found</h2>
+          <p className="text-muted-foreground mb-6">Unable to find feedback with ID: {feedbackId}</p>
+          <Button onClick={() => router.push('/facilitator/feedback')}>
+            Return to Feedback List
+          </Button>
+        </div>
       </div>
     );
   }
@@ -144,71 +261,71 @@ export default function StudentDetail() {
           </div>
           
           <p className="text-lg text-muted-foreground mb-6">
-            View the student's feedback:
+            View the student's feedback: <span className="font-medium">{feedbackData.is_marked ? "Marked" : "Unmarked"}</span>
           </p>
         </header>
         
-        {selectedStudent && (
-          <div className="space-y-8">
-            {/* Student Card */}
-            <Card className="max-w-3xl">
-              <CardHeader>
-                <CardTitle className="text-2xl">{selectedStudent.name}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Student ID</p>
-                    <p className="font-medium">{selectedStudent.studentId}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">University</p>
-                    <p className="font-medium">{selectedStudent.university}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Assigned Health Service</p>
-                    <p className="font-medium">{selectedStudent.healthService}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Assigned Clinic Area</p>
-                    <p className="font-medium">{selectedStudent.clinicArea}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Placement Start Date</p>
-                    <p className="font-medium">{formatDate(selectedStudent.startDate)}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Placement End Date</p>
-                    <p className="font-medium">{formatDate(selectedStudent.endDate)}</p>
-                  </div>
+        <div className="space-y-8">
+          
+          
+          {/* Student Card */}
+          <Card className="max-w-3xl">
+            <CardHeader>
+              <CardTitle className="text-2xl">{selectedStudent.name}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Student ID</p>
+                  <p className="font-medium">{selectedStudent.studentId}</p>
                 </div>
-              </CardContent>
-            </Card>
-            
-            {/* Confirmation */}
-            <div className="pt-6 border-t">
-              <div className="flex items-center space-x-2 mb-6">
-                <Checkbox 
-                  id="confirmation" 
-                  checked={confirmed} 
-                  onCheckedChange={handleConfirmChange}
-                />
-                <Label 
-                  htmlFor="confirmation" 
-                  className="text-sm"
-                >
-                  I have reviewed the student's details above and confirm I am reviewing the feedback and determining the ANSAT scoring for the correct student.
-                </Label>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">University</p>
+                  <p className="font-medium">{selectedStudent.university}</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Assigned Health Service</p>
+                  <p className="font-medium">{selectedStudent.healthService}</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Assigned Clinic Area</p>
+                  <p className="font-medium">{selectedStudent.clinicArea}</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Placement Start Date</p>
+                  <p className="font-medium">{formatDate(selectedStudent.startDate)}</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Placement End Date</p>
+                  <p className="font-medium">{formatDate(selectedStudent.endDate)}</p>
+                </div>
               </div>
-              
-              {confirmed && (
-                <Button onClick={handleNextClick} className="mt-4">
-                  Next
-                </Button>
-              )}
+            </CardContent>
+          </Card>
+          
+          {/* Confirmation */}
+          <div className="pt-6 border-t">
+            <div className="flex items-center space-x-2 mb-6">
+              <Checkbox 
+                id="confirmation" 
+                checked={confirmed} 
+                onCheckedChange={handleConfirmChange}
+              />
+              <Label 
+                htmlFor="confirmation" 
+                className="text-sm"
+              >
+                I have reviewed the student's details above and confirm I am reviewing the feedback and determining the ANSAT scoring for the correct student.
+              </Label>
             </div>
+            
+            {confirmed && (
+              <Button onClick={handleNextClick} className="mt-4">
+                {feedbackData.is_marked ? "Review Feedback" : "Create Feedback"}
+              </Button>
+            )}
           </div>
-        )}
+        </div>
       </main>
     </div>
   );
