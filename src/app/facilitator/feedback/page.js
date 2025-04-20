@@ -89,6 +89,8 @@ export default function AllFeedback() {
         // 如果没有存储的数据，则使用示例数据
 
         // Original response (e.g., from API)
+        // const testRes = await GetAllStudentsWithDetails();
+        // console.log(testRes);
 
         const response = await GetAllStudentsWithDetails();
 
@@ -123,6 +125,7 @@ export default function AllFeedback() {
             const aiFeedbackDescriptions = ai_feedback_items.map((item) => ({
               item_id: item.item_id,
               description: item.item_details.description,
+              is_positive: item.is_positive,
             }));
 
             // Extract review scores and comments if review exists
