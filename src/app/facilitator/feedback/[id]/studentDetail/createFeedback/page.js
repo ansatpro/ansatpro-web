@@ -66,11 +66,7 @@ export default function ReviewFeedback() {
               date: currentFeedback.date,
               studentName: currentFeedback.studentName,
               originalFeedback: currentFeedback.content,
-              mappedAnsatItems: [
-                // Example mapped items
-                { text: "clinical skills", status: "strength" },
-                { text: "documentation", status: "improvement" }
-              ]
+            
             });
             
             setLoading(false);
@@ -93,11 +89,7 @@ export default function ReviewFeedback() {
               date: feedback.date,
               studentName: feedback.studentName,
               originalFeedback: feedback.content,
-              mappedAnsatItems: [
-                // Example mapped items
-                { text: "clinical skills", status: "strength" },
-                { text: "documentation", status: "improvement" }
-              ]
+              
             });
             
             setLoading(false);
@@ -105,20 +97,6 @@ export default function ReviewFeedback() {
           }
         }
         
-        // If not found in localStorage, use mock data
-        console.log("Using fallback feedback data");
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        setFeedbackData({
-          id: feedbackId,
-          date: "2020-02-05T19:32:00",
-          studentName: "Joshua Davis",
-          originalFeedback: "The student followed proper infection control procedures but needed guidance on sterile technique.",
-          mappedAnsatItems: [
-            { text: "infection control", status: "strength" },
-            { text: "sterile technique", status: "improvement" }
-          ]
-        });
         
       } catch (error) {
         console.error("Error fetching feedback data:", error);
