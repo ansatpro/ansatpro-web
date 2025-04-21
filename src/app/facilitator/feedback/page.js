@@ -381,8 +381,8 @@ export default function AllFeedback() {
             <Button variant="outline" size="sm">
               Log out
             </Button>
-          </div>
-        </header>
+        </div>
+    </header>
 
         {/* Search and filters */}
         <Card className="mb-6">
@@ -445,7 +445,7 @@ export default function AllFeedback() {
                   </Select>
                 </div>
 
-                <div>
+            <div>
                   <label className="mb-2 block text-sm font-medium">
                     Health Service
                   </label>
@@ -465,9 +465,9 @@ export default function AllFeedback() {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
+            </div>
 
-                <div>
+            <div>
                   <label className="mb-2 block text-sm font-medium">
                     Clinic Area
                   </label>
@@ -487,9 +487,9 @@ export default function AllFeedback() {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
+            </div>
 
-                <div>
+            <div>
                   <label className="mb-2 block text-sm font-medium">
                     Time Period
                   </label>
@@ -565,7 +565,7 @@ export default function AllFeedback() {
             </div>
           </div>
         )}
-      </main>
+    </main>
     </div>
   );
 }

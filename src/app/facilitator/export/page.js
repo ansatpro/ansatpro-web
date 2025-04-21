@@ -30,34 +30,87 @@ export default function ExportPage() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
-  // 示例学生数据
+  // 示例学生数据 - 更新格式以与反馈系统保持一致
   const sampleStudents = [
-    { id: "S1001", name: "Olivia Martinez", university: "University of Melbourne" },
-    { id: "S1002", name: "Michael Johnson", university: "Stanford University" },
-    { id: "S1003", name: "Emma Wilson", university: "Deakin University" },
-    { id: "S1004", name: "James Smith", university: "Monash University" },
-    { id: "S1005", name: "Sophia Chen", university: "University of Sydney" },
-    { id: "S1006", name: "William Brown", university: "RMIT University" },
-    { id: "S1007", name: "Ava Davis", university: "La Trobe University" },
-    { id: "S1008", name: "Lucas Thompson", university: "University of Queensland" },
+    { 
+      docId: "doc123", 
+      studentId: "S1001", 
+      studentName: "Olivia Martinez", 
+      studentUniversity: "University of Melbourne",
+      
+    },
+    { 
+      docId: "doc124", 
+      studentId: "S1002", 
+      studentName: "Michael Johnson", 
+      studentUniversity: "Stanford University",
+      courses: [
+        { code: "MED201", name: "Clinical Skills", year: "2023" }
+      ]
+    },
+    { 
+      docId: "doc125", 
+      studentId: "S1003", 
+      studentName: "Emma Wilson", 
+      studentUniversity: "Deakin University",
+      courses: [
+        { code: "MED301", name: "Advanced Diagnostics", year: "2023" }
+      ]
+    },
+    { 
+      docId: "doc126", 
+      studentId: "S1004", 
+      studentName: "James Smith", 
+      studentUniversity: "Monash University",
+      courses: [
+        { code: "BIO220", name: "Physiology", year: "2023" }
+      ]
+    },
+    { 
+      docId: "doc127", 
+      studentId: "S1005", 
+      studentName: "Sophia Chen", 
+      studentUniversity: "University of Sydney",
+      courses: [
+        { code: "MED110", name: "Medical Ethics", year: "2023" }
+      ]
+    },
+    { 
+      docId: "doc128", 
+      studentId: "S1006", 
+      studentName: "William Brown", 
+      studentUniversity: "RMIT University",
+      courses: [
+        { code: "BIO250", name: "Microbiology", year: "2023" }
+      ]
+    },
+    { 
+      docId: "doc129", 
+      studentId: "S1007", 
+      studentName: "Ava Davis", 
+      studentUniversity: "La Trobe University",
+      courses: [
+        { code: "MED205", name: "Patient Care", year: "2023" }
+      ]
+    },
+    { 
+      docId: "doc130", 
+      studentId: "S1008", 
+      studentName: "Lucas Thompson", 
+      studentUniversity: "University of Queensland",
+      courses: [
+        { code: "BIO230", name: "Immunology", year: "2023" }
+      ]
+    },
   ];
 
   // 初始化数据
   useEffect(() => {
     const initializeData = async () => {
       try {
-        // 检查localStorage中是否已有学生数据
-        const storedStudents = localStorage.getItem('ansatpro_students');
+        // 先清除localStorage中的学生数据以避免格式不一致的问题
+        localStorage.removeItem('ansatpro_students');
         
-        if (storedStudents) {
-          // 如果localStorage中有数据，使用它
-          const parsedStudents = JSON.parse(storedStudents);
-          setStudents(parsedStudents);
-          setIsLoading(false);
-          return;
-        }
-        
-        // 如果没有存储的数据，则使用示例数据
         // 模拟加载延迟
         await new Promise(resolve => setTimeout(resolve, 800));
         
@@ -100,12 +153,18 @@ export default function ExportPage() {
       return;
     }
     
-    // 根据ID或姓名进行搜索
-    const results = students.filter(
-      (student) =>
-        student.id.toLowerCase().includes(value.toLowerCase()) ||
-        student.name.toLowerCase().includes(value.toLowerCase())
-    );
+    // 确保students数组存在且有内容
+    if (!students || students.length === 0) {
+      return;
+    }
+    
+    // 根据学生ID或姓名进行搜索
+    const lowercaseValue = value.toLowerCase();
+    const results = students.filter(student => {
+      const studentIdMatch = student.studentId && student.studentId.toLowerCase().includes(lowercaseValue);
+      const studentNameMatch = student.studentName && student.studentName.toLowerCase().includes(lowercaseValue);
+      return studentIdMatch || studentNameMatch;
+    });
     
     setSearchResults(results);
     setShowDropdown(true);
@@ -121,12 +180,20 @@ export default function ExportPage() {
 
   // 选择学生
   const selectStudent = (student) => {
+    if (!student || !student.docId) {
+      console.error("Invalid student data:", student);
+      return;
+    }
+    
     setSelectedStudent(student);
-    setSearchTerm(`${student.id} - ${student.name}`);
+    setSearchTerm(student.studentName || "");
     setShowDropdown(false);
     
     // 将所选学生存储到localStorage
     localStorage.setItem('ansatpro_selected_student', JSON.stringify(student));
+    
+    // 跳转到学生详情页面 - 使用docId作为路由参数
+    router.push(`/facilitator/export/${student.docId}/studentDetail`);
   };
 
   return (
@@ -225,14 +292,13 @@ export default function ExportPage() {
                     <ul className="py-1">
                       {searchResults.map((student) => (
                         <li 
-                          key={student.id}
+                          key={student.docId}
                           className="px-4 py-2 hover:bg-accent cursor-pointer"
                           onClick={() => selectStudent(student)}
                         >
-                          <div className="font-medium">{student.name}</div>
-                          <div className="text-sm text-muted-foreground flex justify-between">
-                            <span>ID: {student.id}</span>
-                            <span>{student.university}</span>
+                          <div className="font-medium">{student.studentName}</div>
+                          <div className="text-xs text-muted-foreground">
+                            ID: {student.studentId} | {student.studentUniversity}
                           </div>
                         </li>
                       ))}
@@ -245,9 +311,10 @@ export default function ExportPage() {
               {selectedStudent && (
                 <div className="mt-6 p-4 border rounded-md bg-muted/20">
                   <h3 className="text-lg font-medium mb-2">Selected Student</h3>
-                  <p><span className="font-medium">ID:</span> {selectedStudent.id}</p>
-                  <p><span className="font-medium">Name:</span> {selectedStudent.name}</p>
-                  <p><span className="font-medium">University:</span> {selectedStudent.university}</p>
+                  <p><span className="font-medium">ID:</span> {selectedStudent.studentId}</p>
+                  <p><span className="font-medium">Name:</span> {selectedStudent.studentName}</p>
+                  <p><span className="font-medium">University:</span> {selectedStudent.studentUniversity}</p>
+                  <p><span className="font-medium">Document ID:</span> {selectedStudent.docId}</p>
                 </div>
               )}
             </div>
