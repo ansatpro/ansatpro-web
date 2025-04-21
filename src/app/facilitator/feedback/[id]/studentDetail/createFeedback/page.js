@@ -32,6 +32,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { PostFacilitatorComments } from "../../../../../../../lib/HowToConnectToFunction";
 
 export default function ReviewFeedback() {
   const router = useRouter();
@@ -188,7 +189,8 @@ export default function ReviewFeedback() {
     // In a real application, this would call an API
     try {
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const res = await PostFacilitatorComments(submissionData);
+      console.log(res);
 
       // Update feedback status to marked in localStorage
       const storedFeedbacks = localStorage.getItem("ansatpro_feedbacks");
