@@ -154,8 +154,19 @@ export default function StudentDetailPage() {
   
   // 处理生成AI摘要
   const handleGenerateAISummary = async () => {
-    // 直接导航到AI摘要页面
-    router.push(`/facilitator/export/${docId}/studentDetail/aiSummary`);
+    setExportLoading(prev => ({ ...prev, aiSummary: true }));
+    
+    try {
+      // 模拟AI处理 - 在实际应用中，这里将是API调用
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast.success("AI Summary has been generated successfully.");
+    } catch (error) {
+      console.error("AI Summary generation error:", error);
+      toast.error("There was an error generating the AI summary. Please try again.");
+    } finally {
+      setExportLoading(prev => ({ ...prev, aiSummary: false }));
+    }
   };
   
   // 处理导出操作
@@ -179,117 +190,38 @@ export default function StudentDetailPage() {
     setExportLoading(prev => ({ ...prev, [exportType]: true }));
     
     try {
-      // 根据不同的导出类型执行不同的逻辑
-      if (exportType === "Preceptor Feedback") {
-        await exportPreceptorFeedback();
-      } else if (exportType === "Facilitator Review") {
-        await exportFacilitatorFeedback();
-      }
+      // 模拟导出处理 - 在实际应用中，这里将是API调用
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // 创建模拟PDF下载
+      const fileName = `${student.studentName}_${exportType.replace(/\s+/g, '_')}.pdf`;
+      
+      // 创建一个Blob对象
+      const blob = new Blob([`Content - ${exportType} for ${student.studentName}`], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      
+      // 创建下载链接并触发点击
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      
+      // 清理
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 0);
+      
+      toast.success(`${exportType} has been downloaded.`);
       
       setShowExportDialog(false);
     } catch (error) {
       console.error("Export error:", error);
-      toast.error("There was an error exporting the reports. Please try again.");
+      toast.error("There was an error exporting the report. Please try again.");
     } finally {
       setExportLoading(prev => ({ ...prev, [exportType]: false }));
     }
-  };
-  
-  // 导出所有Preceptor反馈
-  const exportPreceptorFeedback = async () => {
-    // 模拟从localStorage或API获取反馈数据
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // 模拟获取的preceptor反馈列表
-    const preceptorFeedbacks = generateMockFeedbacks("preceptor", 3);
-    
-    if (preceptorFeedbacks.length === 0) {
-      toast.error("No preceptor feedback found for this student.");
-      return;
-    }
-    
-    // 为每个反馈生成PDF并下载
-    for (let i = 0; i < preceptorFeedbacks.length; i++) {
-      const feedback = preceptorFeedbacks[i];
-      const fileName = `${student.studentName}_Preceptor_Feedback_${i+1}.pdf`;
-      
-      await generateAndDownloadPDF(fileName, feedback);
-      
-      // 小延迟，避免浏览器同时触发多个下载
-      if (i < preceptorFeedbacks.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
-    }
-    
-    toast.success(`${preceptorFeedbacks.length} preceptor feedback reports have been downloaded.`);
-  };
-  
-  // 导出所有Facilitator反馈
-  const exportFacilitatorFeedback = async () => {
-    // 模拟从localStorage或API获取反馈数据
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // 模拟获取的facilitator反馈列表
-    const facilitatorFeedbacks = generateMockFeedbacks("facilitator", 2);
-    
-    if (facilitatorFeedbacks.length === 0) {
-      toast.error("No facilitator feedback found for this student.");
-      return;
-    }
-    
-    // 为每个反馈生成PDF并下载
-    for (let i = 0; i < facilitatorFeedbacks.length; i++) {
-      const feedback = facilitatorFeedbacks[i];
-      const fileName = `${student.studentName}_Facilitator_Feedback_${i+1}.pdf`;
-      
-      await generateAndDownloadPDF(fileName, feedback);
-      
-      // 小延迟，避免浏览器同时触发多个下载
-      if (i < facilitatorFeedbacks.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
-    }
-    
-    toast.success(`${facilitatorFeedbacks.length} facilitator feedback reports have been downloaded.`);
-  };
-  
-  // 生成并下载PDF
-  const generateAndDownloadPDF = async (fileName, content) => {
-    // 创建Blob对象
-    const blob = new Blob([JSON.stringify(content, null, 2)], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    
-    // 创建下载链接并触发点击
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    
-    // 清理
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 0);
-  };
-  
-  // 生成模拟反馈数据
-  const generateMockFeedbacks = (type, count) => {
-    const feedbacks = [];
-    for (let i = 0; i < count; i++) {
-      feedbacks.push({
-        id: `${type}_feedback_${i+1}`,
-        studentId: student.studentId,
-        studentName: student.studentName,
-        date: new Date(Date.now() - i * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 每隔30天一个
-        type: type,
-        content: `This is a sample ${type} feedback ${i+1} for ${student.studentName}`,
-        score: Math.floor(Math.random() * 5) + 1,
-        comments: `${type} comments for feedback ${i+1}`,
-        reviewer: `${type.charAt(0).toUpperCase() + type.slice(1)} Reviewer ${i+1}`
-      });
-    }
-    return feedbacks;
   };
   
   if (loading) {
