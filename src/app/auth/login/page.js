@@ -1,24 +1,43 @@
 "use client";
 
-import { useState } from "react";
-import { account } from "../../appwrite";
+import { useState, useEffect } from "react";
+import { account, functions } from "../../../../lib/appwrite";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { GetAllStudents } from "../../../../lib/HowToConnectToFunction";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
+import dynamic from 'next/dynamic';
+
+const TextPressure = dynamic(() => import('../../../components/TextPressure'), { ssr: false });
+
+const handleAnimationComplete = () => {
+  console.log('All letters have animated!');
+};
 
 const LoginPage = () => {
+  const router = useRouter();
+
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
 
   // Handle login
   const handleLogin = async (e) => {
+
     e.preventDefault();
     setError("");
     setIsLoading(true);
@@ -33,8 +52,34 @@ const LoginPage = () => {
 
       // create a new session
       await account.createEmailPasswordSession(email, password);
+      const jwt = (await account.createJWT()).jwt;
+      localStorage.setItem('jwt', jwt);
       const user = await account.get();
-      setLoggedInUser(user);
+
+      const execution = await functions.createExecution(
+        process.env.NEXT_PUBLIC_FN_USER_METADATA,
+        JSON.stringify({
+          jwt,
+          action: 'getUserRole',
+        })
+      );
+
+      const res = JSON.parse(execution.responseBody); // <-- crashes if not valid JSON
+
+      if (res.status !== 'success') {
+        throw new Error("Failed to retrieve user role");
+      }
+
+      const role = res.data?.role;
+
+
+      if (role === "preceptor") {
+        router.push("/preceptor/home");
+      } else if (role === "facilitator") {
+        router.push("/facilitator/home");
+      }
+
+      console.log("🪵 Raw response body:", execution.responseBody);
     } catch (err) {
       console.error("Login failed:", err);
       setError(err.message || "Failed to login. Please check your credentials.");
@@ -57,106 +102,110 @@ const LoginPage = () => {
     }
   };
 
-  if (loggedInUser) {
-    return (
-      <>
-      
-              <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-        
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center">Welcome!</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-center text-gray-600 mb-4">You are successfully logged in.</p>
-            {loggedInUser.name && (
-              <p className="text-center font-medium">Hello, {loggedInUser.name}!</p>
-            )}
-          </CardContent>
-          <CardFooter className="flex justify-center">
-            <Button
-              variant="destructive"
-              onClick={logout}
-              disabled={isLoading}
-            >
-              {isLoading ? "Logging out..." : "Logout"}
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-      </>
 
-    );
-  }
 
   return (
-    <>
-        <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-      
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-center">Log in</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          <form className="space-y-4" onSubmit={handleLogin}>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isLoading}
+    <div className="relative flex items-center justify-center min-h-screen overflow-hidden bg-white">
+      {/* Login Card */}
+      <div className="relative z-10 w-full max-w-md px-6 sm:px-0">
+        <Card className="rounded-2xl border border-gray-200 shadow-xl bg-white/90 backdrop-blur-sm">
+          <CardContent className="p-6 sm:p-8">
+            <div className="text-center mb-6">
+              <TextPressure
+                text="ANSATPRO"
+                flex={true}
+                alpha={false}
+                stroke={false}
+                width={true}
+                weight={true}
+                italic={true}
+                textColor="#3A6784"
+                strokeColor="#ff0000"
+                minFontSize={36}
               />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link href="/auth/forgot-password" className="text-xs text-blue-600 hover:text-blue-800">
-                  Forgot your password?
-                </Link>
-              </div>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={isLoading}
-              />
+              <p className="text-gray-500 mt-1">Sign in to your account</p>
             </div>
 
-            <div className="text-center text-sm my-2">
-              Don&apos;t have an account?&nbsp;&nbsp;
-              <Link href="/auth/register" className="text-blue-600 hover:text-blue-800">
-                Sign up
-              </Link>
-            </div>
+            {error && (
+              <Alert variant="destructive" className="mb-4 rounded-xl border-l-4 border-red-600 bg-red-50">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            {hasMounted && (
+              <form className="space-y-6" onSubmit={handleLogin}>
+                {/* Email */}
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Enter email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      disabled={isLoading}
+                      className="pl-10 py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200"
+                    />
+                  </div>
+                </div>
 
-            <div className="pt-2">
-              <Button
-                variant="default"
-                className="w-full"
-                type="submit"
-                disabled={isLoading}
-              >
-                {isLoading ? "Logging in..." : "Login"}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+                {/* Password */}
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      disabled={isLoading}
+                      className="pl-10 pr-10 py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Button */}
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full py-4 bg-[#3A6784] hover:bg-[#2d5268] text-white font-semibold text-base rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
+                >
+                  {isLoading ? "Signing in..." : "Sign In"}
+                </Button>
+
+                {/* Links */}
+                <div className="flex justify-center space-x-1 text-sm text-gray-600 mt-2">
+                  <span>No account?</span>
+                  <Link href="/auth/register" className="text-[#3A6784] hover:text-[#2d5268] font-medium">
+                    Sign Up
+                  </Link>
+                </div>
+                <div className="flex justify-center text-sm text-gray-600">
+                  <Link href="/auth/forgot-password" className="text-[#3A6784] hover:text-[#2d5268] font-medium">
+                    Forgot Password?
+                  </Link>
+                </div>
+              </form>
+            )}
+
+          </CardContent>
+        </Card>
+      </div>
     </div>
-    </>
   );
 };
 
 export default LoginPage;
+
