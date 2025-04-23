@@ -3,6 +3,20 @@
 import { useEffect, useState } from 'react';
 import { account, functions } from '@/app/appwrite'
 import PreceptorLayout from "@/components/layout/preceptorLayout";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+    User, 
+    Calendar, 
+    MessageSquare, 
+    Hash, 
+    GraduationCap, 
+    Stethoscope, 
+    Building2, 
+    ClipboardList, 
+    Users, 
+    CheckCircle2, 
+    XCircle 
+} from 'lucide-react';
 
 export default function PreceptorFeedbacksPage() {
     const [feedbacks, setFeedbacks] = useState([]);
@@ -55,17 +69,26 @@ export default function PreceptorFeedbacksPage() {
         <PreceptorLayout>
             <div className="py-10 px-4">
                 <div className="max-w-3xl mx-auto">
-                    {/* Header (space for future search) */}
-                    <div className="mb-6">
-                        <h1 className="text-2xl font-bold text-gray-800 mb-2">Previous Feedback</h1>
-                        <input
-                            type="text"
-                            placeholder="Search by student name..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full sm:w-80 px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        />
-                    </div>
+                    {/* Header */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="mb-6 text-center"
+                    >
+                        <h1 className="text-2xl font-bold text-gray-800 mb-4">Previous Feedback</h1>
+                        <div className="flex justify-center">
+                            <motion.input
+                                type="text"
+                                placeholder="Search by student name..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full sm:w-80 px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                whileFocus={{ scale: 1.02 }}
+                                transition={{ duration: 0.2 }}
+                            />
+                        </div>
+                    </motion.div>
 
                     {/* Feedback cards */}
                     <div className="space-y-4">
@@ -73,87 +96,114 @@ export default function PreceptorFeedbacksPage() {
                             const isOpen = expandedIndex === index;
 
                             return (
-                                <div
+                                <motion.div
                                     key={index}
-                                    className="bg-white border rounded-lg p-4 shadow hover:shadow-md transition cursor-pointer"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                                    className="bg-white border rounded-lg p-4 shadow hover:shadow-lg cursor-pointer"
                                     onClick={() => setExpandedIndex(isOpen ? null : index)}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
                                 >
                                     {/* Collapsed summary */}
-                                    <div className="text-sm text-gray-500 mb-1">
+                                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
+                                        <Calendar className="w-4 h-4" />
                                         {fb.created_at ? new Date(fb.created_at).toLocaleDateString() : "Unknown date"}
                                     </div>
 
-                                    <div className="text-base font-semibold text-gray-800">
+                                    <div className="flex items-center gap-2 text-base font-semibold text-gray-800">
+                                        <User className="w-5 h-5" />
                                         {fb.first_name} {fb.last_name}
                                     </div>
 
-                                    <div className="text-sm text-gray-600 mt-1 truncate max-w-full">
+                                    <div className="flex items-center gap-2 text-sm text-gray-600 mt-1 truncate max-w-full">
+                                        <MessageSquare className="w-4 h-4" />
                                         {fb.content ?? 'No feedback content.'}
                                     </div>
 
                                     {/* Expanded full details */}
-                                    {isOpen && (
-                                        <div className="mt-4 text-sm space-y-2 text-gray-700">
-                                            <div>
-                                                <span className="font-medium">Student ID:</span> {fb.student_id}
-                                            </div>
-                                            <div>
-                                                <span className="font-medium">University:</span> {fb.university_id ?? 'N/A'}
-                                            </div>
-                                            <div>
-                                                <span className="font-medium">Health Service:</span> {fb.health_service_id ?? 'N/A'}
-                                            </div>
-                                            <div>
-                                                <span className="font-medium">Clinical Area:</span> {fb.clinic_area_id ?? 'N/A'}
-                                            </div>
+                                    <AnimatePresence>
+                                        {isOpen && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: "auto", opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="mt-4 text-sm space-y-3 text-gray-700">
+                                                    <div className="flex items-center gap-2">
+                                                        <Hash className="w-4 h-4" />
+                                                        <span className="font-medium">Student ID:</span> {fb.student_id}
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <GraduationCap className="w-4 h-4" />
+                                                        <span className="font-medium">University:</span> {fb.university_id ?? 'N/A'}
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Stethoscope className="w-4 h-4" />
+                                                        <span className="font-medium">Health Service:</span> {fb.health_service_id ?? 'N/A'}
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Building2 className="w-4 h-4" />
+                                                        <span className="font-medium">Clinical Area:</span> {fb.clinic_area_id ?? 'N/A'}
+                                                    </div>
 
-                                            <div>
-                                                <span className="font-medium">Original Feedback:</span>
-                                                <div className="mt-1 text-gray-800">{fb.content}</div>
-                                            </div>
+                                                    <div className="flex items-start gap-2">
+                                                        <MessageSquare className="w-4 h-4 mt-1" />
+                                                        <div>
+                                                            <span className="font-medium">Original Feedback:</span>
+                                                            <div className="mt-1 text-gray-800">{fb.content}</div>
+                                                        </div>
+                                                    </div>
 
-                                            <div>
-                                                <span className="font-medium">Selected ANSAT ITEMS:</span>
-                                                <ul className="ml-4 list-disc">
-                                                    {Object.entries(fb.ai_items || {}).map(([itemId, { description, is_positive }]) => (
-                                                        <li key={itemId}>
-                                                            {itemId}{description ? `: ${description}` : ''}
-                                                            {!is_positive && (
-                                                                <span className="text-red-500 font-medium ml-2">(Negative)</span>
-                                                            )}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
+                                                    <div className="flex items-start gap-2">
+                                                        <ClipboardList className="w-4 h-4 mt-1" />
+                                                        <div>
+                                                            <span className="font-medium">Selected ANSAT ITEMS:</span>
+                                                            <ul className="ml-4 list-disc">
+                                                                {Object.entries(fb.ai_items || {}).map(([itemId, { description, is_positive }]) => (
+                                                                    <li key={itemId}>
+                                                                        {itemId}{description ? `: ${description}` : ''}
+                                                                        {!is_positive && (
+                                                                            <span className="text-red-500 font-medium ml-2">(Negative)</span>
+                                                                        )}
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                    </div>
 
-                                            <div>
-                                                <span className="font-medium">Discussion Flags:</span>
-                                                <ul className="ml-4 list-disc">
-                                                    <li>
-                                                        With Facilitator:{" "}
-                                                        {fb.flag_discuss_with_facilitator ? (
-                                                            <span className="text-green-600 font-semibold">Yes</span>
-                                                        ) : (
-                                                            <span className="text-red-600 font-semibold">No</span>
-                                                        )}
-                                                    </li>
-                                                    <li>
-                                                        With Student:{" "}
-                                                        {fb.flag_discussed_with_student ? (
-                                                            <span className="text-green-600 font-semibold">Yes</span>
-                                                        ) : (
-                                                            <span className="text-red-600 font-semibold">No</span>
-                                                        )}
-                                                    </li>
-                                                </ul>
-                                            </div>
-
-                                            <div className="text-sm text-gray-400 mt-2">
-                                                {fb.created_at ? new Date(fb.created_at).toLocaleDateString() : ""}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
+                                                    <div className="flex items-start gap-2">
+                                                        <Users className="w-4 h-4 mt-1" />
+                                                        <div>
+                                                            <span className="font-medium">Discussion Flags:</span>
+                                                            <ul className="ml-4 list-disc">
+                                                                <li className="flex items-center gap-2">
+                                                                    With Facilitator:{" "}
+                                                                    {fb.flag_discuss_with_facilitator ? (
+                                                                        <CheckCircle2 className="w-4 h-4 text-green-600" />
+                                                                    ) : (
+                                                                        <XCircle className="w-4 h-4 text-red-600" />
+                                                                    )}
+                                                                </li>
+                                                                <li className="flex items-center gap-2">
+                                                                    With Student:{" "}
+                                                                    {fb.flag_discussed_with_student ? (
+                                                                        <CheckCircle2 className="w-4 h-4 text-green-600" />
+                                                                    ) : (
+                                                                        <XCircle className="w-4 h-4 text-red-600" />
+                                                                    )}
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </motion.div>
                             );
                         })}
                     </div>
