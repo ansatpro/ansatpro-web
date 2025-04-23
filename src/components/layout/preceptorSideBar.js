@@ -16,7 +16,7 @@ export default function PreceptorSideBar() {
 
   return (
     <aside className="fixed top-14 left-0 bottom-0 w-20 bg-white border-r border-gray-200">
-      <nav className="h-full flex flex-col items-center justify-evenly py-6">
+      <nav className="h-[45vh] mt-4 flex flex-col items-center justify-between">
         {navItems.map((item, index) => {
           const isActive = pathname.startsWith(item.path);
           const Icon = item.icon;
