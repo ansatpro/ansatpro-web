@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { account, functions } from "../../appwrite";
 import PreceptorLayout from "@/components/layout/preceptorLayout";
+import LoadingScreen from '@/components/preceptorUI/LoadingScreen';
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function PreceptorAiFeedbackPage() {
   const router = useRouter();
@@ -13,6 +15,8 @@ export default function PreceptorAiFeedbackPage() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [matchedIds, setMatchedIds] = useState([]);
   const [itemPositivity, setItemPositivity] = useState({});
+  const [isLoading, setIsLoading] = useState(true); // 💡 Control visibility
+
 
   useEffect(() => {
     const stored = localStorage.getItem("preceptorPayload");
@@ -24,8 +28,10 @@ export default function PreceptorAiFeedbackPage() {
 
         const fetchData = async () => {
           try {
+            setIsLoading(true); // Start loading
+
             const res = await functions.createExecution(
-              "guest_request",
+              process.env.NEXT_PUBLIC_FN_GUEST_REQUEST,
               JSON.stringify({ action: "getAssessmentItems" })
             );
             const result = JSON.parse(res.responseBody);
@@ -34,7 +40,7 @@ export default function PreceptorAiFeedbackPage() {
             const jwt = localStorage.getItem("jwt");
 
             const aiExecution = await functions.createExecution(
-              "67ffd00400174f76be85",
+              process.env.NEXT_PUBLIC_FN_PRECEPTOR_RELATED,
               JSON.stringify({
                 jwt,
                 action: "getAiFeedbackPreceptor",
@@ -47,6 +53,9 @@ export default function PreceptorAiFeedbackPage() {
 
             setMatchedIds(matched);
             setSelectedIds(matched);
+
+            setIsLoading(false); // Stop loading
+
           } catch (err) {
             console.error("❌ Error fetching data:", err);
           }
@@ -91,7 +100,7 @@ export default function PreceptorAiFeedbackPage() {
       };
 
       const res = await functions.createExecution(
-        "67ffd00400174f76be85",
+        process.env.NEXT_PUBLIC_FN_PRECEPTOR_RELATED,
         JSON.stringify({
           jwt,
           action: "addPreceptorFeedback",
@@ -112,89 +121,110 @@ export default function PreceptorAiFeedbackPage() {
     }
   };
 
+  // Show loading animation
+  if (isLoading) {
+    return <motion.div
+      key="loading"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <LoadingScreen />
+    </motion.div>;
+  }
+
+
   return (
-    <PreceptorLayout>
-      <main className="p-8 font-['Roboto']">
-        <div className="max-w-3xl mx-auto">
-          {/* 顶部说明 */}
-          <div className="mb-6 text-center">
-            <h1 className="text-2xl font-bold mb-2">Confirm ANSAT Items</h1>
-            <p className="text-sm text-gray-600 italic">
-              {matchedIds.length > 0 ? (
-                <>
-                  Based on your feedback, the following ANSAT items are relevant:{" "}
-                  {matchedIds.map((id, index) => (
-                    <span key={id}>
-                      <span className="font-bold">{id}</span>
-                      {index < matchedIds.length - 1 ? ", " : ""}
-                    </span>
-                  ))}
-                </>
-              ) : (
-                "Based on your feedback, no item is selected. Please select it manually."
-              )}
-            </p>
-          </div>
+    <>
+      {isLoading ? (
+        <LoadingScreen />
+      ) : (
+        <PreceptorLayout>
+          <main className="p-8 font-['Roboto']">
+            <div className="max-w-3xl mx-auto">
+              {/* 顶部说明 */}
+              <div className="mb-6 text-center">
+                <h1 className="text-2xl font-bold mb-2">Confirm ANSAT Items</h1>
+                <p className="text-sm text-gray-600 italic">
+                  {matchedIds.length > 0 ? (
+                    <>
+                      Based on your feedback, the following ANSAT items are relevant:{" "}
+                      {matchedIds.map((id, index) => (
+                        <span key={id}>
+                          <span className="font-bold">{id}</span>
+                          {index < matchedIds.length - 1 ? ", " : ""}
+                        </span>
+                      ))}
+                    </>
+                  ) : (
+                    "Based on your feedback, no item is selected. Please select it manually."
+                  )}
+                </p>
+              </div>
 
-          {/* 滚动容器区域 */}
-          <div className="max-h-[400px] overflow-y-auto pr-1 space-y-2 border-t pt-4 mb-6">
-            {assessmentItems.map((item) => (
-              <label
-                key={item.item_id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between bg-white border rounded-md p-3 shadow-sm hover:bg-gray-50 transition"
-              >
-                <div className="flex items-start space-x-3">
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.includes(item.item_id)}
-                    onChange={() => toggleSelection(item.item_id)}
-                    className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                  />
-                  <div>
-                    <span className="block font-medium text-gray-900">
-                      {item.item_id}
-                    </span>
-                    <span className="text-sm text-gray-600">
-                      {item.description}
-                    </span>
-                  </div>
-                </div>
+              {/* 滚动容器区域 */}
+              <div className="max-h-[400px] overflow-y-auto pr-1 space-y-2 border-t pt-4 mb-6">
+                {assessmentItems.map((item) => (
+                  <label
+                    key={item.item_id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between bg-white border rounded-md p-3 shadow-sm hover:bg-gray-50 transition"
+                  >
+                    <div className="flex items-start space-x-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(item.item_id)}
+                        onChange={() => toggleSelection(item.item_id)}
+                        className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                      />
+                      <div>
+                        <span className="block font-medium text-gray-900">
+                          {item.item_id}
+                        </span>
+                        <span className="text-sm text-gray-600">
+                          {item.description}
+                        </span>
+                      </div>
+                    </div>
 
-                {selectedIds.includes(item.item_id) && (
-                  <div className="mt-2 sm:mt-0 flex items-center space-x-2">
-                    <label htmlFor={`positive-${item.item_id}`} className="text-sm text-gray-700">
-                      Positive?
-                    </label>
-                    <input
-                      id={`positive-${item.item_id}`}
-                      type="checkbox"
-                      checked={itemPositivity[item.item_id] ?? true}
-                      onChange={(e) => {
-                        const value = e.target.checked;
-                        setItemPositivity((prev) => ({
-                          ...prev,
-                          [item.item_id]: value,
-                        }));
-                      }}
-                      className="h-4 w-4 text-green-600 border-gray-300 rounded"
-                    />
-                  </div>
-                )}
-              </label>
-            ))}
-          </div>
+                    {selectedIds.includes(item.item_id) && (
+                      <div className="mt-2 sm:mt-0 flex items-center space-x-2">
+                        <label htmlFor={`positive-${item.item_id}`} className="text-sm text-gray-700">
+                          Positive?
+                        </label>
+                        <input
+                          id={`positive-${item.item_id}`}
+                          type="checkbox"
+                          checked={itemPositivity[item.item_id] ?? true}
+                          onChange={(e) => {
+                            const value = e.target.checked;
+                            setItemPositivity((prev) => ({
+                              ...prev,
+                              [item.item_id]: value,
+                            }));
+                          }}
+                          className="h-4 w-4 text-green-600 border-gray-300 rounded"
+                        />
+                      </div>
+                    )}
+                  </label>
+                ))}
+              </div>
 
-          {/* 提交按钮 */}
-          <div className="mt-6 flex justify-center">
-            <button
-              onClick={handleSubmit}
-              className="px-8 py-3 bg-[#3A6784] hover:bg-[#2d5268] text-white font-medium rounded-lg shadow transition-colors"
-            >
-              Confirm
-            </button>
-          </div>
-        </div>
-      </main>
-    </PreceptorLayout>
+              {/* 提交按钮 */}
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={handleSubmit}
+                  className="px-8 py-3 bg-[#3A6784] hover:bg-[#2d5268] text-white font-medium rounded-lg shadow transition-colors"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </main>
+        </PreceptorLayout>
+      )}
+    </>
+
   );
 }

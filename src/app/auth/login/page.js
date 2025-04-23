@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { account, functions } from "../../appwrite";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,19 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
+// import TextPressure from './TextPressure';
+import dynamic from 'next/dynamic';
+
+const TextPressure = dynamic(() => import('@/components/TextPressure'), { ssr: false });
+
+const handleAnimationComplete = () => {
+  console.log('All letters have animated!');
+};
 
 const LoginPage = () => {
+  const router = useRouter();
+
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,8 +29,16 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+
   // Handle login
   const handleLogin = async (e) => {
+
     e.preventDefault();
     setError("");
     setIsLoading(true);
@@ -39,7 +58,7 @@ const LoginPage = () => {
       const user = await account.get();
 
       const execution = await functions.createExecution(
-        '67ffd78c00338787f104',
+        process.env.NEXT_PUBLIC_FN_USER_METADATA,
         JSON.stringify({
           jwt,
           action: 'getUserRole',
@@ -54,12 +73,11 @@ const LoginPage = () => {
 
       const role = res.data?.role;
 
-      if (role === 'preceptor') {
-        window.location.href = '/preceptor/home';
-      } else if (role === 'facilitator') {
-        window.location.href = '/facilitator/home';
-      } else {
-        throw new Error("Unknown role or role missing");
+
+      if (role === "preceptor") {
+        router.push("/preceptor/home");
+      } else if (role === "facilitator") {
+        router.push("/facilitator/home");
       }
 
       console.log("🪵 Raw response body:", execution.responseBody);
@@ -96,82 +114,105 @@ const LoginPage = () => {
 
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white p-4">
-      <Card className="w-full max-w-md border-none shadow-none">
-        <CardContent>
-          <div className="mb-8 text-center">
-            <h1 className="text-2xl font-bold mb-2">Welcome to ANSAT Pro.</h1>
-            <p className="text-gray-500">Sign in to your account</p>
-          </div>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          <form className="space-y-6" onSubmit={handleLogin}>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={isLoading}
-                  className="pl-10 py-6 bg-gray-50"
-                />
-              </div>
+    <div className="relative flex items-center justify-center min-h-screen overflow-hidden bg-white">
+
+      {/* Login Card */}
+      <div className="relative z-10 w-full max-w-md px-6 sm:px-0">
+        <Card className="rounded-2xl border border-gray-200 shadow-xl bg-white/90 backdrop-blur-sm">
+          <CardContent className="p-6 sm:p-8">
+            <div className="text-center mb-6">
+              <TextPressure
+                text="ANSATPRO"
+                flex={true}
+                alpha={false}
+                stroke={false}
+                width={true}
+                weight={true}
+                italic={true}
+                textColor="#3A6784"
+                strokeColor="#ff0000"
+                minFontSize={36}
+              />
+              <p className="text-gray-500 mt-1">Sign in to your account</p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
+
+            {error && (
+              <Alert variant="destructive" className="mb-4 rounded-xl border-l-4 border-red-600 bg-red-50">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            {hasMounted && (
+              <form className="space-y-6" onSubmit={handleLogin}>
+                {/* Email */}
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Enter email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      disabled={isLoading}
+                      className="pl-10 py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200"
+                    />
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      disabled={isLoading}
+                      className="pl-10 pr-10 py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Button */}
+                <Button
+                  type="submit"
                   disabled={isLoading}
-                  className="pl-10 pr-10 py-6 bg-gray-50"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                  className="w-full py-4 bg-[#3A6784] hover:bg-[#2d5268] text-white font-semibold text-base rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
-            </div>
+                  {isLoading ? "Signing in..." : "Sign In"}
+                </Button>
 
-            <Button
-              variant="default"
-              className="w-full py-6 bg-[#3A6784] hover:bg-[#2d5268] text-white font-semibold text-base"
-              type="submit"
-              disabled={isLoading}
-            >
-              {isLoading ? "Signing in..." : "Sign In"}
-            </Button>
+                {/* Links */}
+                <div className="flex justify-center space-x-1 text-sm text-gray-600 mt-2">
+                  <span>No account?</span>
+                  <Link href="/auth/register" className="text-[#3A6784] hover:text-[#2d5268] font-medium">
+                    Sign Up
+                  </Link>
+                </div>
+                <div className="flex justify-center text-sm text-gray-600">
+                  <Link href="/auth/forgot-password" className="text-[#3A6784] hover:text-[#2d5268] font-medium">
+                    Forgot Password?
+                  </Link>
+                </div>
+              </form>
+            )}
 
-            <div className="flex items-center justify-center space-x-1 text-sm">
-              <span className="text-gray-500">No account ?</span>
-              <Link href="/auth/register" className="text-[#3A6784] hover:text-[#2d5268] font-medium">
-                Sign Up
-              </Link>
-            </div>
-            <div className="flex items-center justify-center space-x-1 text-sm">
-              <Link href="/auth/forgot-password" className="text-[#3A6784] hover:text-[#2d5268] font-medium">
-                Forgot Password?
-              </Link>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

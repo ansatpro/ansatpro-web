@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import PreceptorLayout from "@/components/layout/preceptorLayout";
 
+
 export default function PreceptorHome() {
+  const handleAnimationComplete = () => {
+    console.log('All letters have animated!');
+  };
   const router = useRouter();
 
   const handleAddFeedback = () => {
@@ -16,6 +20,7 @@ export default function PreceptorHome() {
     <PreceptorLayout>
       <div className="flex flex-col items-center pt-32">
         <h1 className="text-3xl font-semibold mb-1 font-['Roboto']">HOME</h1>
+
         <p className="text-xl italic text-[#64748B] mb-12 font-['Roboto']">WELCOME!</p>
 
         <div className="grid grid-cols-2 gap-25 max-w-xl mt-30">

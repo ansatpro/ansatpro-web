@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { X } from "lucide-react";
 import { functions, account } from "../../appwrite";
 import PreceptorLayout from "@/components/layout/preceptorLayout"; // ✅ 恢复你的布局组件
+import DotsLoading from "@/components/preceptorUI/SearchLoading";
 
 export default function SearchStudent() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -16,6 +17,11 @@ export default function SearchStudent() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showNoResults, setShowNoResults] = useState(false);
+  const shouldShowStudentList = !searchLoading && students.length > 0 && !selectedStudent;
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,8 +29,9 @@ export default function SearchStudent() {
         const currentUser = await account.get();
         const jwt = localStorage.getItem("jwt");
 
+        setSearchLoading(true);
         const res = await functions.createExecution(
-          '67ffd00400174f76be85',
+          process.env.NEXT_PUBLIC_FN_PRECEPTOR_RELATED,
           JSON.stringify({
             jwt,
             action: 'searchStudents',
@@ -33,6 +40,8 @@ export default function SearchStudent() {
         );
 
         const data = JSON.parse(res.responseBody);
+
+        setSearchLoading(false);
         if (data.status === 'success') {
           setStudents(data.data || []);
         } else {
@@ -52,6 +61,18 @@ export default function SearchStudent() {
       setStudents([]);
     }
   }, [searchQuery]);
+
+  useEffect(() => {
+    if (!searchLoading && searchQuery.length >= 2 && students.length === 0) {
+      const timeout = setTimeout(() => {
+        setShowNoResults(true);
+      }, 500); // ⏱ Delay before showing the message
+
+      return () => clearTimeout(timeout); // cleanup if query changes
+    } else {
+      setShowNoResults(false); // reset if still loading or input changes
+    }
+  }, [searchLoading, students, searchQuery]);
 
   const clearSearch = () => {
     setSearchQuery("");
@@ -86,6 +107,8 @@ export default function SearchStudent() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="py-6 pl-4 pr-10 bg-gray-50 rounded-lg"
             />
+
+            {/* Clear Button */}
             {searchQuery && (
               <button
                 onClick={clearSearch}
@@ -94,7 +117,9 @@ export default function SearchStudent() {
                 <X className="h-5 w-5" />
               </button>
             )}
-            {searchQuery && students.length > 0 && !selectedStudent && (
+
+            {/* Search Results */}
+            {searchQuery.length >= 2 && shouldShowStudentList && (
               <div className="absolute w-full mt-1 bg-white border rounded-lg shadow-lg z-10">
                 {students.map((student) => (
                   <button
@@ -107,7 +132,21 @@ export default function SearchStudent() {
                 ))}
               </div>
             )}
+
+            {/* Loading animation */}
+            {searchQuery.length >= 2 && searchLoading && (
+              <div className="absolute left-1/2 top-full mt-2 -translate-x-1/2 z-20">
+                <DotsLoading />
+              </div>
+            )}
+
+            {searchQuery.length >= 2 && showNoResults && !selectedStudent && (
+              <div className="absolute w-full mt-1 bg-white border rounded-lg shadow-lg z-10">
+                <p className="px-4 py-3 text-gray-500 text-center">No student found matching your search.</p>
+              </div>
+            )}
           </div>
+
         </div>
 
         {/* Student Details */}

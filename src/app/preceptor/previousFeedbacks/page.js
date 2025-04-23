@@ -18,7 +18,7 @@ export default function PreceptorFeedbacksPage() {
                 const jwt = localStorage.getItem("jwt");
 
                 const execution = await functions.createExecution(
-                    '67ffd00400174f76be85',
+                    process.env.NEXT_PUBLIC_FN_PRECEPTOR_RELATED,
                     JSON.stringify({
                         jwt,
                         action: 'getPreceptorFeedbackWithStudent'

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { account, ID, functions } from "../../appwrite";
+import { account, functions, ID } from "../../appwrite";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from 'sonner';
-import { Client } from 'appwrite';
 
-const client = new Client()
-    .setEndpoint('https://cloud.appwrite.io/v1')
-    .setProject('67ebc2ec000c0837dbf2');
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -33,11 +29,10 @@ export default function RegisterPage() {
         university: '',
         isRegisteredNurse: false
     });
-
     useEffect(() => {
         const fetchAffiliations = async () => {
             try {
-                const res = await functions.createExecution('guest_request', JSON.stringify({
+                const res = await functions.createExecution(process.env.NEXT_PUBLIC_FN_GUEST_REQUEST, JSON.stringify({
                     action: 'getAffiliations'
                 }));
                 const parsed = JSON.parse(res.responseBody);
@@ -134,7 +129,7 @@ export default function RegisterPage() {
                 nmba_confirmed: formData.isRegisteredNurse
             };
 
-            await functions.createExecution('67ffd78c00338787f104', JSON.stringify({
+            await functions.createExecution(process.env.NEXT_PUBLIC_FN_USER_METADATA, JSON.stringify({
                 jwt,
                 action: 'addMetadata',
                 payload
@@ -145,6 +140,25 @@ export default function RegisterPage() {
                 description: "Your account has been created.",
                 duration: 3000,
             });
+
+            if (formData.role === "facilitator") {
+                toast({
+                    title: "Facilitator Registration",
+                    description: "You will be redirected to the facilitator home page.",
+                    duration: 3000,
+                });
+                router.push("/facilitator/home");
+            }
+            else if (formData.role === "preceptor") {
+                toast({
+                    title: "Preceptor Registration",
+                    description: "You will redirected to the preceptor home page.",
+                    duration: 3000,
+                });
+                router.push("/preceptor/home");
+            }
+
+
         } catch (error) {
             toast({
                 title: "Registration Failed",
@@ -156,40 +170,81 @@ export default function RegisterPage() {
         }
     };
 
+
+
     return (
-        <div className="flex items-center justify-center min-h-screen bg-white p-4">
-            <Card className="w-full max-w-md border-none shadow-none">
+
+        <div className="relative flex items-center justify-center min-h-screen bg-white overflow-hidden">
+            <Card className="relative z-10 w-full max-w-md w-full max-w-md border border-gray-200 shadow-xl rounded-2xl bg-white">
                 <CardContent>
                     <div className="mb-8 text-center">
-                        <h1 className="text-2xl font-bold mb-2">Welcome to ANSAT Pro.</h1>
+                        <h1 className="text-3xl font-extrabold mt-2 mb-2 text-[#3A6784]">Welcome to ANSAT Pro.</h1>
                         <p className="text-gray-500">Create your account</p>
                     </div>
-                    <form className="space-y-6" onSubmit={handleSubmit}>
+                    <form autoComplete="off" className="space-y-6" onSubmit={handleSubmit}>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="firstName">First Name</Label>
-                                <Input id="firstName" name="firstName" placeholder="First name" value={formData.firstName} onChange={handleInputChange} required className="py-6 bg-gray-50" />
+                                <Input
+                                    autoComplete="off"
+                                    id="firstName"
+                                    name="firstName"
+                                    placeholder="First name"
+                                    value={formData.firstName}
+                                    onChange={handleInputChange}
+                                    required
+                                    className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="lastName">Last Name</Label>
-                                <Input id="lastName" name="lastName" placeholder="Last name" value={formData.lastName} onChange={handleInputChange} required className="py-6 bg-gray-50" />
+                                <Input
+                                    autoComplete="off"
+                                    id="lastName"
+                                    name="lastName"
+                                    placeholder="Last name"
+                                    value={formData.lastName}
+                                    onChange={handleInputChange}
+                                    required
+                                    className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200"
+                                />
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
-                            <Input id="email" name="email" type="email" placeholder="Enter your email" value={formData.email} onChange={handleInputChange} required className="py-6 bg-gray-50" />
+                            <Input
+                                autoComplete="off"
+                                id="email"
+                                name="email"
+                                type="email"
+                                placeholder="Enter your email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                required
+                                className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200"
+                            />
                         </div>
 
                         <div className="space-y-2">
                             <Label htmlFor="password">Password</Label>
-                            <Input id="password" name="password" type="password" placeholder="Create a password" value={formData.password} onChange={handleInputChange} required className="py-6 bg-gray-50" />
+                            <Input
+                                autoComplete="off"
+                                id="password"
+                                name="password"
+                                type="password"
+                                placeholder="Create a password"
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                required
+                                className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200"
+                            />
                         </div>
 
                         <div className="space-y-2">
                             <Label htmlFor="role">Role</Label>
                             <Select name="role" onValueChange={(value) => handleSelectChange(value, 'role')} required>
-                                <SelectTrigger className="py-6 bg-gray-50">
+                                <SelectTrigger className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200">
                                     <SelectValue placeholder="Select your role" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -203,7 +258,7 @@ export default function RegisterPage() {
                             <div className="space-y-2">
                                 <Label htmlFor="healthService">Health Service</Label>
                                 <Select name="healthService" onValueChange={(value) => handleSelectChange(value, 'healthService')}>
-                                    <SelectTrigger className="py-6 bg-gray-50">
+                                    <SelectTrigger className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200">
                                         <SelectValue placeholder="Select your health service" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -221,7 +276,7 @@ export default function RegisterPage() {
                             <div className="space-y-2">
                                 <Label htmlFor="university">University</Label>
                                 <Select name="university" onValueChange={(value) => handleSelectChange(value, 'university')}>
-                                    <SelectTrigger className="py-6 bg-gray-50">
+                                    <SelectTrigger className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200">
                                         <SelectValue placeholder="Select your university" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -236,21 +291,37 @@ export default function RegisterPage() {
                         )}
 
                         <div className="flex items-center space-x-2">
-                            <Checkbox id="isRegisteredNurse" name="isRegisteredNurse" checked={formData.isRegisteredNurse} onCheckedChange={(checked) => handleInputChange({ target: { name: 'isRegisteredNurse', type: 'checkbox', checked } })} />
-                            <label htmlFor="isRegisteredNurse" className="text-sm font-medium">I am a registered nurse</label>
+                            <Checkbox
+                                id="isRegisteredNurse"
+                                name="isRegisteredNurse"
+                                checked={formData.isRegisteredNurse}
+                                onCheckedChange={(checked) =>
+                                    handleInputChange({ target: { name: 'isRegisteredNurse', type: 'checkbox', checked } })
+                                }
+                            />
+                            <label htmlFor="isRegisteredNurse" className="text-sm font-medium text-gray-700">
+                                I declare that I am a registered nurse, holding current nursing registration with Nursing and Midwifery Board of Australia (NMBA).
+                            </label>
                         </div>
 
-                        <Button type="submit" className="w-full py-6 bg-[#3A6784] hover:bg-[#2d5268] text-white font-semibold text-base" disabled={isLoading}>
+                        <Button
+                            type="submit"
+                            className="w-full py-4 bg-[#3A6784] hover:bg-[#2d5268] text-white font-semibold text-base rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
+                            disabled={isLoading}
+                        >
                             {isLoading ? "Creating account..." : "Create Account"}
                         </Button>
 
-                        <div className="flex items-center justify-center space-x-1 text-sm">
-                            <span className="text-gray-500">Already have an account?</span>
-                            <Link href="/auth/login" className="text-[#3A6784] hover:text-[#2d5268] font-medium">Sign In</Link>
+                        <div className="flex items-center justify-center space-x-1 text-sm text-gray-600 mt-2">
+                            <span>Already have an account?</span>
+                            <Link href="/auth/login" className="text-[#3A6784] hover:text-[#2d5268] font-medium">
+                                Sign In
+                            </Link>
                         </div>
                     </form>
                 </CardContent>
             </Card>
         </div>
+
     );
 }
