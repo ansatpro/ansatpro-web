@@ -300,7 +300,7 @@ export default function RegisterPage() {
                                 }
                             />
                             <label htmlFor="isRegisteredNurse" className="text-sm font-medium text-gray-700">
-                                I am a registered nurse
+                                I declare that I am a registered nurse, holding current nursing registration with Nursing and Midwifery Board of Australia (NMBA).
                             </label>
                         </div>
 
