@@ -1,0 +1,98 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
+import { account } from "@/app/appwrite";
+import PreceptorLayout from "@/components/layout/preceptorLayout";
+import { Button } from "@/components/ui/button";
+
+export default function SettingsPage() {
+  const { theme, setTheme } = useTheme();
+  const [user, setUser] = useState({ name: "", email: "", role: "" });
+  const [showHelp, setShowHelp] = useState(false);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await account.get();
+        setUser({
+          name: res.name || "N/A",
+          email: res.email || "N/A",
+          role: res.labels?.includes("Facilitator") ? "Facilitator" : "Preceptor",
+        });
+      } catch (err) {
+        console.error("Failed to load user", err);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  return (
+    <PreceptorLayout>
+      <main className="p-8 font-['Roboto']">
+        <h1 className="text-3xl font-bold text-center mb-8">Settings</h1>
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Profile info */}
+          <div className="bg-white shadow-md rounded-lg p-6">
+            <h2 className="text-lg font-semibold mb-4">Profile information</h2>
+            <div className="border-t pt-2 space-y-3">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Name</span>
+                <span>{user.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Email Address</span>
+                <span>{user.email}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Role</span>
+                <span>{user.role}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* General settings */}
+          <div className="bg-white shadow-md rounded-lg p-6">
+            <h2 className="text-lg font-semibold mb-4">General</h2>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span>Password Change</span>
+                <Button variant="outline">Change</Button>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span>Theme Settings</span>
+                <select
+                  value={theme}
+                  onChange={(e) => setTheme(e.target.value)}
+                  className="border rounded-md px-3 py-1 text-sm"
+                >
+                  <option value="light">Light</option>
+                  <option value="dark">Dark</option>
+                </select>
+              </div>
+
+              <div className="flex justify-between items-center cursor-pointer" onClick={() => setShowHelp((prev) => !prev)}>
+                <span>Help & Support</span>
+                <span className="text-gray-400">{showHelp ? "▲" : "▼"}</span>
+              </div>
+              {showHelp && (
+                <p className="text-sm text-gray-600 ml-2">
+                  For any issues or questions, please contact the system administrator or email support@ansatpro.com.
+                </p>
+              )}
+
+              <div>
+                <span className="block font-medium mb-1">About</span>
+                <p className="text-sm text-gray-600">
+                  This system is designed to support nursing education feedback workflows, aligned with ANSAT standards. Version 1.0.0.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </PreceptorLayout>
+  );
+}
