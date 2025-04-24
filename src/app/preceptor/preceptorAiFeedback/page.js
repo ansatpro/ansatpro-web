@@ -6,6 +6,7 @@ import { account, functions } from "../../appwrite";
 import PreceptorLayout from "@/components/layout/preceptorLayout";
 import LoadingScreen from '@/components/preceptorUI/LoadingScreen';
 import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
 export default function PreceptorAiFeedbackPage() {
   const router = useRouter();
@@ -213,12 +214,12 @@ export default function PreceptorAiFeedbackPage() {
 
               {/* 提交按钮 */}
               <div className="mt-6 flex justify-center">
-                <button
+                <Button
                   onClick={handleSubmit}
                   className="px-8 py-3 bg-[#3A6784] hover:bg-[#2d5268] text-white font-medium rounded-lg shadow transition-colors"
                 >
                   Confirm
-                </button>
+                </Button>
               </div>
             </div>
           </main>

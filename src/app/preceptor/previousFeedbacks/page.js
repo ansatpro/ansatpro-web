@@ -17,6 +17,7 @@ import {
     CheckCircle2, 
     XCircle 
 } from 'lucide-react';
+import LoadingScreen from '@/components/preceptorUI/LoadingScreen';
 
 export default function PreceptorFeedbacksPage() {
     const [feedbacks, setFeedbacks] = useState([]);
@@ -62,7 +63,17 @@ export default function PreceptorFeedbacksPage() {
     });
 
     if (loading) {
-        return <div className="p-4">Loading...</div>;
+        return (
+            <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+            >
+                <LoadingScreen />
+            </motion.div>
+        );
     }
 
     return (

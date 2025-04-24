@@ -22,7 +22,7 @@ export default function PreceptorSideBar() {
           const Icon = item.icon;
 
           const baseStyle =
-            "flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200";
+            "flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 hover:cursor-pointer";
           const activeStyle = isActive
             ? "bg-blue-50 text-[#3A6784]"
             : "text-gray-500 hover:text-[#3A6784] hover:bg-gray-100";
