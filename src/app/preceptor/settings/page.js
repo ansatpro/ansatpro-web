@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
 import { account } from "@/app/appwrite";
 import PreceptorLayout from "@/components/layout/preceptorLayout";
 import { Button } from "@/components/ui/button";
 
 export default function SettingsPage() {
-  const { theme, setTheme } = useTheme();
+  const router = useRouter();
   const [user, setUser] = useState({ name: "", email: "", role: "" });
   const [showHelp, setShowHelp] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -30,6 +30,15 @@ export default function SettingsPage() {
 
     fetchUser();
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await account.deleteSession("current");
+      router.push("/auth/login");
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
+  };
 
   return (
     <PreceptorLayout>
@@ -65,8 +74,7 @@ export default function SettingsPage() {
               <Button
                 onClick={async () => {
                   try {
-                    await account.updatePassword(newPassword, oldPassword); // ✅ correct usage
-
+                    await account.updatePassword(newPassword, oldPassword);
                     alert("✅ Password updated successfully!");
                     setOldPassword("");
                     setNewPassword("");
@@ -82,6 +90,7 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
+
       <main className="p-8 font-['Roboto']">
         <h1 className="text-3xl font-bold text-center mb-8">Settings</h1>
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -113,18 +122,6 @@ export default function SettingsPage() {
                 <Button variant="outline" onClick={() => setShowPasswordModal(true)}>Change</Button>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span>Theme Settings</span>
-                <select
-                  value={theme}
-                  onChange={(e) => setTheme(e.target.value)}
-                  className="border rounded-md px-3 py-1 text-sm"
-                >
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
-                </select>
-              </div>
-
               <div className="flex justify-between items-center cursor-pointer" onClick={() => setShowHelp((prev) => !prev)}>
                 <span>Help & Support</span>
                 <span className="text-gray-400">{showHelp ? "▲" : "▼"}</span>
@@ -140,6 +137,15 @@ export default function SettingsPage() {
                 <p className="text-sm text-gray-600">
                   This system is designed to support nursing education feedback workflows, aligned with ANSAT standards. Version 1.0.0.
                 </p>
+              </div>
+
+              <div className="pt-2">
+                <Button 
+                  onClick={handleLogout}
+                  className="bg-[#3A6784] hover:bg-[#2d5268] text-white"
+                >
+                  Logout
+                </Button>
               </div>
             </div>
           </div>
