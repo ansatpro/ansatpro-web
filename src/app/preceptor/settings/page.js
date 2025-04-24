@@ -34,6 +34,7 @@ export default function SettingsPage() {
   const handleLogout = async () => {
     try {
       await account.deleteSession("current");
+      localStorage.removeItem("jwt"); // ✅ clear stored token
       router.push("/auth/login");
     } catch (err) {
       console.error("Logout failed", err);
@@ -140,7 +141,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="pt-2">
-                <Button 
+                <Button
                   onClick={handleLogout}
                   className="bg-[#3A6784] hover:bg-[#2d5268] text-white"
                 >
