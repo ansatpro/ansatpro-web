@@ -32,6 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { functions } from "../../../../../lib/appwrite";
 
 export default function RegisterStudentPage() {
   const router = useRouter();
@@ -50,7 +51,7 @@ export default function RegisterStudentPage() {
   });
   const [fileName, setFileName] = useState("No file chosen");
   const fileInputRef = useRef(null);
-  
+
   // CSV processing states
   const [csvData, setCsvData] = useState([]);
   const [csvHeaders, setCsvHeaders] = useState([]);
@@ -59,51 +60,103 @@ export default function RegisterStudentPage() {
   const [processingCsv, setProcessingCsv] = useState(false);
   const [previewData, setPreviewData] = useState([]);
 
-  // Predefined values - University list
-  const universities = [
-    "Australian Catholic University",
-    "Deakin University",
-    "La Trobe University",
-    "Monash University",
-    "RMIT University",
-    "University of Melbourne",
-    "Victoria University",
-  ];
+  // Get Affiliations
+  const [healthServices, setHealthServices] = useState([]);
+  const [universities, setUniversities] = useState([]);
+  const [clinicAreas, setClinicAreas] = useState([]);
+  useEffect(() => {
+    const fetchAffiliations = async () => {
+      try {
+        const res = await functions.createExecution(
+          process.env.NEXT_PUBLIC_FN_GUEST_REQUEST,
+          JSON.stringify({
+            action: "getAffiliations",
+          })
+        );
+        const parsed = JSON.parse(res.responseBody);
+        const all = parsed.affiliations || [];
 
-  // Predefined values - Health services list
-  const healthServices = [
-    "Alfred Health",
-    "Austin Health",
-    "Eastern Health",
-    "Monash Health",
-    "Royal Children's Hospital",
-    "Royal Melbourne Hospital",
-    "St Vincent's Hospital",
-  ];
+        const healthServicesData = all.filter(
+          (item) => item.affiliation_type === "health_service"
+        );
+        const universitiesData = all.filter(
+          (item) => item.affiliation_type === "university"
+        );
 
-  // Predefined values - Clinic areas
-  const clinicAreas = [
-    "Emergency Department",
-    "Intensive Care Unit",
-    "Medical Ward",
-    "Surgical Ward",
-    "Pediatrics",
-    "Maternity",
-    "Mental Health",
-    "Rehabilitation",
-  ];
+        const res1 = await functions.createExecution(
+          process.env.NEXT_PUBLIC_FN_GUEST_REQUEST,
+          JSON.stringify({
+            action: "getClinicAreas",
+          })
+        );
+        const parsed_clinicAreas = JSON.parse(res1.responseBody);
+        const all_clinicAreas = parsed_clinicAreas.clinicAreas || [];
+        const clinicAreasData = all_clinicAreas.filter((item) => item.name);
+
+        setHealthServices(healthServicesData);
+        setUniversities(universitiesData);
+        setClinicAreas(clinicAreasData);
+      } catch (err) {
+        console.error("❌ Failed to fetch affiliations:", err.message);
+      }
+    };
+    fetchAffiliations();
+  }, []);
 
   // Required field names and their possible matches in CSV headers
   const requiredFields = {
-    firstName: ["first_name", "firstname", "first name", "given name", "givenname"],
+    firstName: [
+      "first_name",
+      "firstname",
+      "first name",
+      "given name",
+      "givenname",
+    ],
     lastName: ["last_name", "lastname", "last name", "surname", "family name"],
     studentId: ["student_id", "studentid", "student id", "id", "number"],
     university: ["university", "uni", "school", "institution"],
-    healthService: ["health_service", "healthservice", "health service", "service", "hospital", "clinic", "facility"],
-    clinicArea: ["clinic_area", "clinicarea", "clinic area", "area", "department", "speciality", "specialty"],
-    additionalFacilitator: ["additional_facilitator", "additionalfacilitator", "additional facilitator", "facilitator"],
-    startDate: ["start_date", "startdate", "start date", "start", "begin date", "from", "commence"],
-    endDate: ["end_date", "enddate", "end date", "end", "finish date", "to", "completion"],
+    healthService: [
+      "health_service",
+      "healthservice",
+      "health service",
+      "service",
+      "hospital",
+      "clinic",
+      "facility",
+    ],
+    clinicArea: [
+      "clinic_area",
+      "clinicarea",
+      "clinic area",
+      "area",
+      "department",
+      "speciality",
+      "specialty",
+    ],
+    additionalFacilitator: [
+      "additional_facilitator",
+      "additionalfacilitator",
+      "additional facilitator",
+      "facilitator",
+    ],
+    startDate: [
+      "start_date",
+      "startdate",
+      "start date",
+      "start",
+      "begin date",
+      "from",
+      "commence",
+    ],
+    endDate: [
+      "end_date",
+      "enddate",
+      "end date",
+      "end",
+      "finish date",
+      "to",
+      "completion",
+    ],
   };
 
   const handleInputChange = (e) => {
@@ -115,9 +168,9 @@ export default function RegisterStudentPage() {
         [name]: file,
       });
       setFileName(file ? file.name : "No file chosen");
-      
+
       // Process CSV file if it exists
-      if (file && file.name.endsWith('.csv')) {
+      if (file && file.name.endsWith(".csv")) {
         processCsvFile(file);
       }
     } else {
@@ -141,36 +194,37 @@ export default function RegisterStudentPage() {
     if (formData.csvFile) {
       return true;
     }
-    
+
     // Otherwise check if all required fields are filled
     const requiredFields = [
-      'firstName', 
-      'lastName', 
-      'studentId',
-      'university',
-      'healthService',
-      'clinicArea',
-      'startDate',
-      'endDate'
+      "firstName",
+      "lastName",
+      "studentId",
+      "university",
+      "healthService",
+      "clinicArea",
+      "startDate",
+      "endDate",
     ];
-    
-    return requiredFields.every(field => formData[field]);
+
+    return requiredFields.every((field) => formData[field]);
   };
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate form first
     if (!validateForm()) {
       toast({
         title: "Validation Error",
-        description: "Please either fill all required fields or upload a CSV file",
+        description:
+          "Please either fill all required fields or upload a CSV file",
         variant: "destructive",
       });
       return;
     }
-    
+
     setIsLoading(true);
 
     // Check if user has uploaded a CSV file
@@ -201,7 +255,6 @@ export default function RegisterStudentPage() {
 
       // Redirect to success page after successful submission
       router.push("/facilitator/student/success");
-      
     } catch (error) {
       toast({
         title: "Registration Failed",
@@ -215,43 +268,45 @@ export default function RegisterStudentPage() {
   // Process the uploaded CSV file
   const processCsvFile = (file) => {
     setProcessingCsv(true);
-    
+
     const reader = new FileReader();
     reader.onload = (event) => {
       const csvText = event.target.result;
       const lines = csvText.split(/\r\n|\n/);
-      
+
       // Extract headers (first line)
-      const headers = lines[0].split(',').map(header => header.trim().toLowerCase());
+      const headers = lines[0]
+        .split(",")
+        .map((header) => header.trim().toLowerCase());
       setCsvHeaders(headers);
-      
+
       // Parse CSV data (remaining lines)
       const data = [];
       for (let i = 1; i < lines.length; i++) {
-        if (lines[i].trim() === '') continue; // Skip empty lines
-        
+        if (lines[i].trim() === "") continue; // Skip empty lines
+
         const values = parseCSVLine(lines[i]);
         const entry = {};
         headers.forEach((header, index) => {
-          entry[header] = values[index] || '';
+          entry[header] = values[index] || "";
         });
         data.push(entry);
       }
-      
+
       setCsvData(data);
-      
+
       // Auto-map fields based on similarity
       const mapping = autoMapFields(headers);
       setFieldMapping(mapping);
-      
+
       // Generate preview data
       generatePreviewData(data, mapping);
-      
+
       // Show CSV dialog
       setShowCsvDialog(true);
       setProcessingCsv(false);
     };
-    
+
     reader.onerror = () => {
       toast({
         title: "File Reading Error",
@@ -260,29 +315,29 @@ export default function RegisterStudentPage() {
       });
       setProcessingCsv(false);
     };
-    
+
     reader.readAsText(file);
   };
 
   // Parse CSV line handling quoted values with commas
   const parseCSVLine = (line) => {
     const values = [];
-    let current = '';
+    let current = "";
     let inQuotes = false;
-    
+
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
-      
-      if (char === '"' && (i === 0 || line[i-1] !== '\\')) {
+
+      if (char === '"' && (i === 0 || line[i - 1] !== "\\")) {
         inQuotes = !inQuotes;
-      } else if (char === ',' && !inQuotes) {
+      } else if (char === "," && !inQuotes) {
         values.push(current.trim());
-        current = '';
+        current = "";
       } else {
         current += char;
       }
     }
-    
+
     values.push(current.trim());
     return values;
   };
@@ -290,21 +345,21 @@ export default function RegisterStudentPage() {
   // Auto-map CSV headers to required fields based on similarity
   const autoMapFields = (headers) => {
     const mapping = {};
-    
+
     // For each required field
     Object.entries(requiredFields).forEach(([field, possibleMatches]) => {
       // Find the best match in headers
       let bestMatch = null;
       let bestScore = -1;
-      
-      headers.forEach(header => {
+
+      headers.forEach((header) => {
         // Exact match
         if (possibleMatches.includes(header)) {
           bestMatch = header;
           bestScore = Infinity;
           return;
         }
-        
+
         // Calculate similarity score
         const score = calculateSimilarity(header, possibleMatches);
         if (score > bestScore) {
@@ -312,60 +367,63 @@ export default function RegisterStudentPage() {
           bestMatch = header;
         }
       });
-      
+
       // If we found a reasonable match (score threshold)
       if (bestScore > 0.3) {
         mapping[field] = bestMatch;
       }
     });
-    
+
     return mapping;
   };
 
   // Calculate similarity between a header and possible matches
   const calculateSimilarity = (header, possibleMatches) => {
     let maxScore = 0;
-    
-    possibleMatches.forEach(match => {
+
+    possibleMatches.forEach((match) => {
       // Simple substring check
       if (header.includes(match) || match.includes(header)) {
-        const score = Math.min(header.length, match.length) / Math.max(header.length, match.length);
+        const score =
+          Math.min(header.length, match.length) /
+          Math.max(header.length, match.length);
         maxScore = Math.max(maxScore, score);
       }
-      
+
       // Word-by-word comparison
       const headerWords = header.split(/[_\s-]+/);
       const matchWords = match.split(/[_\s-]+/);
-      
+
       let wordMatches = 0;
-      headerWords.forEach(hw => {
-        matchWords.forEach(mw => {
+      headerWords.forEach((hw) => {
+        matchWords.forEach((mw) => {
           if (hw === mw || hw.includes(mw) || mw.includes(hw)) {
             wordMatches++;
           }
         });
       });
-      
-      const wordScore = wordMatches / Math.max(headerWords.length, matchWords.length);
+
+      const wordScore =
+        wordMatches / Math.max(headerWords.length, matchWords.length);
       maxScore = Math.max(maxScore, wordScore);
     });
-    
+
     return maxScore;
   };
 
   // Generate preview data based on mapping
   const generatePreviewData = (data, mapping) => {
     if (data.length === 0) return;
-    
+
     // Use up to 5 rows for preview
-    const previewRows = data.slice(0, 5).map(row => {
+    const previewRows = data.slice(0, 5).map((row) => {
       const mappedRow = {};
       Object.entries(mapping).forEach(([field, header]) => {
-        mappedRow[field] = header ? row[header] : '';
+        mappedRow[field] = header ? row[header] : "";
       });
       return mappedRow;
     });
-    
+
     setPreviewData(previewRows);
   };
 
@@ -373,7 +431,7 @@ export default function RegisterStudentPage() {
   const handleMappingChange = (field, header) => {
     const newMapping = {
       ...fieldMapping,
-      [field]: header === 'not_mapped' ? '' : header,
+      [field]: header === "not_mapped" ? "" : header,
     };
     setFieldMapping(newMapping);
     generatePreviewData(csvData, newMapping);
@@ -382,40 +440,65 @@ export default function RegisterStudentPage() {
   // Process and submit CSV data
   const handleCsvSubmit = async () => {
     setIsLoading(true);
-    
+
     // Check if all required fields are mapped
-    const requiredFieldsList = ['firstName', 'lastName', 'studentId', 'university', 'healthService', 'clinicArea', 'startDate', 'endDate'];
-    const missingFields = requiredFieldsList.filter(field => !fieldMapping[field]);
-    
+    const requiredFieldsList = [
+      "firstName",
+      "lastName",
+      "studentId",
+      "university",
+      "healthService",
+      "clinicArea",
+      "startDate",
+      "endDate",
+    ];
+    const missingFields = requiredFieldsList.filter(
+      (field) => !fieldMapping[field]
+    );
+
     if (missingFields.length > 0) {
       toast({
         title: "Missing Field Mappings",
-        description: `Please map the following required fields: ${missingFields.join(', ')}`,
+        description: `Please map the following required fields: ${missingFields.join(
+          ", "
+        )}`,
         variant: "destructive",
       });
       setIsLoading(false);
       return;
     }
-    
+
     // Process each CSV row
     try {
       let successCount = 0;
       let errorCount = 0;
-      
+
       for (const row of csvData) {
         // Map CSV data to form data structure
         const studentData = {
-          firstName: fieldMapping.firstName ? row[fieldMapping.firstName] : '',
-          lastName: fieldMapping.lastName ? row[fieldMapping.lastName] : '',
-          studentId: fieldMapping.studentId ? row[fieldMapping.studentId] : '',
-          university: fieldMapping.university ? row[fieldMapping.university] : '',
-          healthService: fieldMapping.healthService ? row[fieldMapping.healthService] : '',
-          clinicArea: fieldMapping.clinicArea ? row[fieldMapping.clinicArea] : '',
-          additionalFacilitator: fieldMapping.additionalFacilitator ? row[fieldMapping.additionalFacilitator] : '',
-          startDate: fieldMapping.startDate ? formatDate(row[fieldMapping.startDate]) : '',
-          endDate: fieldMapping.endDate ? formatDate(row[fieldMapping.endDate]) : '',
+          firstName: fieldMapping.firstName ? row[fieldMapping.firstName] : "",
+          lastName: fieldMapping.lastName ? row[fieldMapping.lastName] : "",
+          studentId: fieldMapping.studentId ? row[fieldMapping.studentId] : "",
+          university: fieldMapping.university
+            ? row[fieldMapping.university]
+            : "",
+          healthService: fieldMapping.healthService
+            ? row[fieldMapping.healthService]
+            : "",
+          clinicArea: fieldMapping.clinicArea
+            ? row[fieldMapping.clinicArea]
+            : "",
+          additionalFacilitator: fieldMapping.additionalFacilitator
+            ? row[fieldMapping.additionalFacilitator]
+            : "",
+          startDate: fieldMapping.startDate
+            ? formatDate(row[fieldMapping.startDate])
+            : "",
+          endDate: fieldMapping.endDate
+            ? formatDate(row[fieldMapping.endDate])
+            : "",
         };
-        
+
         try {
           await CreateStudent(studentData);
           successCount++;
@@ -424,14 +507,14 @@ export default function RegisterStudentPage() {
           errorCount++;
         }
       }
-      
+
       // Show result message
       toast({
         title: "Bulk Registration Complete",
         description: `Successfully registered ${successCount} students with ${errorCount} errors.`,
         duration: 5000,
       });
-      
+
       // Redirect to success page if at least one student was registered
       if (successCount > 0) {
         router.push("/facilitator/student/success");
@@ -439,11 +522,11 @@ export default function RegisterStudentPage() {
         setIsLoading(false);
         setShowCsvDialog(false);
       }
-      
     } catch (error) {
       toast({
         title: "Bulk Registration Failed",
-        description: error.message || "An error occurred during bulk registration.",
+        description:
+          error.message || "An error occurred during bulk registration.",
         variant: "destructive",
       });
       setIsLoading(false);
@@ -453,46 +536,45 @@ export default function RegisterStudentPage() {
 
   // Format date strings from various formats to YYYY-MM-DD
   const formatDate = (dateStr) => {
-    if (!dateStr) return '';
-    
+    if (!dateStr) return "";
+
     // Try parsing different date formats
     let date;
-    
+
     // Check if it's already in YYYY-MM-DD format
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
       return dateStr;
     }
-    
+
     // Try MM/DD/YYYY
     if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) {
-      const parts = dateStr.split('/');
+      const parts = dateStr.split("/");
       date = new Date(parts[2], parts[0] - 1, parts[1]);
     }
     // Try DD/MM/YYYY
     else if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) {
-      const parts = dateStr.split('/');
+      const parts = dateStr.split("/");
       date = new Date(parts[2], parts[1] - 1, parts[0]);
     }
     // Try to parse as is
     else {
       date = new Date(dateStr);
     }
-    
+
     // Check if date is valid
     if (isNaN(date.getTime())) {
       return dateStr; // Return original if cannot parse
     }
-    
+
     // Format as YYYY-MM-DD
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
   };
 
   return (
     <div className="container mx-auto py-8 px-4">
-      
       {/* Back Button */}
-      <Button 
-        variant="ghost" 
+      <Button
+        variant="ghost"
         className="mb-4 flex items-center text-muted-foreground hover:text-foreground"
         onClick={() => router.back()}
       >
@@ -502,7 +584,9 @@ export default function RegisterStudentPage() {
 
       <Card className="w-full max-w-4xl mx-auto">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Register Student</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">
+            Register Student
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -560,11 +644,17 @@ export default function RegisterStudentPage() {
                   <SelectValue placeholder="Select university" />
                 </SelectTrigger>
                 <SelectContent className="bg-white">
-                  {universities.map((uni) => (
-                    <SelectItem key={uni} value={uni}>
-                      {uni}
+                  {universities.length > 0 ? (
+                    universities.map((uni) => (
+                      <SelectItem key={uni.$id} value={uni.affiliation_name}>
+                        {uni.affiliation_name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="loading" disabled>
+                      Loading universities...
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -584,11 +674,20 @@ export default function RegisterStudentPage() {
                     <SelectValue placeholder="Select health service" />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
-                    {healthServices.map((service) => (
-                      <SelectItem key={service} value={service}>
-                        {service}
+                    {healthServices.length > 0 ? (
+                      healthServices.map((service) => (
+                        <SelectItem
+                          key={service.$id}
+                          value={service.affiliation_name}
+                        >
+                          {service.affiliation_name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="loading" disabled>
+                        Loading health services...
                       </SelectItem>
-                    ))}
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -606,11 +705,17 @@ export default function RegisterStudentPage() {
                     <SelectValue placeholder="Select clinic area" />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
-                    {clinicAreas.map((area) => (
-                      <SelectItem key={area} value={area}>
-                        {area}
+                    {clinicAreas.length > 0 ? (
+                      clinicAreas.map((area) => (
+                        <SelectItem key={area.$id} value={area.name}>
+                          {area.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="loading" disabled>
+                        Loading clinic areas...
                       </SelectItem>
-                    ))}
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -689,8 +794,14 @@ export default function RegisterStudentPage() {
                 <span className="text-sm text-gray-500">{fileName}</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Upload a CSV file containing student information. The system will automatically detect fields.
-                {formData.csvFile && <span className="font-medium text-green-600"> When using CSV upload, form fields are optional.</span>}
+                Upload a CSV file containing student information. The system
+                will automatically detect fields.
+                {formData.csvFile && (
+                  <span className="font-medium text-green-600">
+                    {" "}
+                    When using CSV upload, form fields are optional.
+                  </span>
+                )}
               </p>
             </div>
 
@@ -713,7 +824,8 @@ export default function RegisterStudentPage() {
           <DialogHeader>
             <DialogTitle className="text-center">CSV Field Mapping</DialogTitle>
             <DialogDescription className="text-center">
-              We've detected {csvData.length} records. Please confirm the field mappings below.
+              We've detected {csvData.length} records. Please confirm the field
+              mappings below.
             </DialogDescription>
           </DialogHeader>
 
@@ -732,19 +844,25 @@ export default function RegisterStudentPage() {
                     <TableRow key={field}>
                       <TableCell className="font-medium">
                         {field}
-                        {field !== 'additionalFacilitator' && <span className="text-red-500 ml-1">*</span>}
+                        {field !== "additionalFacilitator" && (
+                          <span className="text-red-500 ml-1">*</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Select
-                          value={fieldMapping[field] || 'not_mapped'}
-                          onValueChange={(value) => handleMappingChange(field, value)}
+                          value={fieldMapping[field] || "not_mapped"}
+                          onValueChange={(value) =>
+                            handleMappingChange(field, value)
+                          }
                         >
                           <SelectTrigger className="bg-white w-full">
                             <SelectValue placeholder="Select a column" />
                           </SelectTrigger>
                           <SelectContent className="bg-white">
-                            <SelectItem value="not_mapped">Not Mapped</SelectItem>
-                            {csvHeaders.map(header => (
+                            <SelectItem value="not_mapped">
+                              Not Mapped
+                            </SelectItem>
+                            {csvHeaders.map((header) => (
                               <SelectItem key={header} value={header}>
                                 {header}
                               </SelectItem>
@@ -760,12 +878,14 @@ export default function RegisterStudentPage() {
 
             {/* Data Preview */}
             <div>
-              <h3 className="text-lg font-medium mb-2 text-center">Data Preview</h3>
+              <h3 className="text-lg font-medium mb-2 text-center">
+                Data Preview
+              </h3>
               <div className="border rounded-md overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      {Object.keys(requiredFields).map(field => (
+                      {Object.keys(requiredFields).map((field) => (
                         <TableHead key={field}>{field}</TableHead>
                       ))}
                     </TableRow>
@@ -773,8 +893,8 @@ export default function RegisterStudentPage() {
                   <TableBody>
                     {previewData.map((row, index) => (
                       <TableRow key={index}>
-                        {Object.keys(requiredFields).map(field => (
-                          <TableCell key={field}>{row[field] || '-'}</TableCell>
+                        {Object.keys(requiredFields).map((field) => (
+                          <TableCell key={field}>{row[field] || "-"}</TableCell>
                         ))}
                       </TableRow>
                     ))}
@@ -795,10 +915,7 @@ export default function RegisterStudentPage() {
             >
               Cancel
             </Button>
-            <Button 
-              onClick={handleCsvSubmit}
-              disabled={isLoading}
-            >
+            <Button onClick={handleCsvSubmit} disabled={isLoading}>
               {isLoading ? "Processing..." : "Import Data"}
             </Button>
           </DialogFooter>
