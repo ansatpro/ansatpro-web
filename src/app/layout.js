@@ -1,7 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NavigationProvider } from "@/context/NavigationContext";
-import SideNav from "@/components/ui/SideNav/side-nav";
 import ClientSideJWTRefresher from "@/components/ClientSideJWTRefresher"; // path to the client-only component
 
 const geistSans = Geist({
