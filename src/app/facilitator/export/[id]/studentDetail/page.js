@@ -153,13 +153,16 @@ export default function StudentDetailPage() {
     setExportLoading(prev => ({ ...prev, aiSummary: true }));
     
     try {
-      // 模拟AI处理 - 在实际应用中，这里将是API调用
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // 保存当前学生数据到localStorage中以便aiSummary页面访问
+      if (student) {
+        localStorage.setItem('ansatpro_current_student', JSON.stringify(student));
+      }
       
-      toast.success("AI Summary has been generated successfully.");
+      // 跳转到AI摘要页面
+      router.push(`/facilitator/export/${docId}/studentDetail/aiSummary`);
     } catch (error) {
-      console.error("AI Summary generation error:", error);
-      toast.error("There was an error generating the AI summary. Please try again.");
+      console.error("AI Summary navigation error:", error);
+      toast.error("There was an error navigating to the AI summary page. Please try again.");
     } finally {
       setExportLoading(prev => ({ ...prev, aiSummary: false }));
     }
@@ -325,7 +328,7 @@ export default function StudentDetailPage() {
               disabled={exportLoading.aiSummary}
             >
               {exportLoading.aiSummary ? (
-                "Generating..."
+                "Navigating..."
               ) : (
                 <>
                   <Sparkles className="mr-2 h-4 w-4" />

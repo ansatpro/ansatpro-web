@@ -7,10 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { 
-  Home, 
-  MessageSquareText, 
-  Settings, 
-  Users, 
   Download, 
   Bell, 
   LogOut,
@@ -18,9 +14,7 @@ import {
   FileText,
   Calendar,
   User,
-  Sparkles,
   Copy,
-  FileOutput,
   RefreshCcw
 } from "lucide-react";
 import { format } from "date-fns";
@@ -300,6 +294,25 @@ export default function AISummaryPage() {
           return;
         }
         
+        // 首先尝试从ansatpro_current_student加载（由父页面保存的）
+        const currentStudentJson = localStorage.getItem('ansatpro_current_student');
+        
+        if (currentStudentJson) {
+          try {
+            const currentStudent = JSON.parse(currentStudentJson);
+            console.log("从localStorage中找到当前学生:", currentStudent);
+            setStudent(currentStudent);
+            
+            // 模拟AI生成的结果
+            generateMockAISummary(currentStudent);
+            
+            setLoading(false);
+            return;
+          } catch (e) {
+            console.error("解析当前学生数据出错:", e);
+          }
+        }
+        
         // 首先尝试从localStorage加载选中的学生
         const selectedStudentJson = localStorage.getItem('ansatpro_selected_student');
         
@@ -351,7 +364,11 @@ export default function AISummaryPage() {
           docId: docId,
           studentId: "S1000",
           studentName: "Unknown Student",
-          studentUniversity: "Unknown University"
+          studentUniversity: "Unknown University",
+          healthService: "General Hospital",
+          clinicArea: "General Practice",
+          startDate: "2023-01-15",
+          endDate: "2023-06-30"
         };
         
         setStudent(mockStudent);
@@ -504,50 +521,6 @@ This summary is based on ${Math.floor(Math.random() * 5) + 3} feedback reports f
   
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Sidebar navigation */}
-      <aside className="w-64 border-r bg-muted/40 p-6 hidden md:block">
-        <div className="mb-8">
-          <h1 className="text-xl font-bold">ANSAT Pro</h1>
-        </div>
-        <nav className="space-y-2">
-          <Link
-            href="/facilitator/dashboard"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Home className="mr-2 h-4 w-4" />
-            Home
-          </Link>
-          <Link
-            href="/facilitator/student"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Users className="mr-2 h-4 w-4" />
-            Student
-          </Link>
-          <Link
-            href="/facilitator/feedback"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <MessageSquareText className="mr-2 h-4 w-4" />
-            Feedback
-          </Link>
-          <Link
-            href="/facilitator/export"
-            className="flex items-center rounded-md bg-accent px-3 py-2 text-sm font-medium text-accent-foreground"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Link>
-          <Link
-            href="/facilitator/settings"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </Link>
-        </nav>
-      </aside>
-
       {/* Main content */}
       <main className="flex-1 p-6 overflow-auto">
         {/* Header */}
