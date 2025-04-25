@@ -22,9 +22,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <NavigationProvider>{children}</NavigationProvider>
+        <NavigationProvider>
+          {children}
+        </NavigationProvider>
         <ClientSideJWTRefresher /> {/* ✅ Client-only logic here */}
-        {children}
       </body>
     </html>
   );

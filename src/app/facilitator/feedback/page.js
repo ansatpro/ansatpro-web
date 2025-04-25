@@ -45,21 +45,21 @@ export default function AllFeedback() {
   const [clinicAreaFilter, setClinicAreaFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
 
-  // 格式化日期的辅助函数
+  // Helper function to format date
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "short", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  // 初始化数据
+  // Initialize data
   useEffect(() => {
     const initializeData = async () => {
       try {
-        // 检查localStorage中是否已有数据
+        // Check if data already exists in localStorage
         // const storedFeedbacks = localStorage.getItem("ansatpro_feedbacks");
 
         // if (storedFeedbacks) {
-        //   // 如果localStorage中有数据，使用它
+        //   // If data exists in localStorage, use it
         //   const parsedFeedbacks = JSON.parse(storedFeedbacks);
         //   setFeedbacks(parsedFeedbacks);
         //   setFilteredResults(parsedFeedbacks);
@@ -67,7 +67,7 @@ export default function AllFeedback() {
         //   return;
         // }
 
-        // 如果没有存储的数据，则使用示例数据
+        // If no stored data, use sample data
 
         // Original response (e.g., from API)
         // const testRes = await GetAllStudentsWithDetails();
@@ -141,12 +141,12 @@ export default function AllFeedback() {
 
         console.log(sampleFeedbacks);
 
-        // 按日期倒序排列
+        // Sort by date in descending order
         const sortedFeedbacks = [...sampleFeedbacks].sort(
           (a, b) => new Date(b.date) - new Date(a.date)
         );
 
-        // 存储到localStorage
+        // Store to localStorage
         localStorage.setItem(
           "ansatpro_feedbacks",
           JSON.stringify(sortedFeedbacks)
@@ -156,7 +156,7 @@ export default function AllFeedback() {
         setFilteredResults(sortedFeedbacks);
       } catch (err) {
         console.error("Error initializing data:", err);
-        // 如果发生错误，仍然尝试使用示例数据
+        // If error occurs, still try to use sample data
         const sortedFeedbacks = [...sampleFeedbacks].sort(
           (a, b) => new Date(b.date) - new Date(a.date)
         );
@@ -170,12 +170,12 @@ export default function AllFeedback() {
     initializeData();
   }, []);
 
-  // 更新过滤结果当反馈数据变化时
+  // Update filtered results when feedback data changes
   useEffect(() => {
     setFilteredResults(feedbacks);
   }, [feedbacks]);
 
-  // 从反馈数据中获取唯一的筛选值
+  // Get unique filter values from feedback data
   const universities = [
     ...new Set(feedbacks.map((feedback) => feedback.university)),
   ];
@@ -186,84 +186,104 @@ export default function AllFeedback() {
     ...new Set(feedbacks.map((feedback) => feedback.clinicArea)),
   ];
 
-  // 应用筛选器当任何筛选条件变化时
+  // Apply filters when any filter criteria changes
   useEffect(() => {
     applyFilters();
   }, [universityFilter, healthServiceFilter, clinicAreaFilter, dateFilter]);
 
-  // 处理大学筛选变化
+  // Handle university filter change
   const handleUniversityChange = (value) => {
     setUniversityFilter(value);
   };
 
-  // 处理医疗服务筛选变化
+  // Handle health service filter change
   const handleHealthServiceChange = (value) => {
     setHealthServiceFilter(value);
   };
 
-  // 处理诊所区域筛选变化
+  // Handle clinic area filter change
   const handleClinicAreaChange = (value) => {
     setClinicAreaFilter(value);
   };
 
-  // 处理日期筛选变化
+  // Handle date filter change
   const handleDateFilterChange = (value) => {
     setDateFilter(value);
   };
 
-  // 应用所有筛选条件
+  // Apply all filter conditions
   const applyFilters = () => {
     let results = feedbacks;
 
-    // 应用大学筛选
+    // Apply university filter
     if (universityFilter !== "all") {
       results = results.filter(
         (feedback) => feedback.university === universityFilter
       );
     }
 
-    // 应用医疗服务筛选
+    // Apply health service filter
     if (healthServiceFilter !== "all") {
       results = results.filter(
         (feedback) => feedback.healthService === healthServiceFilter
       );
     }
 
-    // 应用诊所区域筛选
+    // Apply clinic area filter
     if (clinicAreaFilter !== "all") {
       results = results.filter(
         (feedback) => feedback.clinicArea === clinicAreaFilter
       );
     }
 
-    // 应用日期筛选
+    // Apply date filter
     if (dateFilter !== "all") {
       const now = new Date();
       let filterDate = new Date();
 
       switch (dateFilter) {
-        case "week":
+        case "newest":
+          // Sort by newest first (descending)
+          results = [...results].sort(
+            (a, b) => new Date(b.date) - new Date(a.date)
+          );
+          break;
+        case "oldest":
+          // Sort by oldest first (ascending)
+          results = [...results].sort(
+            (a, b) => new Date(a.date) - new Date(b.date)
+          );
+          break;
+        case "last7":
+          // Last 7 days
           filterDate.setDate(now.getDate() - 7);
+          results = results.filter(
+            (feedback) => new Date(feedback.date) >= filterDate
+          );
           break;
-        case "month":
+        case "last30":
+          // Last 30 days
           filterDate.setDate(now.getDate() - 30);
+          results = results.filter(
+            (feedback) => new Date(feedback.date) >= filterDate
+          );
           break;
-        case "sixMonths":
-          filterDate.setMonth(now.getMonth() - 6);
+        case "last90":
+          // Last 90 days
+          filterDate.setDate(now.getDate() - 90);
+          results = results.filter(
+            (feedback) => new Date(feedback.date) >= filterDate
+          );
           break;
         default:
           break;
       }
-
-      results = results.filter(
-        (feedback) => new Date(feedback.date) >= filterDate
-      );
     }
 
     setFilteredResults(results);
   };
 
-  // 搜索反馈
+  // Search feedback
   const searchFeedback = () => {
     if (searchTerm.trim() === "") {
       applyFilters();
@@ -279,7 +299,7 @@ export default function AllFeedback() {
     setFilteredResults(results);
   };
 
-  // 清除所有筛选条件
+  // Clear all filters
   const clearFilters = () => {
     setSearchTerm("");
     setUniversityFilter("all");
@@ -289,17 +309,51 @@ export default function AllFeedback() {
     setFilteredResults(feedbacks);
   };
 
-  // 处理点击反馈详情 - 根据is_marked状态决定跳转目标
+  // Handle feedback click - decide redirect target based on is_marked status
   const handleFeedbackClick = (feedback) => {
-    // 存储当前点击的反馈详情到localStorage
-    localStorage.setItem("ansatpro_current_feedback", JSON.stringify(feedback));
-
-    if (feedback.is_marked) {
-      // 已标记，跳转到查看反馈详情页面
-      router.push(`/facilitator/feedback/${feedback.id}/feedbackDetail`);
-    } else {
-      // 未标记，跳转到创建反馈页面
-      router.push(`/facilitator/feedback/${feedback.id}/studentDetail`);
+    try {
+      // Make sure feedback is a valid object before storing
+      if (!feedback || typeof feedback !== 'object') {
+        console.error("Invalid feedback object:", feedback);
+        return;
+      }
+      
+      // Store a clean version of feedback object to avoid circular references
+      const cleanFeedback = {
+        id: feedback.id,
+        studentName: feedback.studentName,
+        studentId: feedback.studentId,
+        university: feedback.university,
+        healthService: feedback.healthService,
+        clinicArea: feedback.clinicArea,
+        date: feedback.date,
+        content: feedback.content,
+        preceptor: feedback.preceptor,
+        preceptor_id: feedback.preceptor_id,
+        is_marked: feedback.is_marked,
+        startDate: feedback.startDate,
+        endDate: feedback.endDate,
+        reviewComment: feedback.reviewComment,
+        reviewScore: feedback.reviewScore,
+        aiFeedbackDescriptions: feedback.aiFeedbackDescriptions || []
+      };
+      
+      // Store current clicked feedback details to localStorage
+      localStorage.setItem("ansatpro_current_feedback", JSON.stringify(cleanFeedback));
+      
+      // Wait a moment before navigating to ensure localStorage is updated
+      setTimeout(() => {
+        if (feedback.is_marked) {
+          // If marked, redirect to view feedback details page
+          router.push(`/facilitator/feedback/${feedback.id}/feedbackDetail`);
+        } else {
+          // If not marked, redirect to create feedback page
+          router.push(`/facilitator/feedback/${feedback.id}/studentDetail`);
+        }
+      }, 100);
+    } catch (error) {
+      console.error("Error in handleFeedbackClick:", error);
+      alert("There was an error processing this feedback. Please try again.");
     }
   };
 
@@ -382,7 +436,7 @@ export default function AllFeedback() {
                 </Select>
               </div>
         
-        <div>
+              <div>
                 <label className="mb-2 block text-sm font-medium">
                   Clinic Area
                 </label>
@@ -404,7 +458,7 @@ export default function AllFeedback() {
                 </Select>
               </div>
 
-            <div>
+              <div>
                 <label className="mb-2 block text-sm font-medium">
                   Date Range
                 </label>
@@ -462,7 +516,7 @@ export default function AllFeedback() {
             >
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
-            <div>
+                  <div>
                     <CardTitle className="text-lg font-bold">
                       {feedback.studentName}
                     </CardTitle>
@@ -499,12 +553,12 @@ export default function AllFeedback() {
                   <Button size="sm" variant="outline" className="bg-white">
                     View Details
                   </Button>
-            </div>
+                </div>
               </CardFooter>
             </Card>
           ))}
-            </div>
+        </div>
       )}
-            </div>
+    </div>
   );
 }

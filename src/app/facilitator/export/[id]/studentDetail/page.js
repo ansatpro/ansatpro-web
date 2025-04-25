@@ -25,13 +25,157 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import { format } from "date-fns";
+import { 
+  Document, 
+  Page, 
+  Text, 
+  View, 
+  StyleSheet, 
+  PDFDownloadLink,
+  Font
+} from "@react-pdf/renderer";
+import { pdf } from '@react-pdf/renderer';
+import { saveAs } from 'file-saver';
 
-// 如果使用toast通知，需要导入toast组件
-// 如果没有安装sonner，则使用自定义toast函数
+// Register fonts
+Font.register({
+  family: 'Roboto',
+  fonts: [
+    { src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf', fontWeight: 'normal' },
+    { src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-bold-webfont.ttf', fontWeight: 'bold' }
+  ]
+});
+
+// Define PDF styles
+const styles = StyleSheet.create({
+  page: {
+    flexDirection: 'column',
+    backgroundColor: '#ffffff',
+    padding: 30,
+    fontFamily: 'Roboto'
+  },
+  header: {
+    textAlign: 'center',
+    marginBottom: 20
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 5
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 15
+  },
+  infoContainer: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 5,
+    padding: 15,
+    marginBottom: 20
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    borderBottomWidth: 1,
+    borderBottomColor: '#dddddd',
+    paddingBottom: 8,
+    marginBottom: 12
+  },
+  infoTable: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%'
+  },
+  tableRow: {
+    flexDirection: 'row',
+    paddingVertical: 5
+  },
+  tableLabel: {
+    width: '35%',
+    fontWeight: 'bold'
+  },
+  tableValue: {
+    width: '65%'
+  },
+  contentContainer: {
+    marginBottom: 20
+  },
+  contentBox: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#dddddd',
+    padding: 15
+  },
+  paragraph: {
+    fontSize: 12,
+    marginBottom: 8,
+    lineHeight: 1.5
+  },
+  footer: {
+    marginTop: 20,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#dddddd',
+    fontSize: 10,
+    color: '#666666',
+    textAlign: 'center'
+  }
+});
+
+// PDF document component for exports
+const ExportPDF = ({ student, exportType, content }) => {
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        {/* Document title */}
+        <View style={styles.header}>
+          <Text style={styles.title}>{exportType} Report</Text>
+          <Text style={styles.subtitle}>Generated on {format(new Date(), "MMMM d, yyyy")}</Text>
+        </View>
+        
+        {/* Student information section */}
+        <View style={styles.infoContainer}>
+          <Text style={styles.sectionTitle}>Student Information</Text>
+          <View style={styles.infoTable}>
+            <View style={styles.tableRow}>
+              <Text style={styles.tableLabel}>Student ID:</Text>
+              <Text style={styles.tableValue}>{student.studentId}</Text>
+            </View>
+            <View style={styles.tableRow}>
+              <Text style={styles.tableLabel}>Student Name:</Text>
+              <Text style={styles.tableValue}>{student.studentName}</Text>
+            </View>
+            <View style={styles.tableRow}>
+              <Text style={styles.tableLabel}>University:</Text>
+              <Text style={styles.tableValue}>{student.studentUniversity}</Text>
+            </View>
+          </View>
+        </View>
+        
+        {/* Content section */}
+        <View style={styles.contentContainer}>
+          <Text style={styles.sectionTitle}>{exportType} Content</Text>
+          <View style={styles.contentBox}>
+            <Text style={styles.paragraph}>{content || `This is a ${exportType.toLowerCase()} report for ${student.studentName}.`}</Text>
+          </View>
+        </View>
+        
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text>ANSAT Pro - Confidential Document - {format(new Date(), "yyyy-MM-dd")}</Text>
+        </View>
+      </Page>
+    </Document>
+  );
+};
+
+// Toast notification function
 const toast = {
   success: (message) => {
     console.log("Success:", message);
-    // 如果有DOM环境，可以创建一个临时元素来显示toast
     if (typeof document !== 'undefined') {
       const toastEl = document.createElement('div');
       toastEl.className = 'fixed top-4 right-4 bg-green-500 text-white p-4 rounded shadow-lg z-50';
@@ -43,8 +187,7 @@ const toast = {
     }
   },
   error: (message) => {
-    console.error("Error:", message);
-    // 如果有DOM环境，可以创建一个临时元素来显示toast
+    console.error("Error:", error);
     if (typeof document !== 'undefined') {
       const toastEl = document.createElement('div');
       toastEl.className = 'fixed top-4 right-4 bg-red-500 text-white p-4 rounded shadow-lg z-50';
@@ -60,7 +203,7 @@ const toast = {
 export default function StudentDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const docId = params.id; // 文档ID作为动态路由
+  const docId = params.id; // Document ID from dynamic route
   
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -69,34 +212,34 @@ export default function StudentDetailPage() {
   const [error, setError] = useState("");
   const [exportType, setExportType] = useState("");
   
-  // 加载学生数据
+  // Load student data
   useEffect(() => {
     const loadStudentData = () => {
       try {
         if (!docId) {
-          setError("无效的文档ID");
+          setError("Invalid document ID");
           setLoading(false);
           return;
         }
         
-        // 首先尝试从localStorage加载选中的学生
+        // First try to load the selected student from localStorage
         const selectedStudentJson = localStorage.getItem('ansatpro_selected_student');
         
         if (selectedStudentJson) {
           try {
             const selectedStudent = JSON.parse(selectedStudentJson);
             if (selectedStudent.docId === docId) {
-              console.log("从localStorage中找到匹配的学生:", selectedStudent);
+              console.log("Found matching student in localStorage:", selectedStudent);
               setStudent(selectedStudent);
               setLoading(false);
               return;
             }
           } catch (e) {
-            console.error("解析localStorage中的学生数据出错:", e);
+            console.error("Error parsing student data from localStorage:", e);
           }
         }
         
-        // 如果找不到匹配的学生，从学生列表中查找
+        // If no matching student found, search the student list
         const studentsJson = localStorage.getItem('ansatpro_students');
         if (studentsJson) {
           try {
@@ -105,37 +248,37 @@ export default function StudentDetailPage() {
               const foundStudent = students.find(s => s.docId === docId);
               
               if (foundStudent) {
-                console.log("从学生列表中找到匹配的学生:", foundStudent);
+                console.log("Found matching student in student list:", foundStudent);
                 setStudent(foundStudent);
                 setLoading(false);
                 return;
               }
             } else {
-              console.error("学生数据格式不正确，不是数组:", typeof students);
+              console.error("Student data format incorrect, not an array:", typeof students);
             }
           } catch (e) {
-            console.error("解析localStorage中的学生列表出错:", e);
+            console.error("Error parsing student list from localStorage:", e);
           }
         } else {
-          console.error("localStorage中没有学生列表数据");
+          console.error("No student list data in localStorage");
         }
         
-        // 如果仍然找不到，使用模拟数据
-        console.log("未找到匹配的学生，使用模拟数据");
+        // If still no match, use mock data
+        console.log("No matching student found, using mock data");
         setStudent({
           docId: docId,
           studentId: "S1000",
           studentName: "Unknown Student",
           studentUniversity: "Unknown University",
-          courses: [
-            { code: "MED101", name: "Introduction to Medicine", year: "2023" },
-            { code: "BIO240", name: "Human Anatomy", year: "2023" }
-          ]
+          healthService: "General Hospital",
+          clinicArea: "General Practice",
+          startDate: "2023-01-15",
+          endDate: "2023-06-30"
         });
         setLoading(false);
       } catch (error) {
         console.error("Error loading student data:", error);
-        setError(`加载学生数据时出错: ${error.message}`);
+        setError(`Error loading student data: ${error.message}`);
         setLoading(false);
       }
     };
@@ -143,35 +286,34 @@ export default function StudentDetailPage() {
     loadStudentData();
   }, [docId]);
   
-  // 返回到搜索页面
+  // Return to search page
   const handleBackClick = () => {
     router.push("/facilitator/export");
   };
   
-  // 处理生成AI摘要
-  const handleGenerateAISummary = async () => {
-    setExportLoading(prev => ({ ...prev, aiSummary: true }));
-    
+  // Handle generating AI summary - Fixed navigation
+  const handleGenerateAISummary = () => {
     try {
-      // 模拟AI处理 - 在实际应用中，这里将是API调用
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // First, save current student data to localStorage for the AI Summary page to access
+      if (student) {
+        localStorage.setItem('ansatpro_current_student', JSON.stringify(student));
+      }
       
-      toast.success("AI Summary has been generated successfully.");
+      // Direct navigation with router
+      router.push(`/facilitator/export/${docId}/studentDetail/aiSummary`);
     } catch (error) {
-      console.error("AI Summary generation error:", error);
-      toast.error("There was an error generating the AI summary. Please try again.");
-    } finally {
-      setExportLoading(prev => ({ ...prev, aiSummary: false }));
+      console.error("AI Summary navigation error:", error);
+      toast.error("Navigation error. Please try again.");
     }
   };
   
-  // 处理导出操作
+  // Handle export operation
   const handleExport = (type) => {
     setExportType(type);
     setShowExportDialog(true);
   };
   
-  // 确认导出报告
+  // Confirm export report using react-pdf
   const confirmExport = async () => {
     if (!exportType) {
       toast.error("No export type selected");
@@ -186,31 +328,34 @@ export default function StudentDetailPage() {
     setExportLoading(prev => ({ ...prev, [exportType]: true }));
     
     try {
-      // 模拟导出处理 - 在实际应用中，这里将是API调用
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Create date string
+      const dateStr = format(new Date(), "yyyy-MM-dd");
       
-      // 创建模拟PDF下载
-      const fileName = `${student.studentName}_${exportType.replace(/\s+/g, '_')}.pdf`;
+      // Create filename
+      const fileName = `${student.studentName}_${exportType.replace(/\s+/g, '_')}_${dateStr}.pdf`;
       
-      // 创建一个Blob对象
-      const blob = new Blob([`Content - ${exportType} for ${student.studentName}`], { type: 'application/pdf' });
+      // Generate mock content based on export type
+      const content = `This is a sample ${exportType} report for ${student.studentName} generated on ${dateStr}.
       
-      // 创建下载链接
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
+It includes information relevant to the student's performance and feedback received during their clinical placement.
+
+The report is intended for educational purposes and provides a comprehensive overview of the student's progress.`;
       
-      // 清理
-      window.URL.revokeObjectURL(url);
-      a.remove();
+      // Generate PDF blob
+      const pdfBlob = await pdf(
+        <ExportPDF 
+          student={student} 
+          exportType={exportType}
+          content={content}
+        />
+      ).toBlob();
       
-      toast.success(`${exportType} has been exported successfully.`);
+      // Use file-saver to save the file
+      saveAs(pdfBlob, fileName);
       
-      // 关闭对话框
+      toast.success(`${exportType} has been exported successfully as PDF.`);
+      
+      // Close dialog
       setShowExportDialog(false);
     } catch (error) {
       console.error("Export error:", error);
@@ -223,7 +368,7 @@ export default function StudentDetailPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-full">
-        <p className="text-lg text-muted-foreground">加载中...</p>
+        <p className="text-lg text-muted-foreground">Loading...</p>
       </div>
     );
   }
@@ -232,7 +377,7 @@ export default function StudentDetailPage() {
     return (
       <div className="flex flex-col justify-center items-center h-full gap-4">
         <p className="text-lg text-red-500">{error}</p>
-        <Button onClick={handleBackClick} variant="outline">返回搜索</Button>
+        <Button onClick={handleBackClick} variant="outline">Return to Search</Button>
       </div>
     );
   }
@@ -317,21 +462,14 @@ export default function StudentDetailPage() {
           <p className="text-muted-foreground">Choose an export option for {student.studentName}'s reports:</p>
           
           <div className="flex flex-col md:flex-row gap-4">
-            {/* AI Summary Button - Different color */}
+            {/* AI Summary Button - Fixed for direct navigation */}
             <Button 
               variant="default" 
               className="bg-purple-600 hover:bg-purple-700"
               onClick={handleGenerateAISummary}
-              disabled={exportLoading.aiSummary}
             >
-              {exportLoading.aiSummary ? (
-                "Generating..."
-              ) : (
-                <>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Generate AI Summary
-                </>
-              )}
+              <Sparkles className="mr-2 h-4 w-4" />
+              Generate AI Summary
             </Button>
             
             {/* Export Preceptor Feedback Button */}

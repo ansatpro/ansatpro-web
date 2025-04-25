@@ -24,7 +24,7 @@ import {
   RefreshCcw
 } from "lucide-react";
 import { format } from "date-fns";
-// 导入react-pdf相关库
+// Import react-pdf related libraries
 import { 
   Document, 
   Page, 
@@ -37,7 +37,7 @@ import {
 import { pdf } from '@react-pdf/renderer';
 import { saveAs } from 'file-saver';
 
-// 注册字体
+// Register fonts
 Font.register({
   family: 'Roboto',
   fonts: [
@@ -46,7 +46,7 @@ Font.register({
   ]
 });
 
-// 定义PDF样式
+// Define PDF styles
 const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
@@ -157,9 +157,9 @@ const styles = StyleSheet.create({
   }
 });
 
-// PDF文档组件
+// PDF document component
 const AISummaryPDF = ({ student, aiSummary, editableContent }) => {
-  // 处理Markdown内容
+  // Process Markdown content
   const renderMarkdownContent = () => {
     const lines = aiSummary.split('\n');
     const elements = [];
@@ -209,13 +209,13 @@ const AISummaryPDF = ({ student, aiSummary, editableContent }) => {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* 文档标题 */}
+        {/* Document title */}
         <View style={styles.header}>
           <Text style={styles.title}>AI Summary Report</Text>
           <Text style={styles.subtitle}>Generated on {format(new Date(), "MMMM d, yyyy")}</Text>
         </View>
         
-        {/* 学生信息部分 */}
+        {/* Student information section */}
         <View style={styles.infoContainer}>
           <Text style={styles.sectionTitle}>Student Information</Text>
           <View style={styles.infoTable}>
@@ -246,7 +246,7 @@ const AISummaryPDF = ({ student, aiSummary, editableContent }) => {
           </View>
         </View>
         
-        {/* AI分析结果部分 */}
+        {/* AI analysis results section */}
         <View style={styles.contentContainer}>
           <Text style={styles.sectionTitle}>AI Analysis Results</Text>
           <View style={styles.contentBox}>
@@ -254,7 +254,7 @@ const AISummaryPDF = ({ student, aiSummary, editableContent }) => {
           </View>
         </View>
         
-        {/* 可编辑内容部分 - 如果有内容才显示 */}
+        {/* Editable content section - only displayed if there is content */}
         {editableContent && editableContent.trim() !== '' && (
           <View style={styles.contentContainer}>
             <Text style={styles.sectionTitle}>Additional Notes</Text>
@@ -264,7 +264,7 @@ const AISummaryPDF = ({ student, aiSummary, editableContent }) => {
           </View>
         )}
         
-        {/* 页脚 */}
+        {/* Footer */}
         <View style={styles.footer}>
           <Text>ANSAT Pro - Confidential Document - {format(new Date(), "yyyy-MM-dd")}</Text>
         </View>
@@ -278,50 +278,69 @@ export default function AISummaryPage() {
   const params = useParams();
   const docId = params.id;
   
-  // 状态管理
+  // State management
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   
-  // AI 分析结果
+  // AI analysis results
   const [aiSummary, setAiSummary] = useState("");
   const [editableContent, setEditableContent] = useState("");
   const [generating, setGenerating] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [copied, setCopied] = useState(false);
   
-  // 从localStorage加载学生数据
+  // Load student data from localStorage
   useEffect(() => {
     const loadStudentData = () => {
       try {
         if (!docId) {
-          setError("无效的文档ID");
+          setError("Invalid document ID");
           setLoading(false);
           return;
         }
         
-        // 首先尝试从localStorage加载选中的学生
+        // First try to load from ansatpro_current_student (set by the parent page)
+        const currentStudentJson = localStorage.getItem('ansatpro_current_student');
+        
+        if (currentStudentJson) {
+          try {
+            const currentStudent = JSON.parse(currentStudentJson);
+            console.log("Found current student in localStorage:", currentStudent);
+            setStudent(currentStudent);
+            
+            // Generate mock AI results
+            generateMockAISummary(currentStudent);
+            
+            setLoading(false);
+            return;
+          } catch (e) {
+            console.error("Error parsing current student data:", e);
+          }
+        }
+        
+        // Try to load from selected student
         const selectedStudentJson = localStorage.getItem('ansatpro_selected_student');
         
         if (selectedStudentJson) {
           try {
             const selectedStudent = JSON.parse(selectedStudentJson);
             if (selectedStudent.docId === docId) {
-              console.log("从localStorage中找到匹配的学生:", selectedStudent);
+              console.log("Found matching student in localStorage:", selectedStudent);
               setStudent(selectedStudent);
               
-              // 模拟AI生成的结果
+              // Generate mock AI results
               generateMockAISummary(selectedStudent);
               
               setLoading(false);
               return;
             }
           } catch (e) {
-            console.error("解析localStorage中的学生数据出错:", e);
+            console.error("Error parsing student data from localStorage:", e);
           }
         }
         
-        // 如果找不到匹配的学生，从学生列表中查找
+        // If no matching student found, search in student list
         const studentsJson = localStorage.getItem('ansatpro_students');
         if (studentsJson) {
           try {
@@ -330,10 +349,10 @@ export default function AISummaryPage() {
               const foundStudent = students.find(s => s.docId === docId);
               
               if (foundStudent) {
-                console.log("从学生列表中找到匹配的学生:", foundStudent);
+                console.log("Found matching student in student list:", foundStudent);
                 setStudent(foundStudent);
                 
-                // 模拟AI生成的结果
+                // Generate mock AI results
                 generateMockAISummary(foundStudent);
                 
                 setLoading(false);
@@ -341,28 +360,32 @@ export default function AISummaryPage() {
               }
             }
           } catch (e) {
-            console.error("解析localStorage中的学生列表出错:", e);
+            console.error("Error parsing student list from localStorage:", e);
           }
         }
         
-        // 如果仍然找不到，使用模拟数据
-        console.log("未找到匹配的学生，使用模拟数据");
+        // If still no match, use mock data
+        console.log("No matching student found, using mock data");
         const mockStudent = {
           docId: docId,
           studentId: "S1000",
           studentName: "Unknown Student",
-          studentUniversity: "Unknown University"
+          studentUniversity: "Unknown University",
+          healthService: "General Hospital",
+          clinicArea: "General Practice",
+          startDate: "2023-01-15",
+          endDate: "2023-06-30"
         };
         
         setStudent(mockStudent);
         
-        // 模拟AI生成的结果
+        // Generate mock AI results
         generateMockAISummary(mockStudent);
         
         setLoading(false);
       } catch (error) {
         console.error("Error loading student data:", error);
-        setError(`加载学生数据时出错: ${error.message}`);
+        setError(`Error loading student data: ${error.message}`);
         setLoading(false);
       }
     };
@@ -370,9 +393,9 @@ export default function AISummaryPage() {
     loadStudentData();
   }, [docId]);
   
-  // 模拟AI生成的摘要
+  // Generate mock AI summary
   const generateMockAISummary = (student) => {
-    // 确保学生对象有所有需要的字段，没有的话添加默认值
+    // Ensure student object has all needed fields, add default values if missing
     const enrichedStudent = {
       ...student,
       healthService: student.healthService || "General Hospital",
@@ -381,7 +404,7 @@ export default function AISummaryPage() {
       endDate: student.endDate || "2023-06-30"
     };
     
-    // 保存扩展后的学生数据
+    // Save enriched student data
     setStudent(enrichedStudent);
     
     const summary = `# Summary for ${enrichedStudent.studentName}
@@ -409,12 +432,12 @@ This summary is based on ${Math.floor(Math.random() * 5) + 3} feedback reports f
     setAiSummary(summary);
   };
   
-  // 返回到搜索页面
+  // Return to student detail page
   const handleBackClick = () => {
     router.push(`/facilitator/export/${docId}/studentDetail`);
   };
   
-  // 复制AI摘要内容
+  // Copy AI summary content
   const handleCopyContent = () => {
     navigator.clipboard.writeText(aiSummary)
       .then(() => {
@@ -422,26 +445,26 @@ This summary is based on ${Math.floor(Math.random() * 5) + 3} feedback reports f
         setTimeout(() => setCopied(false), 2000);
       })
       .catch(err => {
-        console.error('无法复制内容: ', err);
+        console.error('Unable to copy content: ', err);
       });
   };
   
-  // 重新生成AI摘要
+  // Regenerate AI summary
   const handleRegenerate = async () => {
     setGenerating(true);
     
     try {
-      // 模拟AI处理时间
+      // Simulate AI processing time
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // 重新生成摘要，这里使用编辑区域的内容作为输入
+      // Regenerate summary, using content from editable area as input
       let newSummary = "";
       
       if (editableContent.trim()) {
-        // 如果用户提供了内容，基于它生成
+        // If user has provided content, generate based on it
         newSummary = `# AI Analysis of User Content\n\n${editableContent.substring(0, 100)}...\n\n## Key Points\n- Comprehensive assessment of clinical skills\n- Evidence of professional development\n- Structured feedback with actionable insights`;
       } else {
-        // 否则随机生成一个新摘要
+        // Otherwise randomly generate a new summary
         newSummary = `# Updated Summary for ${student.studentName}\n\n## Key Strengths\n- Demonstrates empathy and patient-centered care\n- Effective communication with healthcare team\n- Strong analytical skills in clinical situations\n\n## Areas for Growth\n- Further development of technical skills\n- Continued refinement of time management\n\nThis analysis includes the most recent feedback from preceptors and facilitators.`;
       }
       
@@ -453,18 +476,18 @@ This summary is based on ${Math.floor(Math.random() * 5) + 3} feedback reports f
     }
   };
   
-  // 使用react-pdf导出PDF
+  // Export PDF using react-pdf
   const handleExport = async () => {
     setExporting(true);
     
     try {
-      // 创建日期字符串
+      // Create date string
       const dateStr = format(new Date(), "yyyy-MM-dd");
       
-      // 创建文件名
+      // Create filename
       const fileName = `${student.studentName}_AI_Summary_${dateStr}.pdf`;
       
-      // 生成PDF blob
+      // Generate PDF blob
       const pdfBlob = await pdf(
         <AISummaryPDF 
           student={student} 
@@ -473,11 +496,11 @@ This summary is based on ${Math.floor(Math.random() * 5) + 3} feedback reports f
         />
       ).toBlob();
       
-      // 使用file-saver保存文件
+      // Use file-saver to save the file
       saveAs(pdfBlob, fileName);
     } catch (error) {
       console.error("Export error:", error);
-      alert(`PDF生成出错: ${error.message || '未知错误'}`);
+      alert(`PDF generation error: ${error.message || 'Unknown error'}`);
     } finally {
       setExporting(false);
     }
@@ -496,7 +519,7 @@ This summary is based on ${Math.floor(Math.random() * 5) + 3} feedback reports f
       <div className="flex h-screen items-center justify-center flex-col">
         <p className="text-lg text-red-500 mb-4">{error}</p>
         <Button variant="outline" onClick={handleBackClick}>
-          返回详情页面
+          Return to Details Page
         </Button>
       </div>
     );
@@ -504,50 +527,6 @@ This summary is based on ${Math.floor(Math.random() * 5) + 3} feedback reports f
   
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Sidebar navigation */}
-      <aside className="w-64 border-r bg-muted/40 p-6 hidden md:block">
-        <div className="mb-8">
-          <h1 className="text-xl font-bold">ANSAT Pro</h1>
-        </div>
-        <nav className="space-y-2">
-          <Link
-            href="/facilitator/dashboard"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Home className="mr-2 h-4 w-4" />
-            Home
-          </Link>
-          <Link
-            href="/facilitator/student"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Users className="mr-2 h-4 w-4" />
-            Student
-          </Link>
-          <Link
-            href="/facilitator/feedback"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <MessageSquareText className="mr-2 h-4 w-4" />
-            Feedback
-          </Link>
-          <Link
-            href="/facilitator/export"
-            className="flex items-center rounded-md bg-accent px-3 py-2 text-sm font-medium text-accent-foreground"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Link>
-          <Link
-            href="/facilitator/settings"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </Link>
-        </nav>
-      </aside>
-
       {/* Main content */}
       <main className="flex-1 p-6 overflow-auto">
         {/* Header */}
@@ -577,7 +556,7 @@ This summary is based on ${Math.floor(Math.random() * 5) + 3} feedback reports f
           </div>
         </header>
 
-        {/* 第一部分: 学生信息卡片 */}
+        {/* Part 1: Student information card */}
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-xl">Student Information</CardTitle>
@@ -651,7 +630,7 @@ This summary is based on ${Math.floor(Math.random() * 5) + 3} feedback reports f
           </CardContent>
         </Card>
         
-        {/* 第三部分: AI分析结果 */}
+        {/* Part 2: AI analysis results */}
         <Card className="mb-6">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-xl">AI Analysis Results</CardTitle>
@@ -680,7 +659,7 @@ This summary is based on ${Math.floor(Math.random() * 5) + 3} feedback reports f
           </CardContent>
         </Card>
         
-        {/* 第四部分: 可编辑区域 */}
+        {/* Part 3: Editable area */}
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-xl">Editable Content</CardTitle>
@@ -698,14 +677,13 @@ This summary is based on ${Math.floor(Math.random() * 5) + 3} feedback reports f
           </CardContent>
         </Card>
         
-        {/* 底部按钮 */}
+        {/* Bottom buttons */}
         <div className="flex justify-between items-center mb-12">
           <Button 
             variant="outline" 
             onClick={handleRegenerate} 
             disabled={generating}
             className="gap-2"
-            style={{color: '#000000', backgroundColor: '#ffffff', borderColor: '#d1d5db'}}
           >
             {generating ? (
               <>Generating...</>
@@ -722,7 +700,6 @@ This summary is based on ${Math.floor(Math.random() * 5) + 3} feedback reports f
             disabled={exporting || !aiSummary}
             className="gap-2"
             id="download-btn"
-            style={{color: '#ffffff', backgroundColor: '#3b82f6', borderColor: '#3b82f6'}}
           >
             {exporting ? (
               <>Exporting...</>
