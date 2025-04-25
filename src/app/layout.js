@@ -1,8 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NavigationProvider } from "@/context/NavigationContext";
-import SideNav from "@/components/ui/SideNav/side-nav";
 import ClientSideJWTRefresher from "@/components/ClientSideJWTRefresher"; // path to the client-only component
+import ClientSideRoleGuard from "@/components/ClientSideRoleGuard"; // ⬅️ Add this
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <NavigationProvider>{children}</NavigationProvider>
         <ClientSideJWTRefresher /> {/* ✅ Client-only logic here */}
-        {children}
+        <ClientSideRoleGuard /> {/* ✅ Add role guard globally */}
       </body>
     </html>
   );
