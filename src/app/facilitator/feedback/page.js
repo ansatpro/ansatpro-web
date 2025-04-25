@@ -35,25 +35,6 @@ import { GetAllStudentsWithDetails } from "../../../../lib/HowToConnectToFunctio
 export default function AllFeedback() {
   const router = useRouter();
 
-  // // 预设的示例反馈数据
-  // const sampleFeedbacks = [
-  //   {
-  //     id: "F89012",
-  //     studentName: "Olivia Martinez!",
-  //     studentId: "12345678",
-  //     is_marked: false,
-  //     university: "University",
-  //     healthService: "Community Clinic",
-  //     clinicArea: "Family Medicine",
-  //     date: "2023-07-10",
-  //     content:
-  //       "Olivia demonstrated excellent patient care skills and empathy. Her clinical notes were thorough and well-organized. Need to work on time management during busy clinic hours.",
-  //     preceptor: "Dr. Johnson",
-  //     startDate: "2023-07-10",
-  //     endDate: "2023-07-12",
-  //   },
-  // ];
-
   const [feedbacks, setFeedbacks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filteredResults, setFilteredResults] = useState([]);
@@ -292,7 +273,7 @@ export default function AllFeedback() {
     const results = filteredResults.filter(
       (feedback) =>
         feedback.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        feedback.content.toLowerCase().includes(searchTerm.toLowerCase())
+        feedback.studentId.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     setFilteredResults(results);
@@ -323,249 +304,207 @@ export default function AllFeedback() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Sidebar navigation */}
-      <aside className="w-64 border-r bg-muted/40 p-6 hidden md:block">
-        <div className="mb-8">
-          <h1 className="text-xl font-bold">ANSAT Pro</h1>
-        </div>
-        <nav className="space-y-2">
-          <Link
-            href="/facilitator/dashboard"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Home className="mr-2 h-4 w-4" />
-            Home
-          </Link>
-          <Link
-            href="/facilitator/student"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Users className="mr-2 h-4 w-4" />
-            Student
-          </Link>
-          <Link
-            href="/facilitator/feedback"
-            className="flex items-center rounded-md bg-accent px-3 py-2 text-sm font-medium text-accent-foreground"
-          >
-            <MessageSquareText className="mr-2 h-4 w-4" />
-            Feedback
-          </Link>
-          <Link
-            href="/facilitator/report"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Report
-          </Link>
-          <Link
-            href="/facilitator/settings"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </Link>
-        </nav>
-      </aside>
+    <div className="container mx-auto px-4 py-4">
+      {/* Header */}
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold">Feedback Overview</h1>
+      </header>
 
-      {/* Main content */}
-      <main className="flex-1 p-6">
-        {/* Header */}
-        <header className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Feedback List</h1>
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm">
-              <Bell className="mr-2 h-4 w-4" />
-              Notifications
-            </Button>
-            <Button variant="outline" size="sm">
-              Log out
-            </Button>
-        </div>
-    </header>
+      {/* Search and filters */}
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            {/* Search row */}
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <Input
+                  type="search"
+                  placeholder="Search by student name or ID"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full"
+                  onKeyDown={(e) => e.key === "Enter" && searchFeedback()}
+                />
+              </div>
+              <Button 
+                onClick={searchFeedback} 
+                variant="default"
+                className="flex items-center gap-1"
+              >
+                <Search className="h-4 w-4" />
+                Search
+              </Button>
+            </div>
 
-        {/* Search and filters */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              {/* Search */}
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    type="search"
-                    placeholder="Search for student name or feedback content"
-                    className="pl-10 pr-10"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && searchFeedback()}
-                  />
-                  {searchTerm && (
-                    <button
-                      className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                      onClick={() => setSearchTerm("")}
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-                <Button onClick={searchFeedback} variant="default">
-                  Search
-                </Button>
+            {/* Filters */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+              <div>
+                <label className="mb-2 block text-sm font-medium">
+                  University
+                </label>
+                <Select
+                  value={universityFilter}
+                  onValueChange={handleUniversityChange}
+                >
+                  <SelectTrigger className="w-full bg-white">
+                    <SelectValue placeholder="All Universities" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    <SelectItem value="all">All Universities</SelectItem>
+                    {universities.map((uni) => (
+                      <SelectItem key={uni} value={uni}>
+                        {uni}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium">
+                  Health Service
+                </label>
+                <Select
+                  value={healthServiceFilter}
+                  onValueChange={handleHealthServiceChange}
+                >
+                  <SelectTrigger className="w-full bg-white">
+                    <SelectValue placeholder="All Health Services" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    <SelectItem value="all">All Health Services</SelectItem>
+                    {healthServices.map((service) => (
+                      <SelectItem key={service} value={service}>
+                        {service}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+        
+        <div>
+                <label className="mb-2 block text-sm font-medium">
+                  Clinic Area
+                </label>
+                <Select
+                  value={clinicAreaFilter}
+                  onValueChange={handleClinicAreaChange}
+                >
+                  <SelectTrigger className="w-full bg-white">
+                    <SelectValue placeholder="All Clinic Areas" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    <SelectItem value="all">All Clinic Areas</SelectItem>
+                    {clinicAreas.map((area) => (
+                      <SelectItem key={area} value={area}>
+                        {area}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+            <div>
+                <label className="mb-2 block text-sm font-medium">
+                  Date Range
+                </label>
+                <Select value={dateFilter} onValueChange={handleDateFilterChange}>
+                  <SelectTrigger className="w-full bg-white">
+                    <SelectValue placeholder="All Dates" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    <SelectItem value="all">All Dates</SelectItem>
+                    <SelectItem value="newest">Newest First</SelectItem>
+                    <SelectItem value="oldest">Oldest First</SelectItem>
+                    <SelectItem value="last7">Last 7 Days</SelectItem>
+                    <SelectItem value="last30">Last 30 Days</SelectItem>
+                    <SelectItem value="last90">Last 90 Days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Clear Filters Button - Top right */}
+              <div className="col-span-full flex justify-end">
                 <Button
                   onClick={clearFilters}
                   variant="outline"
-                  className="ml-2"
+                  className="ml-auto flex items-center gap-1"
                 >
+                <X className="h-4 w-4" />
                   Clear Filters
                 </Button>
               </div>
-
-              {/* Filters */}
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                <div>
-                  <label className="mb-2 block text-sm font-medium">
-                    University
-                  </label>
-                  <Select
-                    value={universityFilter}
-                    onValueChange={handleUniversityChange}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="All Universities" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Universities</SelectItem>
-                      {universities.map((uni) => (
-                        <SelectItem key={uni} value={uni}>
-                          {uni}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-            <div>
-                  <label className="mb-2 block text-sm font-medium">
-                    Health Service
-                  </label>
-                  <Select
-                    value={healthServiceFilter}
-                    onValueChange={handleHealthServiceChange}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="All Health Services" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Health Services</SelectItem>
-                      {healthServices.map((service) => (
-                        <SelectItem key={service} value={service}>
-                          {service}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
             </div>
+          </div>
+        </CardContent>
+      </Card>
 
-            <div>
-                  <label className="mb-2 block text-sm font-medium">
-                    Clinic Area
-                  </label>
-                  <Select
-                    value={clinicAreaFilter}
-                    onValueChange={handleClinicAreaChange}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="All Clinic Areas" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Clinic Areas</SelectItem>
-                      {clinicAreas.map((area) => (
-                        <SelectItem key={area} value={area}>
-                          {area}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-            </div>
-
-            <div>
-                  <label className="mb-2 block text-sm font-medium">
-                    Time Period
-                  </label>
-                  <Select
-                    value={dateFilter}
-                    onValueChange={handleDateFilterChange}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="All Time" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Time</SelectItem>
-                      <SelectItem value="week">Last Week</SelectItem>
-                      <SelectItem value="month">Last Month</SelectItem>
-                      <SelectItem value="sixMonths">Last 6 Months</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+      {/* Feedback cards list */}
+      {isLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <div className="loader"></div>
+        </div>
+      ) : filteredResults.length === 0 ? (
+        <Card className="w-full mb-4">
+          <CardContent className="p-6">
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium mb-2">No Feedback Found</h3>
             </div>
           </CardContent>
         </Card>
-
-        {/* Feedback cards - ensuring maximum 3 per row */}
-        {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <p className="text-lg text-muted-foreground">Loading...</p>
-          </div>
-        ) : filteredResults.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredResults.map((feedback) => (
-              <Card
-                key={feedback.id}
-                className="flex flex-col h-full cursor-pointer transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1 hover:border-primary/20 group"
-                onClick={() => handleFeedbackClick(feedback)}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg group-hover:text-primary transition-colors duration-300">
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredResults.map((feedback) => (
+            <Card
+              key={feedback.id}
+              className="w-full mb-4 hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => handleFeedbackClick(feedback)}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+            <div>
+                    <CardTitle className="text-lg font-bold">
                       {feedback.studentName}
                     </CardTitle>
-                    <Badge
-                      variant="outline"
-                      className="group-hover:bg-primary/10 transition-colors duration-300"
-                    >
-                      {feedback.is_marked ? "Marked" : "Unmarked"}
-                    </Badge>
+                    <p className="text-sm text-gray-500">
+                      ID: {feedback.studentId}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <Badge
+                    variant={feedback.is_marked ? "success" : "pending"}
+                    className={feedback.is_marked ? "bg-green-500" : "bg-amber-500"}
+                  >
+                    {feedback.is_marked ? "Reviewed" : "Pending"}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="pb-2">
+                <div className="mb-2">
+                  <p className="text-sm">
+                    <span className="font-medium">Date:</span>{" "}
                     {formatDate(feedback.date)}
                   </p>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <p className="text-sm text-muted-foreground line-clamp-4">
-                    {feedback.content}
+                  <p className="text-sm">
+                    <span className="font-medium">Preceptor:</span>{" "}
+                    {feedback.preceptor}
                   </p>
-                </CardContent>
-                <CardFooter className="border-t pt-3 text-xs text-muted-foreground group-hover:border-primary/20 transition-colors duration-300">
-                  Preceptor: {feedback.preceptor}
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="flex justify-center items-center py-20">
-            <div className="text-center">
-              <p className="text-muted-foreground mb-4">
-                No feedback found matching your filters.
-              </p>
-              <Button variant="outline" onClick={clearFilters}>
-                Clear all filters
-              </Button>
+                </div>
+                <p className="text-sm line-clamp-3">{feedback.content}</p>
+              </CardContent>
+              <CardFooter>
+                <div className="flex justify-between items-center w-full mt-2">
+                  <div className="text-xs text-gray-500">
+                    {feedback.university}
+                  </div>
+                  <Button size="sm" variant="outline" className="bg-white">
+                    View Details
+                  </Button>
             </div>
-          </div>
-        )}
-    </main>
-    </div>
+              </CardFooter>
+            </Card>
+          ))}
+            </div>
+      )}
+            </div>
   );
 }

@@ -14,8 +14,19 @@ import {
   Users, 
   Download, 
   Bell, 
-  LogOut
+  LogOut, 
+  FileOutput, 
+  Sparkles
 } from "lucide-react";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 export default function StudentDetail() {
   const router = useRouter();
@@ -26,6 +37,13 @@ export default function StudentDetail() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [feedbackData, setFeedbackData] = useState(null);
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [exportType, setExportType] = useState('');
+  const [exportLoading, setExportLoading] = useState({
+    'aiSummary': false,
+    'Preceptor Feedback': false,
+    'Facilitator Review': false
+  });
 
   // 预设的反馈数据（用作后备数据）
   const sampleFeedbacks = [
@@ -188,6 +206,56 @@ export default function StudentDetail() {
     }
   };
 
+  // New functions for export functionality
+  const handleGenerateAISummary = () => {
+    setExportLoading(prev => ({ ...prev, aiSummary: true }));
+    
+    // Simulate AI summary generation
+    setTimeout(() => {
+      // Create a temporary text file with AI summary
+      const summaryText = `AI Summary for ${selectedStudent.name}
+Student ID: ${selectedStudent.studentId}
+University: ${selectedStudent.university}
+Health Service: ${selectedStudent.healthService}
+Clinic Area: ${selectedStudent.clinicArea}
+
+This is a simulated AI summary of the student's feedback. In a production environment, 
+this would contain an actual AI-generated analysis of the student's performance based on 
+their feedback data and assessments.
+
+Generated on: ${new Date().toLocaleDateString()}`;
+      
+      // Create a blob and download link
+      const blob = new Blob([summaryText], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${selectedStudent.name.replace(/\s+/g, '_')}_AI_Summary.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      setExportLoading(prev => ({ ...prev, aiSummary: false }));
+    }, 2000);
+  };
+
+  const handleExport = (type) => {
+    setExportType(type);
+    setShowExportDialog(true);
+  };
+
+  const confirmExport = () => {
+    setExportLoading(prev => ({ ...prev, [exportType]: true }));
+    setShowExportDialog(false);
+    
+    // Simulate PDF generation and download
+    setTimeout(() => {
+      alert(`${exportType} for ${selectedStudent.name} has been generated. In a production environment, this would download a PDF file.`);
+      setExportLoading(prev => ({ ...prev, [exportType]: false }));
+    }, 2000);
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -303,6 +371,67 @@ export default function StudentDetail() {
             </CardContent>
           </Card>
           
+          {/* Export Options Card */}
+          <Card className="max-w-3xl">
+            <CardHeader>
+              <CardTitle className="text-xl">Export Options</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <p className="text-muted-foreground">Choose an export option for {selectedStudent.name}'s data:</p>
+              
+              <div className="flex flex-col md:flex-row gap-4">
+                {/* AI Summary Button - Different color */}
+                <Button 
+                  variant="default" 
+                  className="bg-purple-600 hover:bg-purple-700"
+                  onClick={handleGenerateAISummary}
+                  disabled={exportLoading.aiSummary}
+                >
+                  {exportLoading.aiSummary ? (
+                    "Generating..."
+                  ) : (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Generate AI Summary
+                    </>
+                  )}
+                </Button>
+                
+                {/* Export Preceptor Feedback Button */}
+                <Button 
+                  variant="outline"
+                  onClick={() => handleExport("Preceptor Feedback")}
+                  disabled={exportLoading["Preceptor Feedback"]}
+                >
+                  {exportLoading["Preceptor Feedback"] ? (
+                    "Exporting..."
+                  ) : (
+                    <>
+                      <FileOutput className="mr-2 h-4 w-4" />
+                      Export All Preceptor Feedback
+                    </>
+                  )}
+                </Button>
+                
+                {/* Export Facilitator Review Button */}
+                <Button 
+                  variant="outline"
+                  onClick={() => handleExport("Facilitator Review")}
+                  disabled={exportLoading["Facilitator Review"]}
+                >
+                  {exportLoading["Facilitator Review"] ? (
+                    "Exporting..."
+                  ) : (
+                    <>
+                      <Download className="mr-2 h-4 w-4" />
+                      Export All Facilitator Review
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
           {/* Confirmation */}
           <div className="pt-6 border-t">
             <div className="flex items-center space-x-2 mb-6">
@@ -327,6 +456,49 @@ export default function StudentDetail() {
           </div>
         </div>
       </main>
+      
+      {/* Export confirmation dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Export {exportType}</DialogTitle>
+            <DialogDescription>
+              You are about to export {exportType} for {selectedStudent?.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="mb-2">Export Details:</p>
+            <ul className="space-y-1 mb-4">
+              <li className="flex items-start">
+                <span className="font-medium mr-2">Student:</span> 
+                <span>{selectedStudent?.name}</span>
+              </li>
+              <li className="flex items-start">
+                <span className="font-medium mr-2">Export Type:</span> 
+                <span>{exportType}</span>
+              </li>
+              <li className="flex items-start">
+                <span className="font-medium mr-2">Format:</span> 
+                <span>PDF Document</span>
+              </li>
+            </ul>
+            <p className="text-sm text-muted-foreground">
+              This will generate and download a PDF report with all {exportType.toLowerCase()} data.
+            </p>
+          </div>
+          <DialogFooter className="sm:justify-between">
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button 
+              onClick={confirmExport}
+              disabled={exportLoading[exportType]}
+            >
+              {exportLoading[exportType] ? "Exporting..." : "Download PDF"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

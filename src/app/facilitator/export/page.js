@@ -6,12 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { 
-  Home, 
-  MessageSquareText, 
-  Settings, 
-  Users, 
-  Download, 
-  Bell, 
   Search,
   X,
   LogOut
@@ -37,7 +31,6 @@ export default function ExportPage() {
       studentId: "S1001", 
       studentName: "Olivia Martinez", 
       studentUniversity: "University of Melbourne",
-      
     },
     { 
       docId: "doc124", 
@@ -197,137 +190,93 @@ export default function ExportPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Sidebar navigation */}
-      <aside className="w-64 border-r bg-muted/40 p-6 hidden md:block">
-        <div className="mb-8">
-          <h1 className="text-xl font-bold">ANSAT Pro</h1>
-        </div>
-        <nav className="space-y-2">
-          <Link
-            href="/facilitator/dashboard"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Home className="mr-2 h-4 w-4" />
-            Home
-          </Link>
-          <Link
-            href="/facilitator/student"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Users className="mr-2 h-4 w-4" />
-            Student
-          </Link>
-          <Link
-            href="/facilitator/feedback"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <MessageSquareText className="mr-2 h-4 w-4" />
-            Feedback
-          </Link>
-          <Link
-            href="/facilitator/report"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Report
-          </Link>
-          <Link
-            href="/facilitator/settings"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </Link>
-        </nav>
-      </aside>
-
-      {/* Main content */}
-      <main className="flex-1 p-6">
-        {/* Header */}
-        <header className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Student Search</h1>
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm">
-              <Bell className="mr-2 h-4 w-4" />
-              <span className="sr-only md:not-sr-only md:inline-block">Notifications</span>
-            </Button>
-            <Button variant="outline" size="sm">
-              <LogOut className="mr-2 h-4 w-4" />
-              <span className="sr-only md:not-sr-only md:inline-block">Log out</span>
-            </Button>
-          </div>
-        </header>
-
-        {/* Search box */}
-        <Card className="mb-6">
-          <CardHeader>
-            <h2 className="text-xl font-semibold">Search Student by ID or Name</h2>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="relative" ref={searchRef}>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    type="search"
-                    placeholder="Enter student ID or name"
-                    className="pl-10 pr-10"
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                  />
-                  {searchTerm && (
-                    <button 
-                      className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                      onClick={clearSearch}
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-                
-                {/* Dropdown results */}
-                {showDropdown && searchResults.length > 0 && (
-                  <div className="absolute z-10 mt-1 w-full bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
-                    <ul className="py-1">
-                      {searchResults.map((student) => (
-                        <li 
-                          key={student.docId}
-                          className="px-4 py-2 hover:bg-accent cursor-pointer"
-                          onClick={() => selectStudent(student)}
-                        >
-                          <div className="font-medium">{student.studentName}</div>
-                          <div className="text-xs text-muted-foreground">
-                            ID: {student.studentId} | {student.studentUniversity}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+    <div className="container mx-auto px-4 py-4">
+      <h1 className="text-2xl font-bold mb-6">Export Data</h1>
+      
+      <Card className="mb-6">
+        <CardHeader>
+          <h2 className="text-xl font-semibold">Search for a Student</h2>
+          <p className="text-sm text-muted-foreground">
+            To generate reports, start by searching for a student by name or ID
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="relative" ref={searchRef}>
+            <div className="flex gap-2 mb-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search by student name or ID"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  className="pl-10 pr-10"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={clearSearch}
+                    className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
                 )}
               </div>
-              
-              {/* Selected student info */}
-              {selectedStudent && (
-                <div className="mt-6 p-4 border rounded-md bg-muted/20">
-                  <h3 className="text-lg font-medium mb-2">Selected Student</h3>
-                  <p><span className="font-medium">ID:</span> {selectedStudent.studentId}</p>
-                  <p><span className="font-medium">Name:</span> {selectedStudent.studentName}</p>
-                  <p><span className="font-medium">University:</span> {selectedStudent.studentUniversity}</p>
-                  <p><span className="font-medium">Document ID:</span> {selectedStudent.docId}</p>
+            </div>
+            
+            {showDropdown && searchResults.length > 0 && (
+              <div className="absolute w-full bg-white mt-1 rounded-md border shadow-lg z-10 max-h-80 overflow-y-auto">
+                {searchResults.map((student) => (
+                  <div
+                    key={student.docId}
+                    className="p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0"
+                    onClick={() => selectStudent(student)}
+                  >
+                    <div className="font-medium">{student.studentName}</div>
+                    <div className="text-sm text-gray-500 flex justify-between">
+                      <span>ID: {student.studentId}</span>
+                      <span>{student.studentUniversity}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {showDropdown && searchTerm && searchResults.length === 0 && (
+              <div className="absolute w-full bg-white mt-1 rounded-md border shadow-lg z-10">
+                <div className="p-3 text-center text-gray-500">
+                  No students found matching "{searchTerm}"
                 </div>
-              )}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      
+      {selectedStudent && (
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-lg font-medium">{selectedStudent.studentName}</h3>
+                <p className="text-sm text-gray-500">ID: {selectedStudent.studentId}</p>
+                <p className="text-sm text-gray-500">{selectedStudent.studentUniversity}</p>
+              </div>
+              <Button onClick={() => router.push(`/facilitator/export/${selectedStudent.docId}/studentDetail`)}>
+                View Details
+              </Button>
             </div>
           </CardContent>
         </Card>
-        
-        {/* Loading state */}
-        {isLoading && (
-          <div className="flex justify-center items-center py-20">
-            <p className="text-lg text-muted-foreground">Loading student data...</p>
-          </div>
-        )}
-      </main>
+      )}
+      
+      {!isLoading && !searchTerm && (
+        <div className="bg-gray-50 rounded-lg p-8 text-center">
+          <h3 className="text-lg font-medium mb-2">Ready to Generate Reports</h3>
+          <p className="text-gray-500 mb-4">
+            Search for a student above to view their details and generate reports
+          </p>
+        </div>
+      )}
     </div>
   );
 }

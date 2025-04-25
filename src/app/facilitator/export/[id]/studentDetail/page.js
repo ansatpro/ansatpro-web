@@ -6,19 +6,15 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
-  Home, 
-  MessageSquareText, 
-  Settings, 
-  Users, 
-  Download, 
-  Bell, 
-  LogOut,
   ArrowLeft,
   FileText,
   Calendar,
   User,
   Sparkles,
-  FileOutput
+  FileOutput,
+  Download,
+  Bell,
+  LogOut
 } from "lucide-react";
 import { 
   Dialog,
@@ -198,27 +194,27 @@ export default function StudentDetailPage() {
       
       // 创建一个Blob对象
       const blob = new Blob([`Content - ${exportType} for ${student.studentName}`], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
       
-      // 创建下载链接并触发点击
+      // 创建下载链接
+      const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
+      a.style.display = 'none';
       a.href = url;
       a.download = fileName;
       document.body.appendChild(a);
       a.click();
       
       // 清理
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 0);
+      window.URL.revokeObjectURL(url);
+      a.remove();
       
-      toast.success(`${exportType} has been downloaded.`);
+      toast.success(`${exportType} has been exported successfully.`);
       
+      // 关闭对话框
       setShowExportDialog(false);
     } catch (error) {
       console.error("Export error:", error);
-      toast.error("There was an error exporting the report. Please try again.");
+      toast.error(`There was an error exporting the ${exportType}. Please try again.`);
     } finally {
       setExportLoading(prev => ({ ...prev, [exportType]: false }));
     }
@@ -226,201 +222,152 @@ export default function StudentDetailPage() {
   
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <p className="text-lg">Loading student data...</p>
+      <div className="flex justify-center items-center h-full">
+        <p className="text-lg text-muted-foreground">加载中...</p>
       </div>
     );
   }
   
   if (error) {
     return (
-      <div className="flex h-screen items-center justify-center flex-col">
-        <p className="text-lg text-red-500 mb-4">{error}</p>
-        <Button variant="outline" onClick={handleBackClick}>
-          返回搜索页面
-        </Button>
+      <div className="flex flex-col justify-center items-center h-full gap-4">
+        <p className="text-lg text-red-500">{error}</p>
+        <Button onClick={handleBackClick} variant="outline">返回搜索</Button>
       </div>
     );
   }
   
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Sidebar navigation */}
-      <aside className="w-64 border-r bg-muted/40 p-6 hidden md:block">
-        <div className="mb-8">
-          <h1 className="text-xl font-bold">ANSAT Pro</h1>
+    <div>
+      {/* Header */}
+      <header className="mb-8 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={handleBackClick}
+            className="h-9 w-9"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+          </Button>
+          <h1 className="text-3xl font-bold">Student Details</h1>
         </div>
-        <nav className="space-y-2">
-          <Link
-            href="/facilitator/dashboard"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Home className="mr-2 h-4 w-4" />
-            Home
-          </Link>
-          <Link
-            href="/facilitator/student"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Users className="mr-2 h-4 w-4" />
-            Student
-          </Link>
-          <Link
-            href="/facilitator/feedback"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <MessageSquareText className="mr-2 h-4 w-4" />
-            Feedback
-          </Link>
-          <Link
-            href="/facilitator/export"
-            className="flex items-center rounded-md bg-accent px-3 py-2 text-sm font-medium text-accent-foreground"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Link>
-          <Link
-            href="/facilitator/settings"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </Link>
-        </nav>
-      </aside>
-
-      {/* Main content */}
-      <main className="flex-1 p-6">
-        {/* Header */}
-        <header className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={handleBackClick}
-              className="h-9 w-9"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="sr-only">Back</span>
-            </Button>
-            <h1 className="text-3xl font-bold">Student Details</h1>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm">
-              <Bell className="mr-2 h-4 w-4" />
-              <span className="sr-only md:not-sr-only md:inline-block">Notifications</span>
-            </Button>
-            <Button variant="outline" size="sm">
-              <LogOut className="mr-2 h-4 w-4" />
-              <span className="sr-only md:not-sr-only md:inline-block">Log out</span>
-            </Button>
-          </div>
-        </header>
-
-        {/* Student info card */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="text-xl">Student Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center gap-3">
-                <User className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Student ID</p>
-                  <p className="font-medium">{student.studentId}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <User className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Student Name</p>
-                  <p className="font-medium">{student.studentName}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <Calendar className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">University</p>
-                  <p className="font-medium">{student.studentUniversity}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <FileText className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Document ID</p>
-                  <p className="font-medium">{student.docId}</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
         
-        {/* Export Actions Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">Export Options</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <p className="text-muted-foreground">Choose an export option for {student.studentName}'s reports:</p>
-            
-            <div className="flex flex-col md:flex-row gap-4">
-              {/* AI Summary Button - Different color */}
-              <Button 
-                variant="default" 
-                className="bg-purple-600 hover:bg-purple-700"
-                onClick={handleGenerateAISummary}
-                disabled={exportLoading.aiSummary}
-              >
-                {exportLoading.aiSummary ? (
-                  "Generating..."
-                ) : (
-                  <>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Generate AI Summary
-                  </>
-                )}
-              </Button>
-              
-              {/* Export Preceptor Feedback Button */}
-              <Button 
-                variant="outline"
-                onClick={() => handleExport("Preceptor Feedback")}
-                disabled={exportLoading["Preceptor Feedback"]}
-              >
-                {exportLoading["Preceptor Feedback"] ? (
-                  "Exporting..."
-                ) : (
-                  <>
-                    <FileOutput className="mr-2 h-4 w-4" />
-                    Export All Preceptor Feedback
-                  </>
-                )}
-              </Button>
-              
-              {/* Export Facilitator Review Button */}
-              <Button 
-                variant="outline"
-                onClick={() => handleExport("Facilitator Review")}
-                disabled={exportLoading["Facilitator Review"]}
-              >
-                {exportLoading["Facilitator Review"] ? (
-                  "Exporting..."
-                ) : (
-                  <>
-                    <Download className="mr-2 h-4 w-4" />
-                    Export All Facilitator Review
-                  </>
-                )}
-              </Button>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="sm">
+            <Bell className="mr-2 h-4 w-4" />
+            <span className="sr-only md:not-sr-only md:inline-block">Notifications</span>
+          </Button>
+          <Button variant="outline" size="sm">
+            <LogOut className="mr-2 h-4 w-4" />
+            <span className="sr-only md:not-sr-only md:inline-block">Log out</span>
+          </Button>
+        </div>
+      </header>
+
+      {/* Student info card */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-xl">Student Information</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center gap-3">
+              <User className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Student ID</p>
+                <p className="font-medium">{student.studentId}</p>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      </main>
+            
+            <div className="flex items-center gap-3">
+              <User className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Student Name</p>
+                <p className="font-medium">{student.studentName}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">University</p>
+                <p className="font-medium">{student.studentUniversity}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <FileText className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Document ID</p>
+                <p className="font-medium">{student.docId}</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Export Actions Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Export Options</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <p className="text-muted-foreground">Choose an export option for {student.studentName}'s reports:</p>
+          
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* AI Summary Button - Different color */}
+            <Button 
+              variant="default" 
+              className="bg-purple-600 hover:bg-purple-700"
+              onClick={handleGenerateAISummary}
+              disabled={exportLoading.aiSummary}
+            >
+              {exportLoading.aiSummary ? (
+                "Generating..."
+              ) : (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Generate AI Summary
+                </>
+              )}
+            </Button>
+            
+            {/* Export Preceptor Feedback Button */}
+            <Button 
+              variant="outline"
+              onClick={() => handleExport("Preceptor Feedback")}
+              disabled={exportLoading["Preceptor Feedback"]}
+            >
+              {exportLoading["Preceptor Feedback"] ? (
+                "Exporting..."
+              ) : (
+                <>
+                  <FileOutput className="mr-2 h-4 w-4" />
+                  Export All Preceptor Feedback
+                </>
+              )}
+            </Button>
+            
+            {/* Export Facilitator Review Button */}
+            <Button 
+              variant="outline"
+              onClick={() => handleExport("Facilitator Review")}
+              disabled={exportLoading["Facilitator Review"]}
+            >
+              {exportLoading["Facilitator Review"] ? (
+                "Exporting..."
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" />
+                  Export All Facilitator Review
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
       
       {/* Export confirmation dialog */}
       <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
@@ -458,16 +405,8 @@ export default function StudentDetailPage() {
             <Button 
               onClick={confirmExport}
               disabled={exportLoading[exportType]}
-              className="gap-2"
             >
-              {exportLoading[exportType] ? (
-                "Processing..."
-              ) : (
-                <>
-                  <Download className="h-4 w-4" />
-                  Download
-                </>
-              )}
+              {exportLoading[exportType] ? "Exporting..." : "Download PDF"}
             </Button>
           </DialogFooter>
         </DialogContent>

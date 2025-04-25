@@ -1,7 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NavigationProvider } from "@/context/NavigationContext";
-import SideNav from "@/components/ui/SideNav/side-nav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,9 +22,8 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <NavigationProvider>
-          <SideNav />
+          {children}
         </NavigationProvider>
-        {children}
       </body>
     </html>
   );
