@@ -142,12 +142,12 @@ export default function PreceptorAiFeedbackPage() {
         <LoadingScreen />
       ) : (
         <PreceptorLayout>
-          <main className="p-8 font-['Roboto']">
-            <div className="max-w-3xl mx-auto">
-              {/* 顶部说明 */}
-              <div className="mb-6 text-center">
-                <h1 className="text-2xl font-bold mb-2">Confirm ANSAT Items</h1>
-                <p className="text-sm text-gray-600 italic">
+          <div className="flex flex-col">
+            {/* 固定的标题区域 */}
+            <div className="px-8 py-6">
+              <div className="max-w-3xl mx-auto">
+                <h1 className="text-2xl font-bold mb-2 text-center">Confirm ANSAT Items</h1>
+                <p className="text-sm text-gray-600 italic text-center">
                   {matchedIds.length > 0 ? (
                     <>
                       Based on your feedback, the following ANSAT items are relevant:{" "}
@@ -163,57 +163,65 @@ export default function PreceptorAiFeedbackPage() {
                   )}
                 </p>
               </div>
+            </div>
 
-              {/* 滚动容器区域 */}
-              <div className="max-h-[400px] overflow-y-auto pr-1 space-y-2 border-t pt-4 mb-6">
-                {assessmentItems.map((item) => (
-                  <label
-                    key={item.item_id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between bg-white border rounded-md p-3 shadow-sm hover:bg-gray-50 transition"
-                  >
-                    <div className="flex items-start space-x-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.includes(item.item_id)}
-                        onChange={() => toggleSelection(item.item_id)}
-                        className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                      />
-                      <div>
-                        <span className="block font-medium text-gray-900">
-                          {item.item_id}
-                        </span>
-                        <span className="text-sm text-gray-600">
-                          {item.description}
-                        </span>
-                      </div>
-                    </div>
+            {/* 可滚动的内容区域 */}
+            <div className="px-8 pb-4">
+              <div className="max-w-3xl mx-auto">
+                <div className="h-[45vh] overflow-y-auto border rounded-lg bg-gray-50">
+                  <div className="p-4 space-y-2">
+                    {assessmentItems.map((item) => (
+                      <label
+                        key={item.item_id}
+                        className="flex flex-col sm:flex-row sm:items-center justify-between bg-white border rounded-md p-2.5 shadow-sm hover:bg-gray-50 transition"
+                      >
+                        <div className="flex items-start space-x-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(item.item_id)}
+                            onChange={() => toggleSelection(item.item_id)}
+                            className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                          />
+                          <div>
+                            <span className="block font-medium text-gray-900">
+                              {item.item_id}
+                            </span>
+                            <span className="text-sm text-gray-600">
+                              {item.description}
+                            </span>
+                          </div>
+                        </div>
 
-                    {selectedIds.includes(item.item_id) && (
-                      <div className="mt-2 sm:mt-0 flex items-center space-x-2">
-                        <label htmlFor={`positive-${item.item_id}`} className="text-sm text-gray-700">
-                          Positive?
-                        </label>
-                        <input
-                          id={`positive-${item.item_id}`}
-                          type="checkbox"
-                          checked={itemPositivity[item.item_id] ?? true}
-                          onChange={(e) => {
-                            const value = e.target.checked;
-                            setItemPositivity((prev) => ({
-                              ...prev,
-                              [item.item_id]: value,
-                            }));
-                          }}
-                          className="h-4 w-4 text-green-600 border-gray-300 rounded"
-                        />
-                      </div>
-                    )}
-                  </label>
-                ))}
+                        {selectedIds.includes(item.item_id) && (
+                          <div className="mt-2 sm:mt-0 flex items-center space-x-2">
+                            <label htmlFor={`positive-${item.item_id}`} className="text-sm text-gray-700">
+                              Positive?
+                            </label>
+                            <input
+                              id={`positive-${item.item_id}`}
+                              type="checkbox"
+                              checked={itemPositivity[item.item_id] ?? true}
+                              onChange={(e) => {
+                                const value = e.target.checked;
+                                setItemPositivity((prev) => ({
+                                  ...prev,
+                                  [item.item_id]: value,
+                                }));
+                              }}
+                              className="h-4 w-4 text-green-600 border-gray-300 rounded"
+                            />
+                          </div>
+                        )}
+                      </label>
+                    ))}
+                  </div>
+                </div>
               </div>
+            </div>
 
-              {/* 提交按钮 */}
-              <div className="mt-6 flex justify-center">
+            {/* 固定的底部按钮 */}
+            <div className="px-8 py-4">
+              <div className="max-w-3xl mx-auto flex justify-center">
                 <Button
                   onClick={handleSubmit}
                   className="px-8 py-3 bg-[#3A6784] hover:bg-[#2d5268] text-white font-medium rounded-lg shadow transition-colors"
@@ -222,10 +230,9 @@ export default function PreceptorAiFeedbackPage() {
                 </Button>
               </div>
             </div>
-          </main>
+          </div>
         </PreceptorLayout>
       )}
     </>
-
   );
 }

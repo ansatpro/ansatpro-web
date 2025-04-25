@@ -27,31 +27,38 @@ export default function PreceptorFeedbackForm() {
     const [discussionDate, setDiscussionDate] = useState(null);
     const [status, setStatus] = useState(null);
     const [calendarOpen, setCalendarOpen] = useState(false); // ✅ 控制弹窗收起
+    const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
-        const loadUser = async () => {
-            try {
-                const currentUser = await account.get();
-                const jwt = localStorage.getItem("jwt");
-                setUser(currentUser);
-                setJwt(jwt);
+        setIsClient(true);
+    }, []);
 
-                const storedStudent = localStorage.getItem('selectedStudent');
-                if (storedStudent) {
-                    const parsedStudent = JSON.parse(storedStudent);
-                    if (!parsedStudent.student_id) {
-                        setStatus('❌ Invalid student data. Please go back and select a student again.');
-                        return;
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const loadUser = async () => {
+                try {
+                    const currentUser = await account.get();
+                    const jwt = localStorage.getItem("jwt");
+                    setUser(currentUser);
+                    setJwt(jwt);
+
+                    const storedStudent = localStorage.getItem('selectedStudent');
+                    if (storedStudent) {
+                        const parsedStudent = JSON.parse(storedStudent);
+                        if (!parsedStudent.student_id) {
+                            setStatus('❌ Invalid student data. Please go back and select a student again.');
+                            return;
+                        }
+                        setSelectedStudent(parsedStudent);
+                    } else {
+                        setStatus('❌ No student selected. Please go back and select a student.');
                     }
-                    setSelectedStudent(parsedStudent);
-                } else {
-                    setStatus('❌ No student selected. Please go back and select a student.');
+                } catch (err) {
+                    setStatus('❌ Authentication error. Please try again.');
                 }
-            } catch (err) {
-                setStatus('❌ Authentication error. Please try again.');
-            }
-        };
-        loadUser();
+            };
+            loadUser();
+        }
     }, []);
 
     const handleSubmit = async (e) => {
@@ -86,6 +93,11 @@ export default function PreceptorFeedbackForm() {
             console.error(err);
             setStatus('❌ Submission failed.');
         }
+    };
+
+    const getWordCount = () => {
+        if (!content) return 0;
+        return content.trim().split(/\s+/).filter(Boolean).length;
     };
 
     return (
@@ -128,9 +140,11 @@ export default function PreceptorFeedbackForm() {
                                 placeholder="Input text"
                                 className="min-h-[200px] font-['Roboto']"
                             />
-                            <div className="text-sm text-gray-500 mt-2 font-['Roboto']">
-                                Word count: {content.trim().split(/\s+/).filter(Boolean).length}
-                            </div>
+                            {isClient && (
+                                <div className="text-sm text-gray-500 mt-2 font-['Roboto']">
+                                    Word count: {getWordCount()}
+                                </div>
+                            )}
                         </div>
 
                         <div className="space-y-6 font-['Roboto']">
@@ -183,7 +197,7 @@ export default function PreceptorFeedbackForm() {
                                                 )}
                                             >
                                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                                {discussionDate ? format(discussionDate, "PPP") : "Pick a date"}
+                                                {isClient && discussionDate ? format(discussionDate, "PPP") : "Pick a date"}
                                             </Button>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-auto p-0" align="start">

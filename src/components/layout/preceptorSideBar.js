@@ -15,14 +15,29 @@ export default function PreceptorSideBar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed top-14 left-0 bottom-0 w-20 bg-white border-r border-gray-200">
-      <nav className="h-[45vh] mt-4 flex flex-col items-center justify-between">
+    <aside className="
+      fixed 
+      left-0 
+      bg-white 
+      border-t md:border-r border-gray-200 
+      z-50 
+      w-full md:w-20 
+      bottom-0 md:top-14 
+      md:bottom-auto
+    ">
+      <nav className="
+        flex 
+        flex-row md:flex-col 
+        items-center 
+        justify-evenly 
+        h-16 md:h-[45vh] 
+        px-4 md:mt-4
+      ">
         {navItems.map((item, index) => {
           const isActive = pathname.startsWith(item.path);
           const Icon = item.icon;
 
-          const baseStyle =
-            "flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 hover:cursor-pointer";
+          const baseStyle = "flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 hover:cursor-pointer";
           const activeStyle = isActive
             ? "bg-blue-50 text-[#3A6784]"
             : "text-gray-500 hover:text-[#3A6784] hover:bg-gray-100";

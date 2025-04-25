@@ -176,11 +176,11 @@ export default function SearchStudent() {
                 </label>
               </div>
 
-              <div className="flex justify-end">
+              <div className="flex flex-col sm:flex-row justify-end gap-4">
                 <Button
                   variant="outline"
                   onClick={clearSearch}
-                  className="mr-2 px-6 py-3 rounded-lg text-[#3A6784] border-[#3A6784] hover:bg-[#f0f4f8] text-base font-semibold font-['Roboto']"
+                  className="w-full sm:w-auto px-6 py-3 rounded-lg text-[#3A6784] border-[#3A6784] hover:bg-[#f0f4f8] text-base font-semibold font-['Roboto']"
                 >
                   Clear Selection
                 </Button>
@@ -192,7 +192,7 @@ export default function SearchStudent() {
                       window.location.href = '/preceptor/addPreceptorFeedbacks';
                     }
                   }}
-                  className="px-6 py-3 rounded-lg bg-[#3A6784] hover:bg-[#2d5268] text-white text-base font-semibold font-['Roboto'] transition-transform duration-200 hover:scale-105"
+                  className="w-full sm:w-auto px-6 py-3 rounded-lg bg-[#3A6784] hover:bg-[#2d5268] text-white text-base font-semibold font-['Roboto'] transition-transform duration-200 hover:scale-105"
                 >
                   Continue to Feedback
                 </Button>

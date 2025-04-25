@@ -18,6 +18,7 @@ export default function RegisterPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [healthServices, setHealthServices] = useState([]);
     const [universities, setUniversities] = useState([]);
+    const [mounted, setMounted] = useState(false);
 
     const [formData, setFormData] = useState({
         firstName: '',
@@ -29,7 +30,14 @@ export default function RegisterPage() {
         university: '',
         isRegisteredNurse: false
     });
+
     useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (!mounted) return;
+        
         const fetchAffiliations = async () => {
             try {
                 const res = await functions.createExecution(process.env.NEXT_PUBLIC_FN_GUEST_REQUEST, JSON.stringify({
@@ -45,7 +53,7 @@ export default function RegisterPage() {
             }
         };
         fetchAffiliations();
-    }, []);
+    }, [mounted]);
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -172,10 +180,9 @@ export default function RegisterPage() {
 
 
 
-    return (
-
+    return mounted ? (
         <div className="relative flex items-center justify-center min-h-screen bg-white overflow-hidden">
-            <Card className="relative z-10 w-full max-w-md w-full max-w-md border border-gray-200 shadow-xl rounded-2xl bg-white">
+            <Card className="relative z-10 w-full max-w-md border border-gray-200 shadow-xl rounded-2xl bg-white mx-4">
                 <CardContent>
                     <div className="mb-8 text-center">
                         <h1 className="text-3xl font-extrabold mt-2 mb-2 text-[#3A6784]">Welcome to ANSAT Pro.</h1>
@@ -322,6 +329,5 @@ export default function RegisterPage() {
                 </CardContent>
             </Card>
         </div>
-
-    );
+    ) : null;
 }

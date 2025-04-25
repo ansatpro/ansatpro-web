@@ -8,7 +8,7 @@ export default function PreceptorLayout({ children }) {
     <div className="bg-white min-h-screen">
       <PreceptorTopBar />
       <PreceptorSideBar />
-      <main className="pt-14 ml-16 min-h-screen">
+      <main className="pt-14 md:ml-20 pb-16 md:pb-0">
         {children}
       </main>
     </div>
