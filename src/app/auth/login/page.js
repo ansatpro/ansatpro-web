@@ -1,21 +1,30 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { account, functions } from "../../../../lib/appwrite";
+import { account, functions } from "../../appwrite";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import dynamic from 'next/dynamic';
+// import TextPressure from './TextPressure';
+import dynamic from "next/dynamic";
 
-const TextPressure = dynamic(() => import('../../../components/TextPressure'), { ssr: false });
+const TextPressure = dynamic(() => import("@/components/TextPressure"), {
+  ssr: false,
+});
 
 const handleAnimationComplete = () => {
-  console.log('All letters have animated!');
+  console.log("All letters have animated!");
 };
 
 const LoginPage = () => {
@@ -34,10 +43,8 @@ const LoginPage = () => {
     setHasMounted(true);
   }, []);
 
-
   // Handle login
   const handleLogin = async (e) => {
-
     e.preventDefault();
     setError("");
     setIsLoading(true);
@@ -47,31 +54,33 @@ const LoginPage = () => {
       try {
         await account.deleteSession("current");
       } catch (deleteError) {
-        console.warn("No active session to delete or already deleted:", deleteError.message);
+        console.warn(
+          "No active session to delete or already deleted:",
+          deleteError.message
+        );
       }
 
       // create a new session
       await account.createEmailPasswordSession(email, password);
       const jwt = (await account.createJWT()).jwt;
-      localStorage.setItem('jwt', jwt);
+      localStorage.setItem("jwt", jwt);
       const user = await account.get();
 
       const execution = await functions.createExecution(
         process.env.NEXT_PUBLIC_FN_USER_METADATA,
         JSON.stringify({
           jwt,
-          action: 'getUserRole',
+          action: "getUserRole",
         })
       );
 
       const res = JSON.parse(execution.responseBody); // <-- crashes if not valid JSON
 
-      if (res.status !== 'success') {
+      if (res.status !== "success") {
         throw new Error("Failed to retrieve user role");
       }
 
       const role = res.data?.role;
-
 
       if (role === "preceptor") {
         router.push("/preceptor/home");
@@ -80,9 +89,17 @@ const LoginPage = () => {
       }
 
       console.log("🪵 Raw response body:", execution.responseBody);
+
+      // const result = JSON.parse(execution.responseBody);
+
+      // setLoggedInUser(user);
+      // // Redirect directly to preceptor home page
+      // window.location.href = '/preceptor/home';
     } catch (err) {
       console.error("Login failed:", err);
-      setError(err.message || "Failed to login. Please check your credentials.");
+      setError(
+        err.message || "Failed to login. Please check your credentials."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -101,8 +118,6 @@ const LoginPage = () => {
       setIsLoading(false);
     }
   };
-
-
 
   return (
     <div className="relative flex items-center justify-center min-h-screen overflow-hidden bg-white">
@@ -127,7 +142,10 @@ const LoginPage = () => {
             </div>
 
             {error && (
-              <Alert variant="destructive" className="mb-4 rounded-xl border-l-4 border-red-600 bg-red-50">
+              <Alert
+                variant="destructive"
+                className="mb-4 rounded-xl border-l-4 border-red-600 bg-red-50"
+              >
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
@@ -171,7 +189,11 @@ const LoginPage = () => {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
                     >
-                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -188,18 +210,23 @@ const LoginPage = () => {
                 {/* Links */}
                 <div className="flex justify-center space-x-1 text-sm text-gray-600 mt-2">
                   <span>No account?</span>
-                  <Link href="/auth/register" className="text-[#3A6784] hover:text-[#2d5268] font-medium">
+                  <Link
+                    href="/auth/register"
+                    className="text-[#3A6784] hover:text-[#2d5268] font-medium"
+                  >
                     Sign Up
                   </Link>
                 </div>
                 <div className="flex justify-center text-sm text-gray-600">
-                  <Link href="/auth/forgot-password" className="text-[#3A6784] hover:text-[#2d5268] font-medium">
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-[#3A6784] hover:text-[#2d5268] font-medium"
+                  >
                     Forgot Password?
                   </Link>
                 </div>
               </form>
             )}
-
           </CardContent>
         </Card>
       </div>
@@ -208,4 +235,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-

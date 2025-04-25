@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NavigationProvider } from "@/context/NavigationContext";
 import SideNav from "@/components/ui/SideNav/side-nav";
+import ClientSideJWTRefresher from "@/components/ClientSideJWTRefresher"; // path to the client-only component
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,6 +26,7 @@ export default function RootLayout({ children }) {
         <NavigationProvider>
           <SideNav />
         </NavigationProvider>
+        <ClientSideJWTRefresher /> {/* ✅ Client-only logic here */}
         {children}
       </body>
     </html>

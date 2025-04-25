@@ -11,7 +11,7 @@ export default function HomePage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  
+
   // Get current time to determine greeting
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -19,7 +19,7 @@ export default function HomePage() {
     if (hour < 18) return "Good Afternoon";
     return "Good Evening";
   };
-  
+
   // Fetch current user data
   useEffect(() => {
     const fetchUser = async () => {
@@ -67,24 +67,39 @@ export default function HomePage() {
           <h1 className="text-xl font-bold">ANSAT Pro</h1>
         </div>
         <nav className="space-y-2">
-          <Link href="/facilitator/home" className="flex items-center rounded-md bg-accent px-3 py-2 text-sm font-medium text-accent-foreground">
+          <Link
+            href="/facilitator/home"
+            className="flex items-center rounded-md bg-accent px-3 py-2 text-sm font-medium text-accent-foreground"
+          >
             Home
           </Link>
-          <Link href="/facilitator/student/studentList" className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground">
+          <Link
+            href="/facilitator/student/studentList"
+            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+          >
             Student
           </Link>
-          <Link href="/facilitator/feedback" className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground">
+          <Link
+            href="/facilitator/feedback"
+            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+          >
             Feedback
           </Link>
-          <Link href="/facilitator/report" className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground">
+          <Link
+            href="/facilitator/report"
+            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+          >
             Report
           </Link>
-          <Link href="/facilitator/settings" className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground">
+          <Link
+            href="/facilitator/settings"
+            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+          >
             Settings
           </Link>
         </nav>
       </aside>
-      
+
       {/* Main content */}
       <main className="flex-1 p-6">
         {/* Header */}
@@ -94,7 +109,7 @@ export default function HomePage() {
             Log out
           </Button>
         </header>
-        
+
         {/* Welcome section */}
         <section className="mb-8">
           <Card>
@@ -102,30 +117,34 @@ export default function HomePage() {
               <h2 className="mb-6 text-2xl font-semibold">
                 {getGreeting()}, {firstName}!
               </h2>
-              
+
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <Button asChild className="h-auto p-6" variant="outline">
                   <Link href="/facilitator/student/studentRegister">
                     <div className="flex flex-col items-center gap-2">
-                      <span className="text-lg font-medium">Register Student</span>
+                      <span className="text-lg font-medium">
+                        Register Student
+                      </span>
                       <p className="text-center text-sm text-muted-foreground">
                         Add a new student to the system
                       </p>
                     </div>
                   </Link>
                 </Button>
-                
+
                 <Button asChild className="h-auto p-6" variant="outline">
                   <Link href="/facilitator/feedback/review">
                     <div className="flex flex-col items-center gap-2">
-                      <span className="text-lg font-medium">Review Feedback</span>
+                      <span className="text-lg font-medium">
+                        Review Feedback
+                      </span>
                       <p className="text-center text-sm text-muted-foreground">
                         View and manage student feedback
                       </p>
                     </div>
                   </Link>
                 </Button>
-                
+
                 <Button asChild className="h-auto p-6" variant="outline">
                   <Link href="/facilitator/report/export">
                     <div className="flex flex-col items-center gap-2">
@@ -140,9 +159,9 @@ export default function HomePage() {
             </CardContent>
           </Card>
         </section>
-        
+
         {/* Recent activity or summary section could be added here */}
-        
+
         <footer className="mt-auto text-center text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} ANSAT Pro. All rights reserved.</p>
         </footer>
