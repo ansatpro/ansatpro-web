@@ -10,6 +10,11 @@ export default function ClientSideRoleGuard() {
 
     useEffect(() => {
         const checkAccess = async () => {
+            // Skip role check for auth-related pages
+            if (pathname.startsWith('/auth/')) {
+                return;
+            }
+
             const jwt = localStorage.getItem("jwt");
             if (!jwt) {
                 router.replace("/auth/login");
