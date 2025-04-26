@@ -269,66 +269,66 @@ export default function RegisterPage() {
                                 minFontSize={36}
                             />
                             <p className="text-gray-500 mt-1">Create your account</p>
-                        </div>
+                    </div>
 
-                        <form autoComplete="off" className="space-y-6" onSubmit={handleSubmit}>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="firstName">First Name</Label>
-                                    <Input
-                                        autoComplete="off"
-                                        id="firstName"
-                                        name="firstName"
-                                        placeholder="First name"
-                                        value={formData.firstName}
-                                        onChange={handleInputChange}
-                                        required
-                                        className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="lastName">Last Name</Label>
-                                    <Input
-                                        autoComplete="off"
-                                        id="lastName"
-                                        name="lastName"
-                                        placeholder="Last name"
-                                        value={formData.lastName}
-                                        onChange={handleInputChange}
-                                        required
-                                        className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200"
-                                    />
-                                </div>
-                            </div>
-
+                    <form autoComplete="off" className="space-y-6" onSubmit={handleSubmit}>
+                        <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
+                                <Label htmlFor="firstName">First Name</Label>
                                 <Input
                                     autoComplete="off"
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    placeholder="Enter your email"
-                                    value={formData.email}
+                                    id="firstName"
+                                    name="firstName"
+                                    placeholder="First name"
+                                    value={formData.firstName}
                                     onChange={handleInputChange}
                                     required
                                     className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200"
                                 />
                             </div>
-
                             <div className="space-y-2">
-                                <Label htmlFor="password">Password</Label>
+                                <Label htmlFor="lastName">Last Name</Label>
+                                <Input
+                                    autoComplete="off"
+                                    id="lastName"
+                                    name="lastName"
+                                    placeholder="Last name"
+                                    value={formData.lastName}
+                                    onChange={handleInputChange}
+                                    required
+                                    className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input
+                                autoComplete="off"
+                                id="email"
+                                name="email"
+                                type="email"
+                                placeholder="Enter your email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                required
+                                className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="password">Password</Label>
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                                    <Input
-                                        autoComplete="off"
-                                        id="password"
-                                        name="password"
+                            <Input
+                                autoComplete="off"
+                                id="password"
+                                name="password"
                                         type={showPassword ? "text" : "password"}
-                                        placeholder="Create a password"
-                                        value={formData.password}
-                                        onChange={handleInputChange}
-                                        required
+                                placeholder="Create a password"
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                required
                                         className="pl-10 pr-10 py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200"
                                     />
                                     <button
@@ -375,77 +375,77 @@ export default function RegisterPage() {
                                         )}
                                     </button>
                                 </div>
-                            </div>
+                        </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="role">Role</Label>
+                        <div className="space-y-2">
+                            <Label htmlFor="role">Role</Label>
                                 <Select
                                     name="role"
                                     onValueChange={(value) => handleSelectChange(value, "role")}
                                     required
                                 >
-                                    <SelectTrigger className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200">
-                                        <SelectValue placeholder="Select your role" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="preceptor">Preceptor</SelectItem>
-                                        <SelectItem value="facilitator">Facilitator</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                                <SelectTrigger className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200">
+                                    <SelectValue placeholder="Select your role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="preceptor">Preceptor</SelectItem>
+                                    <SelectItem value="facilitator">Facilitator</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
 
                             {formData.role === "preceptor" && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="healthService">Health Service</Label>
+                            <div className="space-y-2">
+                                <Label htmlFor="healthService">Health Service</Label>
                                     <Select
                                         name="healthService"
                                         onValueChange={(value) =>
                                             handleSelectChange(value, "healthService")
                                         }
                                     >
-                                        <SelectTrigger className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200">
-                                            <SelectValue placeholder="Select your health service" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {healthServices.map((service) => (
-                                                <SelectItem key={service.$id} value={service.$id}>
-                                                    {service.affiliation_name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            )}
+                                    <SelectTrigger className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200">
+                                        <SelectValue placeholder="Select your health service" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {healthServices.map((service) => (
+                                            <SelectItem key={service.$id} value={service.$id}>
+                                                {service.affiliation_name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
 
                             {formData.role === "facilitator" && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="university">University</Label>
+                            <div className="space-y-2">
+                                <Label htmlFor="university">University</Label>
                                     <Select
                                         name="university"
                                         onValueChange={(value) =>
                                             handleSelectChange(value, "university")
                                         }
                                     >
-                                        <SelectTrigger className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200">
-                                            <SelectValue placeholder="Select your university" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {universities.map((uni) => (
-                                                <SelectItem key={uni.$id} value={uni.$id}>
-                                                    {uni.affiliation_name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            )}
+                                    <SelectTrigger className="py-4 bg-gray-50 rounded-xl focus:ring-2 focus:ring-[#3A6784] transition duration-200">
+                                        <SelectValue placeholder="Select your university" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {universities.map((uni) => (
+                                            <SelectItem key={uni.$id} value={uni.$id}>
+                                                {uni.affiliation_name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
 
-                            <div className="flex items-center space-x-2">
-                                <Checkbox
-                                    id="isRegisteredNurse"
-                                    name="isRegisteredNurse"
-                                    checked={formData.isRegisteredNurse}
-                                    onCheckedChange={(checked) =>
+                        <div className="flex items-center space-x-2">
+                            <Checkbox
+                                id="isRegisteredNurse"
+                                name="isRegisteredNurse"
+                                checked={formData.isRegisteredNurse}
+                                onCheckedChange={(checked) =>
                                         handleInputChange({
                                             target: {
                                                 name: "isRegisteredNurse",
@@ -462,30 +462,30 @@ export default function RegisterPage() {
                                     I declare that I am a registered nurse, holding current nursing
                                     registration with Nursing and Midwifery Board of Australia
                                     (NMBA).
-                                </label>
-                            </div>
+                            </label>
+                        </div>
 
-                            <Button
-                                type="submit"
-                                className="w-full py-4 bg-[#3A6784] hover:bg-[#2d5268] text-white font-semibold text-base rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
-                                disabled={isLoading}
-                            >
-                                {isLoading ? "Creating account..." : "Create Account"}
-                            </Button>
+                        <Button
+                            type="submit"
+                            className="w-full py-4 bg-[#3A6784] hover:bg-[#2d5268] text-white font-semibold text-base rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "Creating account..." : "Create Account"}
+                        </Button>
 
-                            <div className="flex items-center justify-center space-x-1 text-sm text-gray-600 mt-2">
-                                <span>Already have an account?</span>
+                        <div className="flex items-center justify-center space-x-1 text-sm text-gray-600 mt-2">
+                            <span>Already have an account?</span>
                                 <Link
                                     href="/auth/login"
                                     className="text-[#3A6784] hover:text-[#2d5268] font-medium"
                                 >
-                                    Sign In
-                                </Link>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
-            </div>
+                                Sign In
+                            </Link>
+                        </div>
+                    </form>
+                </CardContent>
+            </Card>
+        </div>
         </div>
     );
 }

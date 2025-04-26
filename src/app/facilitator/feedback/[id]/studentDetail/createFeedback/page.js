@@ -8,21 +8,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
-  CalendarIcon,
-} from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Tooltip,
-  TooltipContent,
   TooltipProvider,
+  TooltipContent,
   TooltipTrigger,
+  Tooltip,
 } from "@/components/ui/tooltip";
-import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { PostFacilitatorComments } from "../../../../../../../lib/HowToConnectToFunction";
@@ -453,30 +445,15 @@ export default function ReviewFeedback() {
                 <p className="text-sm mb-2">
                   Please select the discussion date
                 </p>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[240px] justify-start text-left font-normal",
-                        !discussionDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {discussionDate
-                        ? format(discussionDate, "PPP")
-                        : "Select date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={discussionDate}
-                      onSelect={setDiscussionDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <Input
+                  type="date"
+                  value={discussionDate ? format(discussionDate, "yyyy-MM-dd") : ""}
+                  onChange={(e) => {
+                    const date = e.target.value ? new Date(e.target.value) : null;
+                    setDiscussionDate(date);
+                  }}
+                  className="w-[240px]"
+                />
               </div>
             )}
           </CardContent>

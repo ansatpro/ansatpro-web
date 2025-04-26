@@ -32,6 +32,15 @@ export default function FeedbackDetail() {
             
             // Check if ID matches
             if (currentFeedback.id === feedbackId) {
+              // Extract discussion data from reviewData if available
+              let discussedWithStudent = false;
+              let discussionDate = "";
+              
+              if (currentFeedback.reviewData) {
+                discussedWithStudent = currentFeedback.reviewData.discussedWithStudent;
+                discussionDate = currentFeedback.reviewData.discussionDate;
+              }
+              
               setFeedbackData({
                 id: currentFeedback.id,
                 date: currentFeedback.date || "Unknown date",
@@ -40,11 +49,13 @@ export default function FeedbackDetail() {
                 is_marked: !!currentFeedback.is_marked,
                 reviewComment: currentFeedback.reviewComment || "",
                 reviewScore: currentFeedback.reviewScore || [],
-                discussedWithStudent: currentFeedback.discussedWithStudent || false,
-                discussionDate: currentFeedback.discussionDate || "",
+                discussedWithStudent: discussedWithStudent,
+                discussionDate: discussionDate,
                 aiFeedbackItems: currentFeedback.aiFeedbackDescriptions || []
               });
               
+              // Get all available items from both sources
+              console.log("Loaded feedback data from current_feedback localStorage");
               setLoading(false);
               return;
             }
@@ -62,6 +73,15 @@ export default function FeedbackDetail() {
             const feedback = feedbacks.find(f => f.id === feedbackId);
             
             if (feedback) {
+              // Extract discussion data from reviewData if available
+              let discussedWithStudent = false;
+              let discussionDate = "";
+              
+              if (feedback.reviewData) {
+                discussedWithStudent = feedback.reviewData.discussedWithStudent;
+                discussionDate = feedback.reviewData.discussionDate;
+              }
+              
               setFeedbackData({
                 id: feedback.id,
                 date: feedback.date || "Unknown date",
@@ -70,11 +90,12 @@ export default function FeedbackDetail() {
                 is_marked: !!feedback.is_marked,
                 reviewComment: feedback.reviewComment || "",
                 reviewScore: feedback.reviewScore || [],
-                discussedWithStudent: feedback.discussedWithStudent || false,
-                discussionDate: feedback.discussionDate || "",
+                discussedWithStudent: discussedWithStudent,
+                discussionDate: discussionDate,
                 aiFeedbackItems: feedback.aiFeedbackDescriptions || []
               });
               
+              console.log("Loaded feedback data from feedbacks list localStorage");
               setLoading(false);
               return;
             }
@@ -232,62 +253,84 @@ export default function FeedbackDetail() {
           <CardTitle className="text-xl">Assessment Items</CardTitle>
         </CardHeader>
         <CardContent>
-          {(feedbackData.reviewScore && feedbackData.reviewScore.length > 0) || 
-           (feedbackData.aiFeedbackItems && feedbackData.aiFeedbackItems.length > 0) ? (
-            <div className="border rounded-md overflow-hidden">
-              <div className="grid grid-cols-12 bg-gray-100 p-3 border-b">
-                <div className="col-span-2 font-medium">Item ID</div>
-                <div className="col-span-6 font-medium">Description</div>
-                <div className="col-span-2 font-medium">Type</div>
-                <div className="col-span-2 font-medium">Rating</div>
-              </div>
-              <div className="divide-y">
-                {/* AI identified items */}
-                {feedbackData.aiFeedbackItems && feedbackData.aiFeedbackItems.map((item, index) => {
-                  // Find if there's a corresponding rating for this AI item
-                  const matchingRating = feedbackData.reviewScore?.find(
-                    scoreItem => scoreItem.item_id === item.item_id
-                  );
-                  
-                  return (
-                    <div key={`ai-${index}`} className="grid grid-cols-12 p-3">
-                      <div className="col-span-2">{item.item_id || `AI-${index + 1}`}</div>
-                      <div className="col-span-6">{item.description || "No description available"}</div>
-                      <div className="col-span-2">
-                        <span className={item.is_positive ? "text-green-600" : "text-amber-600"}>
-                          {item.is_positive ? "Strength" : "Improvement"}
-                        </span>
-                      </div>
-                      <div className="col-span-2">
-                        {matchingRating ? getRatingLabel(matchingRating.score) : "-"}
-                      </div>
-                    </div>
-                  );
-                })}
-                
-                {/* Any remaining manual assessment items that don't match AI items */}
-                {feedbackData.reviewScore && feedbackData.reviewScore
-                  .filter(scoreItem => !feedbackData.aiFeedbackItems?.some(
-                    aiItem => aiItem.item_id === scoreItem.item_id
-                  ))
-                  .map((item, index) => (
-                    <div key={`score-${index}`} className="grid grid-cols-12 p-3">
-                      <div className="col-span-2">{item.item_id || `M-${index + 1}`}</div>
-                      <div className="col-span-6">-</div>
-                      <div className="col-span-2">-</div>
-                      <div className="col-span-2">
-                        {getRatingLabel(item.score)}
-                      </div>
-                    </div>
-                  ))
+          {(() => {
+            // Combine AI items and review scores for comprehensive item listing
+            const allItems = new Map();
+            
+            // Add AI feedback items to the map
+            if (feedbackData.aiFeedbackItems && feedbackData.aiFeedbackItems.length > 0) {
+              feedbackData.aiFeedbackItems.forEach(item => {
+                allItems.set(item.item_id, {
+                  itemId: item.item_id,
+                  description: item.description || "",
+                  isPositive: item.is_positive,
+                  rating: null
+                });
+              });
+            }
+            
+            // Add or update with review scores
+            if (feedbackData.reviewScore && feedbackData.reviewScore.length > 0) {
+              feedbackData.reviewScore.forEach(item => {
+                if (allItems.has(item.item_id)) {
+                  // Update existing item with rating
+                  const existingItem = allItems.get(item.item_id);
+                  existingItem.rating = item.score;
+                  allItems.set(item.item_id, existingItem);
+                } else {
+                  // Add new item with just the rating
+                  allItems.set(item.item_id, {
+                    itemId: item.item_id,
+                    description: "",
+                    isPositive: null,
+                    rating: item.score
+                  });
                 }
+              });
+            }
+            
+            // Convert map to array for rendering
+            const combinedItems = Array.from(allItems.values());
+            
+            if (combinedItems.length === 0) {
+              return (
+                <div className="p-4 border rounded-md">
+                  <p className="text-muted-foreground">No assessment items available</p>
+                </div>
+              );
+            }
+            
+            return (
+              <div className="border rounded-md overflow-hidden">
+                <div className="grid grid-cols-12 bg-gray-100 p-3 border-b">
+                  <div className="col-span-2 font-medium">Item ID</div>
+                  <div className="col-span-6 font-medium">Description</div>
+                  <div className="col-span-2 font-medium">Type</div>
+                  <div className="col-span-2 font-medium">Rating</div>
+                </div>
+                <div className="divide-y">
+                  {combinedItems.map((item, index) => (
+                    <div key={`item-${index}`} className="grid grid-cols-12 p-3">
+                      <div className="col-span-2">{item.itemId || `Item-${index + 1}`}</div>
+                      <div className="col-span-6">{item.description || "-"}</div>
+                      <div className="col-span-2">
+                        {item.isPositive !== null ? (
+                          <span className={item.isPositive ? "text-green-600" : "text-amber-600"}>
+                            {item.isPositive ? "Strength" : "Improvement"}
+                          </span>
+                        ) : (
+                          "-"
+                        )}
+                      </div>
+                      <div className="col-span-2">
+                        {item.rating ? getRatingLabel(item.rating) : "-"}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="p-4 border rounded-md">
-              <p className="text-muted-foreground">No assessment items available</p>
-            </div>
-          )}
+            );
+          })()}
         </CardContent>
       </Card>
 
@@ -297,8 +340,8 @@ export default function FeedbackDetail() {
           <CardTitle className="text-xl">Student Discussion</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className={`p-4 border rounded-md ${feedbackData.discussedWithStudent ? 'bg-green-50' : 'bg-amber-50'}`}>
-            {feedbackData.discussedWithStudent ? (
+          <div className={`p-4 border rounded-md ${feedbackData.discussedWithStudent === "yes" ? 'bg-green-50' : 'bg-amber-50'}`}>
+            {feedbackData.discussedWithStudent === "yes" ? (
               <p className="text-green-700">
                 This feedback has been discussed with the student on {formatDate(feedbackData.discussionDate)}.
               </p>
@@ -324,4 +367,4 @@ export default function FeedbackDetail() {
       </div>
     </div>
   );
-} 
+}

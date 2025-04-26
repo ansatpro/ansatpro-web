@@ -6,41 +6,101 @@ import { Bell, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { account, realtimeClient } from "@/app/appwrite";
+import { GetAllNotifications } from "../../../lib/HowToConnectToFunction";
 
 export default function FacilitatorTopBar() {
   const router = useRouter(); // Initialize useRouter
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [hasNotifications, setHasNotifications] = useState(false);
+  const [currentUser, setCurrentUser] = useState();
+  // const [notifications, setNotifications] = useState([]);
+  const [triggerGetNotifications, setTriggerGetNotifications] = useState(false);
 
-  // Check for notifications
+  // Fetch current user
   useEffect(() => {
-    const checkForNotifications = () => {
+    const fetchUser = async () => {
       try {
-        // Check localStorage for feedback data
-        const storedFeedbacks = localStorage.getItem('ansatpro_feedbacks');
-        
-        if (storedFeedbacks) {
-          const feedbacks = JSON.parse(storedFeedbacks);
-          // Check if any feedback has flag_discuss_with_facilitator set to true
-          const hasUnreadNotifications = feedbacks.some(
-            feedback => feedback.flag_discuss_with_facilitator === true
-          );
-          
-          setHasNotifications(hasUnreadNotifications);
-        }
+        const user = await account.get();
+        setCurrentUser(user);
       } catch (error) {
-        console.error("Error checking notifications:", error);
+        console.error("Failed to fetch user:", error);
       }
     };
 
-    checkForNotifications();
-    
-    // Check for new notifications every minute
-    const intervalId = setInterval(checkForNotifications, 60000);
-    
-    return () => clearInterval(intervalId);
+    fetchUser();
   }, []);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      const res = await GetAllNotifications();
+      // console.log(res);
+
+      const finalNotification = res.map((notification) => ({
+        notification_DocId: notification.documentID,
+        message: notification.message,
+        read: notification.is_read,
+        createdAt: notification.messageTime,
+      }));
+
+      console.log("finalNotification:", finalNotification);
+
+      // Check if any notification is unread
+      const hasUnread = res.some(
+        (notification) => notification.is_read === false
+      );
+
+      if (hasUnread) {
+        setHasNotifications(true);
+      } else {
+        setHasNotifications(false);
+      }
+      setTriggerGetNotifications(false);
+    };
+
+    fetchNotifications();
+  }, [triggerGetNotifications]);
+
+  // Use realtime to check for notifications
+  useEffect(() => {
+    if (!currentUser) return; // Don't subscribe if no user or not on client side
+
+    try {
+      const unsubscribe = realtimeClient.subscribe("documents", (response) => {
+        // notification is created
+        if (
+          response.events.includes(
+            `databases.${process.env.NEXT_PUBLIC_DB_ID}.collections.notifications.documents.*.create`
+          ) &&
+          response.payload.recipient_id === currentUser.$id
+        ) {
+          setTriggerGetNotifications(true);
+        } else if (
+          response.events.includes(
+            `databases.${process.env.NEXT_PUBLIC_DB_ID}.collections.notifications.documents.*.delete`
+          ) &&
+          response.payload.recipient_id === currentUser.$id
+        ) {
+          setTriggerGetNotifications(true);
+        } else if (
+          response.events.includes(
+            `databases.${process.env.NEXT_PUBLIC_DB_ID}.collections.notifications.documents.*.update`
+          ) &&
+          response.payload.recipient_id === currentUser.$id
+        ) {
+          setTriggerGetNotifications(true);
+        }
+      });
+
+      // Cleanup subscription
+      return () => {
+        unsubscribe();
+      };
+    } catch (error) {
+      console.error("Failed to subscribe to notifications:", error);
+    }
+  }, [currentUser]);
 
   // Handle logout logic
   const handleLogout = () => {
@@ -80,18 +140,17 @@ export default function FacilitatorTopBar() {
 
         {/* Notification and Logout Buttons */}
         <div className="flex items-center gap-2">
-          
           {/* Notification Button */}
           <div className="relative">
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               className="flex items-center justify-center "
-              onClick={() => router.push('/facilitator/notification')}
+              onClick={() => router.push("/facilitator/notification")}
             >
               <Bell className="h-4 w-4" />
             </Button>
-            
+
             {/* Notification indicator */}
             {hasNotifications && (
               <span className="absolute -top-1 -right-1 flex h-3 w-3">
@@ -110,9 +169,7 @@ export default function FacilitatorTopBar() {
             disabled={isLoading} // Disable button while logging out
           >
             <LogOut className="h-4 w-4 md:mr-2" />
-            <span>
-              {isLoading ? "Logging out..." : "Log out"}
-            </span>
+            <span>{isLoading ? "Logging out..." : "Log out"}</span>
           </Button>
         </div>
       </div>
