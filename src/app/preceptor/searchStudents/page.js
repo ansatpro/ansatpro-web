@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { X } from "lucide-react";
 import { functions, account } from "../../appwrite";
-import PreceptorLayout from "@/components/layout/preceptorLayout"; // ✅ 恢复你的布局组件
+import PreceptorLayout from "@/components/layout/preceptorLayout";
 import DotsLoading from "@/components/preceptorUI/SearchLoading";
 
 export default function SearchStudent() {
@@ -19,9 +19,13 @@ export default function SearchStudent() {
   const [error, setError] = useState(null);
   const [searchLoading, setSearchLoading] = useState(false);
   const [showNoResults, setShowNoResults] = useState(false);
+  const [hasHydrated, setHasHydrated] = useState(false); // ✅ Hydration flag
+
   const shouldShowStudentList = !searchLoading && students.length > 0 && !selectedStudent;
 
-
+  useEffect(() => {
+    setHasHydrated(true); // ✅ Mark after hydration
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,11 +70,10 @@ export default function SearchStudent() {
     if (!searchLoading && searchQuery.length >= 2 && students.length === 0) {
       const timeout = setTimeout(() => {
         setShowNoResults(true);
-      }, 500); // ⏱ Delay before showing the message
-
-      return () => clearTimeout(timeout); // cleanup if query changes
+      }, 500);
+      return () => clearTimeout(timeout);
     } else {
-      setShowNoResults(false); // reset if still loading or input changes
+      setShowNoResults(false);
     }
   }, [searchLoading, students, searchQuery]);
 
@@ -78,6 +81,13 @@ export default function SearchStudent() {
     setSearchQuery("");
     setSelectedStudent(null);
     setIsConfirmed(false);
+  };
+
+  const handleContinue = () => {
+    if (selectedStudent) {
+      localStorage.setItem('selectedStudent', JSON.stringify(selectedStudent));
+      window.location.href = '/preceptor/addPreceptorFeedbacks';
+    }
   };
 
   if (error) {
@@ -94,7 +104,7 @@ export default function SearchStudent() {
     <PreceptorLayout>
       <main className="pt-10 px-6 max-w-3xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2 font-['Roboto']">STUDENT DETAIL</h1>
+          <h1 className="text-3xl font-bold mb-2 font-['Roboto']">Student Detail</h1>
         </div>
 
         {/* Search Box */}
@@ -105,8 +115,13 @@ export default function SearchStudent() {
               placeholder="Enter student name"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="py-6 pl-4 pr-10 bg-gray-50 rounded-lg"
+              className="text-base leading-6 px-4 py-3 bg-gray-50 rounded-lg"
+              inputMode="text"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck="false"
             />
+
 
             {/* Clear Button */}
             {searchQuery && (
@@ -119,7 +134,7 @@ export default function SearchStudent() {
             )}
 
             {/* Search Results */}
-            {searchQuery.length >= 2 && shouldShowStudentList && (
+            {hasHydrated && searchQuery.length >= 2 && shouldShowStudentList && (
               <div className="absolute w-full mt-1 bg-white border rounded-lg shadow-lg z-10">
                 {students.map((student) => (
                   <button
@@ -134,23 +149,23 @@ export default function SearchStudent() {
             )}
 
             {/* Loading animation */}
-            {searchQuery.length >= 2 && searchLoading && (
+            {hasHydrated && searchQuery.length >= 2 && searchLoading && (
               <div className="absolute left-1/2 top-full mt-2 -translate-x-1/2 z-20">
                 <DotsLoading />
               </div>
             )}
 
-            {searchQuery.length >= 2 && showNoResults && !selectedStudent && (
+            {/* No Results */}
+            {hasHydrated && searchQuery.length >= 2 && showNoResults && !selectedStudent && (
               <div className="absolute w-full mt-1 bg-white border rounded-lg shadow-lg z-10">
                 <p className="px-4 py-3 text-gray-500 text-center">No student found matching your search.</p>
               </div>
             )}
           </div>
-
         </div>
 
         {/* Student Details */}
-        {selectedStudent && (
+        {hasHydrated && selectedStudent && (
           <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
             <h2 className="text-xl font-semibold mb-4 font-['Roboto']">
               {selectedStudent.first_name} {selectedStudent.last_name}
@@ -158,7 +173,7 @@ export default function SearchStudent() {
             <div className="space-y-2 text-gray-600 font-['Roboto']">
               <p>Student ID: {selectedStudent.student_id}</p>
               <p>University: {selectedStudent.university_id}</p>
-              <p>health_service: {selectedStudent.health_service_id || 'Not assigned'}</p>
+              <p>Health Service: {selectedStudent.health_service_id || 'Not assigned'}</p>
               <p>Clinic Area: {selectedStudent.clinic_area_id || 'Not assigned'}</p>
               <p>Start Date: {selectedStudent.start_date ? new Date(selectedStudent.start_date).toLocaleDateString() : 'Not set'}</p>
               <p>End Date: {selectedStudent.end_date ? new Date(selectedStudent.end_date).toLocaleDateString() : 'Not set'}</p>
@@ -176,22 +191,17 @@ export default function SearchStudent() {
                 </label>
               </div>
 
-              <div className="flex justify-end">
+              <div className="flex flex-col gap-4">
                 <Button
                   variant="outline"
                   onClick={clearSearch}
-                  className="mr-2 px-6 py-3 rounded-lg text-[#3A6784] border-[#3A6784] hover:bg-[#f0f4f8] text-base font-semibold font-['Roboto']"
+                  className="px-6 py-3 rounded-lg text-[#3A6784] border-[#3A6784] hover:bg-[#f0f4f8] text-base font-semibold font-['Roboto']"
                 >
                   Clear Selection
                 </Button>
                 <Button
                   disabled={!isConfirmed}
-                  onClick={() => {
-                    if (selectedStudent && isConfirmed) {
-                      localStorage.setItem('selectedStudent', JSON.stringify(selectedStudent));
-                      window.location.href = '/preceptor/addPreceptorFeedbacks';
-                    }
-                  }}
+                  onClick={handleContinue}
                   className="px-6 py-3 rounded-lg bg-[#3A6784] hover:bg-[#2d5268] text-white text-base font-semibold font-['Roboto'] transition-transform duration-200 hover:scale-105"
                 >
                   Continue to Feedback

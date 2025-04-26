@@ -3,37 +3,36 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils"; // Keep consistent with your project style
+import { cn } from "@/lib/utils"; // 保持你原来的样式风格
 
-function Calendar({ className, value, onChange, ...props }) {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(value || null);
-  const [currentMonth, setCurrentMonth] = useState(
-    value ? value.getMonth() : new Date().getMonth()
-  );
-  const [currentYear, setCurrentYear] = useState(
-    value ? value.getFullYear() : new Date().getFullYear()
-  );
+function CalendarPlus({ className, mode = "single", value, onChange, ...props }) {
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [range, setRange] = useState({ start: null, end: null });
 
   useEffect(() => {
     if (value) {
-      setSelectedDate(value);
-      setCurrentMonth(value.getMonth());
-      setCurrentYear(value.getFullYear());
+      if (mode === "single") {
+        setSelectedDate(value);
+        setCurrentMonth(value.getMonth());
+        setCurrentYear(value.getFullYear());
+      } else if (mode === "range") {
+        setRange(value);
+        setCurrentMonth(value?.start?.getMonth() || new Date().getMonth());
+        setCurrentYear(value?.start?.getFullYear() || new Date().getFullYear());
+      }
     }
-  }, [value]);
+  }, [value, mode]);
 
-  const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]; // Start from Monday
+  const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const months = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",
   ];
 
   const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
-  const getFirstDayOfMonth = (year, month) => {
-    const day = new Date(year, month, 1).getDay();
-    return (day + 6) % 7; // Adjust so Monday is the first day
-  };
+  const getFirstDayOfMonth = (year, month) => (new Date(year, month, 1).getDay() + 6) % 7;
 
   const prevMonth = () => {
     if (currentMonth === 0) {
@@ -62,7 +61,7 @@ function Calendar({ className, value, onChange, ...props }) {
     );
   };
 
-  const isSelected = (day) => {
+  const isSelectedSingle = (day) => {
     if (!selectedDate) return false;
     return (
       day === selectedDate.getDate() &&
@@ -71,10 +70,34 @@ function Calendar({ className, value, onChange, ...props }) {
     );
   };
 
+  const isInRange = (day) => {
+    if (!range.start || !range.end) return false;
+    const d = new Date(currentYear, currentMonth, day);
+    return d >= range.start && d <= range.end;
+  };
+
+  const isSelectedRange = (day) => {
+    if (!range.start && !range.end) return false;
+    const d = new Date(currentYear, currentMonth, day);
+    return d.toDateString() === range.start?.toDateString() || d.toDateString() === range.end?.toDateString();
+  };
+
   const handleDateClick = (day) => {
-    const newDate = new Date(currentYear, currentMonth, day);
-    setSelectedDate(newDate);
-    if (onChange) onChange(newDate);
+    const selected = new Date(currentYear, currentMonth, day);
+    if (mode === "single") {
+      setSelectedDate(selected);
+      if (onChange) onChange(selected);
+    } else if (mode === "range") {
+      if (!range.start || (range.start && range.end)) {
+        setRange({ start: selected, end: null });
+      } else if (selected < range.start) {
+        setRange({ start: selected, end: range.start });
+        if (onChange) onChange({ start: selected, end: range.start });
+      } else {
+        setRange({ ...range, end: selected });
+        if (onChange) onChange({ start: range.start, end: selected });
+      }
+    }
   };
 
   const renderCalendarDays = () => {
@@ -95,7 +118,9 @@ function Calendar({ className, value, onChange, ...props }) {
           className={cn(
             "flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-all hover:bg-gray-100",
             isToday(day) && "bg-blue-100 text-blue-600 font-semibold",
-            isSelected(day) && "shadow-[0_0_0_2px_rgba(59,130,246,0.5)]"
+            (mode === "single" && isSelectedSingle(day)) && "bg-blue-500 text-white",
+            (mode === "range" && isInRange(day)) && "bg-blue-100 text-blue-700",
+            (mode === "range" && isSelectedRange(day)) && "bg-blue-500 text-white"
           )}
         >
           {day}
@@ -106,7 +131,6 @@ function Calendar({ className, value, onChange, ...props }) {
     return days;
   };
 
-  // Generate year options for quick selection (current year ± 10 years)
   const yearOptions = Array.from({ length: 21 }, (_, i) => new Date().getFullYear() - 10 + i);
 
   return (
@@ -116,7 +140,7 @@ function Calendar({ className, value, onChange, ...props }) {
         <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
           <select
             value={currentYear}
-            onChange={e => setCurrentYear(Number(e.target.value))}
+            onChange={(e) => setCurrentYear(Number(e.target.value))}
             className="border rounded px-1 py-0.5 text-base focus:outline-none"
           >
             {yearOptions.map(year => (
@@ -158,4 +182,4 @@ function Calendar({ className, value, onChange, ...props }) {
   );
 }
 
-export { Calendar };
+export { CalendarPlus };

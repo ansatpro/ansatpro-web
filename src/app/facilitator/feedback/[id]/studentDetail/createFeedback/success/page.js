@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   CheckCircle,
-  Plus,
   ArrowLeft
 } from "lucide-react";
 
@@ -59,7 +58,6 @@ export default function SuccessPage() {
                   className="space-x-2" 
                   onClick={handleAddAnotherFeedback}
                 >
-                  <Plus className="h-4 w-4" />
                   <span>Add Another Feedback</span>
                 </Button>
                 

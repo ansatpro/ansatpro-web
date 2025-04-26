@@ -74,7 +74,7 @@ export default function AllFeedback() {
         // console.log(testRes);
 
         const response = await GetAllStudentsWithDetails();
-
+        console.log("raw data:", response);
         // Convert to sampleFeedbacks format
         const sampleFeedbacks = [];
 
@@ -116,6 +116,10 @@ export default function AllFeedback() {
                 item_id: score.item_id,
                 score: score.score,
               })) || [];
+            const flag_discussed_with_student =
+              is_marked?.flag_discussed_with_student ?? false;
+            const discussion_date = is_marked?.discussion_date || null;
+            const reviewDate = is_marked?.$createdAt || null;
 
             // Push transformed feedback to sampleFeedbacks
             sampleFeedbacks.push({
@@ -135,11 +139,14 @@ export default function AllFeedback() {
               reviewComment,
               reviewScore,
               aiFeedbackDescriptions,
+              flag_discussed_with_student,
+              discussion_date,
+              reviewDate,
             });
           });
         });
 
-        console.log(sampleFeedbacks);
+        console.log("for test", sampleFeedbacks);
 
         // Sort by date in descending order
         const sortedFeedbacks = [...sampleFeedbacks].sort(
@@ -313,11 +320,11 @@ export default function AllFeedback() {
   const handleFeedbackClick = (feedback) => {
     try {
       // Make sure feedback is a valid object before storing
-      if (!feedback || typeof feedback !== 'object') {
+      if (!feedback || typeof feedback !== "object") {
         console.error("Invalid feedback object:", feedback);
         return;
       }
-      
+
       // Store a clean version of feedback object to avoid circular references
       const cleanFeedback = {
         id: feedback.id,
@@ -335,12 +342,15 @@ export default function AllFeedback() {
         endDate: feedback.endDate,
         reviewComment: feedback.reviewComment,
         reviewScore: feedback.reviewScore,
-        aiFeedbackDescriptions: feedback.aiFeedbackDescriptions || []
+        aiFeedbackDescriptions: feedback.aiFeedbackDescriptions || [],
       };
-      
+
       // Store current clicked feedback details to localStorage
-      localStorage.setItem("ansatpro_current_feedback", JSON.stringify(cleanFeedback));
-      
+      localStorage.setItem(
+        "ansatpro_current_feedback",
+        JSON.stringify(cleanFeedback)
+      );
+
       // Wait a moment before navigating to ensure localStorage is updated
       setTimeout(() => {
         if (feedback.is_marked) {
@@ -380,8 +390,8 @@ export default function AllFeedback() {
                   onKeyDown={(e) => e.key === "Enter" && searchFeedback()}
                 />
               </div>
-              <Button 
-                onClick={searchFeedback} 
+              <Button
+                onClick={searchFeedback}
                 variant="default"
                 className="flex items-center gap-1"
               >
@@ -435,8 +445,8 @@ export default function AllFeedback() {
                   </SelectContent>
                 </Select>
               </div>
-        
-        <div>
+
+              <div>
                 <label className="mb-2 block text-sm font-medium">
                   Clinic Area
                 </label>
@@ -458,11 +468,14 @@ export default function AllFeedback() {
                 </Select>
               </div>
 
-            <div>
+              <div>
                 <label className="mb-2 block text-sm font-medium">
                   Date Range
                 </label>
-                <Select value={dateFilter} onValueChange={handleDateFilterChange}>
+                <Select
+                  value={dateFilter}
+                  onValueChange={handleDateFilterChange}
+                >
                   <SelectTrigger className="w-full bg-white">
                     <SelectValue placeholder="All Dates" />
                   </SelectTrigger>
@@ -476,7 +489,7 @@ export default function AllFeedback() {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               {/* Clear Filters Button - Top right */}
               <div className="col-span-full flex justify-end">
                 <Button
@@ -484,7 +497,7 @@ export default function AllFeedback() {
                   variant="outline"
                   className="ml-auto flex items-center gap-1"
                 >
-                <X className="h-4 w-4" />
+                  <X className="h-4 w-4" />
                   Clear Filters
                 </Button>
               </div>
@@ -516,7 +529,7 @@ export default function AllFeedback() {
             >
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
-            <div>
+                  <div>
                     <CardTitle className="text-lg font-bold">
                       {feedback.studentName}
                     </CardTitle>
@@ -526,7 +539,9 @@ export default function AllFeedback() {
                   </div>
                   <Badge
                     variant={feedback.is_marked ? "success" : "pending"}
-                    className={feedback.is_marked ? "bg-green-500" : "bg-amber-500"}
+                    className={
+                      feedback.is_marked ? "bg-green-500" : "bg-amber-500"
+                    }
                   >
                     {feedback.is_marked ? "Reviewed" : "Pending"}
                   </Badge>
@@ -553,12 +568,12 @@ export default function AllFeedback() {
                   <Button size="sm" variant="outline" className="bg-white">
                     View Details
                   </Button>
-            </div>
+                </div>
               </CardFooter>
             </Card>
           ))}
-            </div>
+        </div>
       )}
-            </div>
+    </div>
   );
 }
