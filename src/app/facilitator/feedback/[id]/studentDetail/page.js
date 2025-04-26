@@ -11,14 +11,14 @@ import { Label } from "@/components/ui/label";
 export default function StudentDetail() {
   const router = useRouter();
   const params = useParams();
-  const feedbackId = params.id; // 获取URL中的ID参数
+  const feedbackId = params.id; // Get ID parameter from URL
   
   const [confirmed, setConfirmed] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [feedbackData, setFeedbackData] = useState(null);
 
-  // 预设的反馈数据（用作后备数据）
+  // Preset feedback data (used as fallback)
   const sampleFeedbacks = [
     {
       id: "F89012",
@@ -52,22 +52,22 @@ export default function StudentDetail() {
     }
   ];
 
-  // 获取反馈和学生数据
+  // Fetch feedback and student data
   useEffect(() => {
     const fetchFeedbackData = async () => {
       try {
-        // 尝试首先从localStorage获取当前反馈
+        // First try to get current feedback from localStorage
         const storedCurrentFeedback = localStorage.getItem('ansatpro_current_feedback');
         
         if (storedCurrentFeedback) {
           const currentFeedback = JSON.parse(storedCurrentFeedback);
           
-          // 检查是否是我们需要的反馈ID
+          // Check if this is the feedback we need
           if (currentFeedback.id === feedbackId) {
             console.log("Using feedback data from localStorage");
             setFeedbackData(currentFeedback);
             
-            // 创建学生详情对象
+            // Create student details object
             const studentDetails = {
               name: currentFeedback.studentName,
               studentId: currentFeedback.studentId || `ID-${currentFeedback.id}`,
@@ -84,7 +84,7 @@ export default function StudentDetail() {
           }
         }
         
-        // 如果未找到当前反馈，尝试从所有反馈列表中获取
+        // If current feedback not found, try to get from all feedbacks list
         const storedFeedbacks = localStorage.getItem('ansatpro_feedbacks');
         
         if (storedFeedbacks) {
@@ -95,7 +95,7 @@ export default function StudentDetail() {
             console.log("Using feedback data from stored feedbacks list");
             setFeedbackData(feedback);
             
-            // 创建学生详情对象
+            // Create student details object
             const studentDetails = {
               name: feedback.studentName,
               studentId: feedback.studentId || `ID-${feedback.id}`,
@@ -112,17 +112,17 @@ export default function StudentDetail() {
           }
         }
         
-        // 如果localStorage中没有数据，回退到模拟数据
+        // If no data in localStorage, fall back to mock data
         console.log("Using fallback data");
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        // 查找反馈
+        // Find feedback
         const feedback = sampleFeedbacks.find(f => f.id === feedbackId);
         
         if (feedback) {
           setFeedbackData(feedback);
           
-          // 创建学生详情对象
+          // Create student details object
           const studentDetails = {
             name: feedback.studentName,
             studentId: feedback.studentId || `ID-${feedback.id}`,
@@ -149,26 +149,26 @@ export default function StudentDetail() {
     }
   }, [feedbackId]);
 
-  // 处理复选框状态变化
+  // Handle checkbox state change
   const handleConfirmChange = (checked) => {
     setConfirmed(checked);
   };
 
-  // 处理下一步按钮点击
+  // Handle next button click
   const handleNextClick = () => {
     if (confirmed && feedbackData) {
-      // 根据反馈标记状态决定下一步去向
+      // Decide where to go next based on feedback status
       if (feedbackData.is_marked) {
-        // 已标记，跳转到查看页面
+        // Already marked, go to review page
         router.push(`/facilitator/feedback/${feedbackId}/studentDetail/reviewFeedback`);
       } else {
-        // 未标记，跳转到创建页面
+        // Not marked, go to create page
         router.push(`/facilitator/feedback/${feedbackId}/studentDetail/createFeedback`);
       }
     }
   };
 
-  // 格式化日期显示
+  // Format date for display
   const formatDate = (dateString) => {
     try {
       const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -187,7 +187,7 @@ export default function StudentDetail() {
     );
   }
 
-  // 如果未找到反馈数据
+  // If feedback data not found
   if (!feedbackData || !selectedStudent) {
     return (
       <div className="flex min-h-screen items-center justify-center">
