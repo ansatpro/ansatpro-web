@@ -4,18 +4,18 @@ import { useEffect, useState } from 'react';
 import { account, functions } from '@/app/appwrite'
 import PreceptorLayout from "@/components/layout/preceptorLayout";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-    User, 
-    Calendar, 
-    MessageSquare, 
-    Hash, 
-    GraduationCap, 
-    Stethoscope, 
-    Building2, 
-    ClipboardList, 
-    Users, 
-    CheckCircle2, 
-    XCircle 
+import {
+    User,
+    Calendar,
+    MessageSquare,
+    Hash,
+    GraduationCap,
+    Stethoscope,
+    Building2,
+    ClipboardList,
+    Users,
+    CheckCircle2,
+    XCircle
 } from 'lucide-react';
 import LoadingScreen from '@/components/preceptorUI/LoadingScreen';
 
@@ -44,6 +44,7 @@ export default function PreceptorFeedbacksPage() {
 
                 if (result.status === 'success') {
                     setFeedbacks(result.data);
+                    console.log('✅ Feedbacks fetched successfully:', result.data);
                 } else {
                     console.error('❌ Failed to fetch:', result.message);
                 }
@@ -81,7 +82,7 @@ export default function PreceptorFeedbacksPage() {
             <div className="py-10 px-4">
                 <div className="max-w-3xl mx-auto">
                     {/* Header */}
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
