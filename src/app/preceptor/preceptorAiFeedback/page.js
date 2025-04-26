@@ -92,12 +92,21 @@ export default function PreceptorAiFeedbackPage() {
 
   const handleSubmit = async () => {
     if (!payload) return;
+
     try {
       const jwt = localStorage.getItem("jwt");
 
+      // 🔥 New logic: build final positivity mapping
+      const finalItemPositivity = {};
+
+      selectedIds.forEach((id) => {
+        finalItemPositivity[id] = itemPositivity[id] ?? true;
+        // If user selected positivity, use it; otherwise default true
+      });
+
       const fullPayload = {
         ...payload,
-        ai_item_list: itemPositivity,
+        ai_item_list: finalItemPositivity,
       };
 
       const res = await functions.createExecution(
@@ -112,7 +121,7 @@ export default function PreceptorAiFeedbackPage() {
       const result = JSON.parse(res.responseBody);
       if (result.status === "success") {
         localStorage.removeItem("preceptorPayload");
-        router.push("/preceptor/success"); // ✅ 成功后跳转
+        router.push("/preceptor/success");
       } else {
         alert("❌ Submission failed: " + result.message);
       }
@@ -121,6 +130,7 @@ export default function PreceptorAiFeedbackPage() {
       alert("Something went wrong while submitting.");
     }
   };
+
 
   // Show loading animation
   if (isLoading) {
@@ -144,7 +154,6 @@ export default function PreceptorAiFeedbackPage() {
         <PreceptorLayout>
           <main className="p-8 font-['Roboto']">
             <div className="max-w-3xl mx-auto">
-              {/* 顶部说明 */}
               <div className="mb-6 text-center">
                 <h1 className="text-2xl font-bold mb-2">Confirm ANSAT Items</h1>
                 <p className="text-sm text-gray-600 italic">
