@@ -34,6 +34,7 @@ import {
 } from "@react-pdf/renderer";
 import { pdf } from '@react-pdf/renderer';
 import { saveAs } from 'file-saver';
+import { GetAllStudentsWithDetails } from "../../../../../../lib/HowToConnectToFunction";
 
 // Register fonts
 Font.register({
@@ -188,6 +189,36 @@ const toast = {
   }
 };
 
+// Helper function to format date as YYYY-MM-DD
+const formatDateToYMD = (dateString) => {
+  if (!dateString) return "Not Available";
+  
+  try {
+    // Handle ISO date format from API (split at T to get just the date part)
+    if (typeof dateString === 'string' && dateString.includes('T')) {
+      dateString = dateString.split('T')[0];
+      // If we now have a valid YYYY-MM-DD format, return it
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        return dateString;
+      }
+    }
+    
+    // Try to parse the date
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      // If invalid date but still a string with something, return it
+      return typeof dateString === 'string' && dateString.trim() ? dateString : "Not Available";
+    }
+    
+    // Format date to YYYY-MM-DD
+    return format(date, "yyyy-MM-dd");
+  } catch (e) {
+    console.error("Date formatting error:", e, "for date:", dateString);
+    // Return original if processing fails
+    return typeof dateString === 'string' ? dateString : "Not Available";
+  }
+};
+
 // PDF document component for reports
 const ReportPDF = ({ student, reportType, reportContent }) => {
   // Generate mock feedback data based on report type
@@ -263,26 +294,22 @@ const ReportPDF = ({ student, reportType, reportContent }) => {
             </View>
             <View style={styles.tableRow}>
               <Text style={styles.tableLabel}>University:</Text>
-              <Text style={styles.tableValue}>{student.studentUniversity}</Text>
+              <Text style={styles.tableValue}>{student.university || student.studentUniversity}</Text>
             </View>
-            {student.healthService && (
-              <View style={styles.tableRow}>
-                <Text style={styles.tableLabel}>Health Service:</Text>
-                <Text style={styles.tableValue}>{student.healthService}</Text>
-              </View>
-            )}
-            {student.clinicArea && (
-              <View style={styles.tableRow}>
-                <Text style={styles.tableLabel}>Clinic Area:</Text>
-                <Text style={styles.tableValue}>{student.clinicArea}</Text>
-              </View>
-            )}
-            {student.startDate && student.endDate && (
-              <View style={styles.tableRow}>
-                <Text style={styles.tableLabel}>Period:</Text>
-                <Text style={styles.tableValue}>{student.startDate} to {student.endDate}</Text>
-              </View>
-            )}
+            <View style={styles.tableRow}>
+              <Text style={styles.tableLabel}>Health Service:</Text>
+              <Text style={styles.tableValue}>{student.healthService || "Not Available"}</Text>
+            </View>
+            <View style={styles.tableRow}>
+              <Text style={styles.tableLabel}>Clinic Area:</Text>
+              <Text style={styles.tableValue}>{student.clinicArea || "Not Available"}</Text>
+            </View>
+            <View style={styles.tableRow}>
+              <Text style={styles.tableLabel}>Placement Period:</Text>
+              <Text style={styles.tableValue}>
+                {formatDateToYMD(student.startDate)} to {formatDateToYMD(student.endDate)}
+              </Text>
+            </View>
           </View>
         </View>
         
@@ -336,7 +363,7 @@ export default function StudentDetailPage() {
   
   // Load student data
   useEffect(() => {
-    const loadStudentData = () => {
+    const loadStudentData = async () => {
       try {
         if (!docId) {
           setError("Invalid document ID");
@@ -352,7 +379,10 @@ export default function StudentDetailPage() {
             const selectedStudent = JSON.parse(selectedStudentJson);
             if (selectedStudent.docId === docId) {
               console.log("Found matching student in localStorage:", selectedStudent);
-              setStudent(selectedStudent);
+              
+              // Try to get additional student data from API
+              const enrichedStudent = await enrichStudentData(selectedStudent);
+              setStudent(enrichedStudent);
               setLoading(false);
               return;
             }
@@ -371,7 +401,10 @@ export default function StudentDetailPage() {
               
               if (foundStudent) {
                 console.log("Found matching student in student list:", foundStudent);
-                setStudent(foundStudent);
+                
+                // Try to get additional student data from API
+                const enrichedStudent = await enrichStudentData(foundStudent);
+                setStudent(enrichedStudent);
                 setLoading(false);
                 return;
               }
@@ -385,13 +418,58 @@ export default function StudentDetailPage() {
           console.error("No student list data in localStorage");
         }
         
+        // If still not found, try to fetch from API
+        try {
+          const response = await GetAllStudentsWithDetails();
+          console.log("API Response:", response);
+          
+          if (response && Array.isArray(response)) {
+            const foundStudent = response.find(s => 
+              s.$id === docId || 
+              s.student_id === docId
+            );
+            
+            if (foundStudent) {
+              console.log("Found student from API:", foundStudent);
+              
+              // Extract and format dates 
+              const startDate = foundStudent.start_date ? foundStudent.start_date : null;
+              const endDate = foundStudent.end_date ? foundStudent.end_date : null;
+              
+              const mappedStudent = {
+                docId: foundStudent.$id || docId,
+                studentId: foundStudent.student_id,
+                studentName: `${foundStudent.first_name} ${foundStudent.last_name}`,
+                university: foundStudent.university_id,
+                studentUniversity: foundStudent.university_id, // For backward compatibility
+                healthService: foundStudent.health_service_id,
+                clinicArea: foundStudent.clinic_area_id,
+                startDate: startDate,
+                endDate: endDate,
+                courses: [] // Default empty courses array
+              };
+              
+              setStudent(mappedStudent);
+              setLoading(false);
+              return;
+            }
+          }
+        } catch (apiError) {
+          console.error("Error fetching student data from API:", apiError);
+        }
+        
         // If still not found, use mock data
         console.log("No matching student found, using mock data");
         setStudent({
           docId: docId,
           studentId: "S1000",
           studentName: "Unknown Student",
+          university: "Unknown University",
           studentUniversity: "Unknown University",
+          healthService: "General Hospital",
+          clinicArea: "General Practice",
+          startDate: "2023-01-15",
+          endDate: "2023-06-30",
           courses: [
             { code: "MED101", name: "Introduction to Medicine", year: "2023" },
             { code: "BIO240", name: "Human Anatomy", year: "2023" }
@@ -407,6 +485,55 @@ export default function StudentDetailPage() {
     
     loadStudentData();
   }, [docId]);
+
+  // Helper function to ensure student data has all required fields
+  const enrichStudentData = async (studentData) => {
+    console.log("Enriching student data:", studentData);
+    
+    // Try to get missing data from the API, especially for dates and other fields
+    if (!studentData.healthService || !studentData.clinicArea || 
+        !studentData.startDate || !studentData.endDate) {
+      try {
+        console.log("Trying to get additional data from API for student:", studentData.studentId);
+        const response = await GetAllStudentsWithDetails();
+        
+        if (response && Array.isArray(response)) {
+          const foundStudent = response.find(s => 
+            s.$id === studentData.docId || 
+            s.student_id === studentData.studentId
+          );
+          
+          if (foundStudent) {
+            console.log("Found student in API:", foundStudent);
+            
+            // Update student data with API data if available
+            studentData = {
+              ...studentData,
+              healthService: studentData.healthService || foundStudent.health_service_id,
+              clinicArea: studentData.clinicArea || foundStudent.clinic_area_id,
+              startDate: studentData.startDate || foundStudent.start_date,
+              endDate: studentData.endDate || foundStudent.end_date,
+              university: studentData.university || foundStudent.university_id
+            };
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data from API:", error);
+      }
+    }
+    
+    // Format dates consistently
+    const formattedStudent = {
+      ...studentData,
+      startDate: formatDateToYMD(studentData.startDate),
+      endDate: formatDateToYMD(studentData.endDate),
+      university: studentData.university || studentData.studentUniversity
+    };
+    
+    console.log("Formatted student data:", formattedStudent);
+    
+    return formattedStudent;
+  };
   
   // Navigate back to search page
   const handleBackClick = () => {
@@ -543,13 +670,13 @@ export default function StudentDetailPage() {
             </div>
             
             <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
+              <FileText className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-sm text-muted-foreground">University</p>
-                <p className="font-medium">{student.studentUniversity}</p>
+                <p className="font-medium">{student.university || student.studentUniversity}</p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <FileText className="h-5 w-5 text-muted-foreground" />
               <div>
@@ -557,6 +684,40 @@ export default function StudentDetailPage() {
                 <p className="font-medium">{student.docId}</p>
               </div>
             </div>
+            
+            <div className="flex items-center gap-3">
+              <FileText className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Health Service</p>
+                <p className="font-medium">{student.healthService || "Not Available"}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <FileText className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Clinic Area</p>
+                <p className="font-medium">{student.clinicArea || "Not Available"}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Start Date</p>
+                <p className="font-medium">{formatDateToYMD(student.startDate)}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">End Date</p>
+                <p className="font-medium">{formatDateToYMD(student.endDate)}</p>
+              </div>
+            </div>
+            
+            
           </div>
         </CardContent>
       </Card>

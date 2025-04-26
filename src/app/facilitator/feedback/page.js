@@ -20,12 +20,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Home,
-  MessageSquareText,
-  Settings,
-  Users,
-  Download,
-  Bell,
   Search,
   X,
   ChevronLeft,
@@ -614,7 +608,7 @@ export default function AllFeedback() {
             <div className="mt-8 flex flex-col items-center gap-4">
               <div className="text-sm text-muted-foreground">
                 Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredResults.length)} of {filteredResults.length} items
-              </div>
+            </div>
               <div className="flex items-center gap-1">
                 {/* 上一页按钮 */}
                 {currentPage > 1 && (
@@ -669,7 +663,7 @@ export default function AllFeedback() {
                         </Button>
                       );
                     })}
-                </div>
+            </div>
                 
                 {/* 下一页按钮 */}
                 {currentPage < totalPages && (

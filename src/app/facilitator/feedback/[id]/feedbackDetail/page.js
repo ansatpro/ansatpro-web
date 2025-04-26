@@ -32,15 +32,7 @@ export default function FeedbackDetail() {
             
             // Check if ID matches
             if (currentFeedback.id === feedbackId) {
-              // Extract discussion data from reviewData if available
-              let discussedWithStudent = false;
-              let discussionDate = "";
-              
-              if (currentFeedback.reviewData) {
-                discussedWithStudent = currentFeedback.reviewData.discussedWithStudent;
-                discussionDate = currentFeedback.reviewData.discussionDate;
-              }
-              
+              // Extract data directly with correct field names
               setFeedbackData({
                 id: currentFeedback.id,
                 date: currentFeedback.date || "Unknown date",
@@ -49,8 +41,26 @@ export default function FeedbackDetail() {
                 is_marked: !!currentFeedback.is_marked,
                 reviewComment: currentFeedback.reviewComment || "",
                 reviewScore: currentFeedback.reviewScore || [],
-                discussedWithStudent: discussedWithStudent,
-                discussionDate: discussionDate,
+                flag_discussed_with_student: (() => {
+                  // 确保从各种可能的位置和格式正确获取讨论状态
+                  if (currentFeedback.flag_discussed_with_student !== undefined) {
+                    return currentFeedback.flag_discussed_with_student;
+                  }
+                  if (currentFeedback.reviewData?.discussedWithStudent !== undefined) {
+                    return currentFeedback.reviewData.discussedWithStudent === "yes";
+                  }
+                  return false;
+                })(),
+                discussion_date: (() => {
+                  // 确保从各种可能的位置正确获取讨论日期
+                  if (currentFeedback.discussion_date) {
+                    return currentFeedback.discussion_date;
+                  }
+                  if (currentFeedback.reviewData?.discussionDate) {
+                    return currentFeedback.reviewData.discussionDate;
+                  }
+                  return "";
+                })(),
                 aiFeedbackItems: currentFeedback.aiFeedbackDescriptions || []
               });
               
@@ -73,15 +83,7 @@ export default function FeedbackDetail() {
             const feedback = feedbacks.find(f => f.id === feedbackId);
             
             if (feedback) {
-              // Extract discussion data from reviewData if available
-              let discussedWithStudent = false;
-              let discussionDate = "";
-              
-              if (feedback.reviewData) {
-                discussedWithStudent = feedback.reviewData.discussedWithStudent;
-                discussionDate = feedback.reviewData.discussionDate;
-              }
-              
+              // Extract data directly with correct field names
               setFeedbackData({
                 id: feedback.id,
                 date: feedback.date || "Unknown date",
@@ -90,8 +92,26 @@ export default function FeedbackDetail() {
                 is_marked: !!feedback.is_marked,
                 reviewComment: feedback.reviewComment || "",
                 reviewScore: feedback.reviewScore || [],
-                discussedWithStudent: discussedWithStudent,
-                discussionDate: discussionDate,
+                flag_discussed_with_student: (() => {
+                  // 确保从各种可能的位置和格式正确获取讨论状态
+                  if (feedback.flag_discussed_with_student !== undefined) {
+                    return feedback.flag_discussed_with_student;
+                  }
+                  if (feedback.reviewData?.discussedWithStudent !== undefined) {
+                    return feedback.reviewData.discussedWithStudent === "yes";
+                  }
+                  return false;
+                })(),
+                discussion_date: (() => {
+                  // 确保从各种可能的位置正确获取讨论日期
+                  if (feedback.discussion_date) {
+                    return feedback.discussion_date;
+                  }
+                  if (feedback.reviewData?.discussionDate) {
+                    return feedback.reviewData.discussionDate;
+                  }
+                  return "";
+                })(),
                 aiFeedbackItems: feedback.aiFeedbackDescriptions || []
               });
               
@@ -116,8 +136,8 @@ export default function FeedbackDetail() {
           is_marked: false,
           reviewComment: "",
           reviewScore: [],
-          discussedWithStudent: false,
-          discussionDate: "",
+          flag_discussed_with_student: false,
+          discussion_date: "",
           aiFeedbackItems: []
         });
         
@@ -220,7 +240,7 @@ export default function FeedbackDetail() {
       {/* Original feedback */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-xl">Original Feedback</CardTitle>
+          <CardTitle className="text-xl">Preceptor Feedback</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="p-4 border rounded-md">
@@ -234,7 +254,7 @@ export default function FeedbackDetail() {
       {/* Assessment Comments */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-xl">Comments</CardTitle>
+          <CardTitle className="text-xl">Facilitator Review</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="p-4 border rounded-md">
@@ -337,20 +357,40 @@ export default function FeedbackDetail() {
       {/* Student discussion section */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-xl">Student Discussion</CardTitle>
+          <CardTitle className="text-xl">Student Discussion (Facilitator)</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className={`p-4 border rounded-md ${feedbackData.discussedWithStudent === "yes" ? 'bg-green-50' : 'bg-amber-50'}`}>
-            {feedbackData.discussedWithStudent === "yes" ? (
-              <p className="text-green-700">
-                This feedback has been discussed with the student on {formatDate(feedbackData.discussionDate)}.
-              </p>
-            ) : (
-              <p className="text-amber-700">
-                This feedback has not been discussed with the student.
-              </p>
-            )}
-          </div>
+          {console.log("Debug discussion data:", {
+            flag_discussed_with_student: feedbackData.flag_discussed_with_student,
+            discussion_date: feedbackData.discussion_date
+          })}
+          {(() => {
+            // 明确检查数据类型和值
+            const wasDiscussed = 
+              feedbackData.flag_discussed_with_student === true || 
+              feedbackData.flag_discussed_with_student === "true" || 
+              feedbackData.flag_discussed_with_student === "yes";
+            
+            const discussionDate = feedbackData.discussion_date;
+            
+            return (
+              <div className={`p-4 border rounded-md ${wasDiscussed ? 'bg-green-50' : 'bg-amber-50'}`}>
+                {wasDiscussed && discussionDate ? (
+                  <p className="text-green-700">
+                    This feedback has been discussed with the student on {formatDate(discussionDate)}.
+                  </p>
+                ) : wasDiscussed ? (
+                  <p className="text-green-700">
+                    This feedback has been discussed with the student.
+                  </p>
+                ) : (
+                  <p className="text-amber-700">
+                    This feedback has not been discussed with the student.
+                  </p>
+                )}
+              </div>
+            );
+          })()}
         </CardContent>
       </Card>
       
