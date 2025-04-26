@@ -537,17 +537,6 @@ This summary is based on ${Math.floor(Math.random() * 5) + 3} feedback reports f
             </Button>
             <h1 className="text-3xl font-bold">AI Summary</h1>
           </div>
-          
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm">
-              <Bell className="mr-2 h-4 w-4" />
-              <span className="sr-only md:not-sr-only md:inline-block">Notifications</span>
-            </Button>
-            <Button variant="outline" size="sm">
-              <LogOut className="mr-2 h-4 w-4" />
-              <span className="sr-only md:not-sr-only md:inline-block">Log out</span>
-            </Button>
-          </div>
         </header>
 
         {/* 第一部分: 学生信息卡片 */}

@@ -21,65 +21,6 @@ export default function ExportPage() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
-  // 示例学生数据 - 更新格式以与反馈系统保持一致
-  // const sampleStudents = [
-  //   {
-  //     docId: "doc123",
-  //     studentId: "S1001",
-  //     studentName: "Olivia Martinez",
-  //     studentUniversity: "University of Melbourne",
-  //   },
-  //   {
-  //     docId: "doc124",
-  //     studentId: "S1002",
-  //     studentName: "Michael Johnson",
-  //     studentUniversity: "Stanford University",
-  //     courses: [{ code: "MED201", name: "Clinical Skills", year: "2023" }],
-  //   },
-  //   {
-  //     docId: "doc125",
-  //     studentId: "S1003",
-  //     studentName: "Emma Wilson",
-  //     studentUniversity: "Deakin University",
-  //     courses: [{ code: "MED301", name: "Advanced Diagnostics", year: "2023" }],
-  //   },
-  //   {
-  //     docId: "doc126",
-  //     studentId: "S1004",
-  //     studentName: "James Smith",
-  //     studentUniversity: "Monash University",
-  //     courses: [{ code: "BIO220", name: "Physiology", year: "2023" }],
-  //   },
-  //   {
-  //     docId: "doc127",
-  //     studentId: "S1005",
-  //     studentName: "Sophia Chen",
-  //     studentUniversity: "University of Sydney",
-  //     courses: [{ code: "MED110", name: "Medical Ethics", year: "2023" }],
-  //   },
-  //   {
-  //     docId: "doc128",
-  //     studentId: "S1006",
-  //     studentName: "William Brown",
-  //     studentUniversity: "RMIT University",
-  //     courses: [{ code: "BIO250", name: "Microbiology", year: "2023" }],
-  //   },
-  //   {
-  //     docId: "doc129",
-  //     studentId: "S1007",
-  //     studentName: "Ava Davis",
-  //     studentUniversity: "La Trobe University",
-  //     courses: [{ code: "MED205", name: "Patient Care", year: "2023" }],
-  //   },
-  //   {
-  //     docId: "doc130",
-  //     studentId: "S1008",
-  //     studentName: "Lucas Thompson",
-  //     studentUniversity: "University of Queensland",
-  //     courses: [{ code: "BIO230", name: "Immunology", year: "2023" }],
-  //   },
-  // ];
-
   // 初始化数据
   useEffect(() => {
     const initializeData = async () => {
@@ -269,106 +210,114 @@ export default function ExportPage() {
 
   return (
     <div className="container mx-auto px-4 py-4">
-      <h1 className="text-2xl font-bold mb-6">Export Data</h1>
+      <h1 className="text-2xl font-bold mb-6 text-left">Export Data</h1>
 
-      <Card className="mb-6">
-        <CardHeader>
-          <h2 className="text-xl font-semibold">Search for a Student</h2>
-          <p className="text-sm text-muted-foreground">
-            To generate reports, start by searching for a student by name or ID
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="relative" ref={searchRef}>
-            <div className="flex gap-2 mb-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search by student name or ID"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  className="pl-10 pr-10"
-                />
-                {searchTerm && (
-                  <button
-                    onClick={clearSearch}
-                    className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
+      {isLoading ? (
+        <div className="py-6">
+          <p className="text-muted-foreground">Loading student data...</p>
+        </div>
+      ) : (
+        <>
+          <Card className="mb-6">
+            <CardHeader>
+              <h2 className="text-xl font-semibold">Search for a Student</h2>
+              <p className="text-sm text-muted-foreground">
+                To generate reports, start by searching for a student by name or ID
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="relative" ref={searchRef}>
+                <div className="flex gap-2 mb-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Search by student name or ID"
+                      value={searchTerm}
+                      onChange={handleSearchChange}
+                      className="pl-10 pr-10"
+                    />
+                    {searchTerm && (
+                      <button
+                        onClick={clearSearch}
+                        className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {showDropdown && searchResults.length > 0 && (
+                  <div className="absolute w-full bg-white mt-1 rounded-md border shadow-lg z-10 max-h-80 overflow-y-auto">
+                    {searchResults.map((student) => (
+                      <div
+                        key={student.docId}
+                        className="p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0"
+                        onClick={() => selectStudent(student)}
+                      >
+                        <div className="font-medium">{student.studentName}</div>
+                        <div className="text-sm text-gray-500 flex justify-between">
+                          <span>ID: {student.studentId}</span>
+                          <span>{student.studentUniversity}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
-              </div>
-            </div>
 
-            {showDropdown && searchResults.length > 0 && (
-              <div className="absolute w-full bg-white mt-1 rounded-md border shadow-lg z-10 max-h-80 overflow-y-auto">
-                {searchResults.map((student) => (
-                  <div
-                    key={student.docId}
-                    className="p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0"
-                    onClick={() => selectStudent(student)}
-                  >
-                    <div className="font-medium">{student.studentName}</div>
-                    <div className="text-sm text-gray-500 flex justify-between">
-                      <span>ID: {student.studentId}</span>
-                      <span>{student.studentUniversity}</span>
+                {showDropdown && searchTerm && searchResults.length === 0 && (
+                  <div className="absolute w-full bg-white mt-1 rounded-md border shadow-lg z-10">
+                    <div className="p-3 text-center text-gray-500">
+                      No students found matching "{searchTerm}"
                     </div>
                   </div>
-                ))}
+                )}
               </div>
-            )}
+            </CardContent>
+          </Card>
 
-            {showDropdown && searchTerm && searchResults.length === 0 && (
-              <div className="absolute w-full bg-white mt-1 rounded-md border shadow-lg z-10">
-                <div className="p-3 text-center text-gray-500">
-                  No students found matching "{searchTerm}"
+          {selectedStudent && (
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-lg font-medium">
+                      {selectedStudent.studentName}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      ID: {selectedStudent.studentId}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {selectedStudent.studentUniversity}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() =>
+                      router.push(
+                        `/facilitator/export/${selectedStudent.docId}/studentDetail`
+                      )
+                    }
+                  >
+                    View Details
+                  </Button>
                 </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              </CardContent>
+            </Card>
+          )}
 
-      {selectedStudent && (
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-lg font-medium">
-                  {selectedStudent.studentName}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  ID: {selectedStudent.studentId}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {selectedStudent.studentUniversity}
-                </p>
-              </div>
-              <Button
-                onClick={() =>
-                  router.push(
-                    `/facilitator/export/${selectedStudent.docId}/studentDetail`
-                  )
-                }
-              >
-                View Details
-              </Button>
+          {!searchTerm && (
+            <div className="bg-gray-50 rounded-lg p-8 text-center">
+              <h3 className="text-lg font-medium mb-2">
+                Ready to Generate Reports
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Search for a student above to view their details and generate
+                reports
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {!isLoading && !searchTerm && (
-        <div className="bg-gray-50 rounded-lg p-8 text-center">
-          <h3 className="text-lg font-medium mb-2">
-            Ready to Generate Reports
-          </h3>
-          <p className="text-gray-500 mb-4">
-            Search for a student above to view their details and generate
-            reports
-          </p>
-        </div>
+          )}
+        </>
       )}
     </div>
   );

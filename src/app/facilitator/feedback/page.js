@@ -436,7 +436,7 @@ export default function AllFeedback() {
                 </Select>
               </div>
         
-              <div>
+        <div>
                 <label className="mb-2 block text-sm font-medium">
                   Clinic Area
                 </label>
@@ -458,7 +458,7 @@ export default function AllFeedback() {
                 </Select>
               </div>
 
-              <div>
+            <div>
                 <label className="mb-2 block text-sm font-medium">
                   Date Range
                 </label>
@@ -516,7 +516,7 @@ export default function AllFeedback() {
             >
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
-                  <div>
+            <div>
                     <CardTitle className="text-lg font-bold">
                       {feedback.studentName}
                     </CardTitle>
@@ -553,12 +553,12 @@ export default function AllFeedback() {
                   <Button size="sm" variant="outline" className="bg-white">
                     View Details
                   </Button>
-                </div>
+            </div>
               </CardFooter>
             </Card>
           ))}
-        </div>
+            </div>
       )}
-    </div>
+            </div>
   );
 }

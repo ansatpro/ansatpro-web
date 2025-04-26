@@ -11,13 +11,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { 
-  Home, 
-  MessageSquareText, 
-  Settings, 
-  Users, 
-  Download, 
-  Bell, 
-  LogOut,
   ChevronDown
 } from "lucide-react";
 import {
@@ -251,65 +244,11 @@ export default function AssessmentForm() {
   
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Sidebar navigation */}
-      <aside className="w-64 border-r bg-muted/40 p-6 hidden md:block">
-        <div className="mb-8">
-          <h1 className="text-xl font-bold">Assessment Pro</h1>
-        </div>
-        <nav className="space-y-2">
-          <Link
-            href="/facilitator/dashboard"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Home className="mr-2 h-4 w-4" />
-            Home
-          </Link>
-          <Link
-            href="/facilitator/student"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Users className="mr-2 h-4 w-4" />
-            Students
-          </Link>
-          <Link
-            href="/facilitator/feedback"
-            className="flex items-center rounded-md bg-accent px-3 py-2 text-sm font-medium text-accent-foreground"
-          >
-            <MessageSquareText className="mr-2 h-4 w-4" />
-            Feedback
-          </Link>
-          <Link
-            href="/facilitator/report"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Reports
-          </Link>
-          <Link
-            href="/facilitator/settings"
-            className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </Link>
-        </nav>
-      </aside>
-
       {/* Main content area */}
       <main className="flex-1 p-6">
         {/* Page title */}
-        <header className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Assessment Form</h1>
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm">
-              <Bell className="mr-2 h-4 w-4" />
-              <span className="sr-only md:not-sr-only md:inline-block">Notifications</span>
-            </Button>
-            <Button variant="outline" size="sm">
-              <LogOut className="mr-2 h-4 w-4" />
-              <span className="sr-only md:not-sr-only md:inline-block">Log out</span>
-            </Button>
-          </div>
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold">Feedback Detail</h1>
         </header>
 
         {/* Student information card */}
