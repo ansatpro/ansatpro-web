@@ -566,7 +566,7 @@ export default function StudentDetailPage() {
     setShowExportDialog(true);
   };
   
-  // Confirm export report
+  // Export confirmation dialog
   const confirmExport = async () => {
     if (!exportType) {
       toast.error("No export type selected");
@@ -603,6 +603,11 @@ export default function StudentDetailPage() {
       
       // Close dialog
       setShowExportDialog(false);
+      
+      // Navigate to success page after brief delay to ensure file download starts
+      setTimeout(() => {
+        router.push("/facilitator/export/success");
+      }, 500);
     } catch (error) {
       console.error("Export error:", error);
       toast.error(`There was an error exporting the ${exportType}. Please try again.`);

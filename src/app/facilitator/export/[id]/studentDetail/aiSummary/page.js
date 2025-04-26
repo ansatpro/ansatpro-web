@@ -694,6 +694,11 @@ This updated analysis includes the most recent feedback from preceptors and faci
       
       // Save file using file-saver
       saveAs(pdfBlob, fileName);
+      
+      // Navigate to success page after brief delay to ensure file download starts
+      setTimeout(() => {
+        router.push("/facilitator/export/success");
+      }, 500);
     } catch (error) {
       console.error("Export error:", error);
       alert(`PDF generation error: ${error.message || 'Unknown error'}`);

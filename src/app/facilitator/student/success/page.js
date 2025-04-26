@@ -1,7 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,7 +13,7 @@ export default function RegistrationSuccessPage() {
   };
 
   const handleReturnHome = () => {
-    router.push("/facilitator/home");
+    router.push("/facilitator/student");
   };
 
   return (
@@ -42,7 +40,7 @@ export default function RegistrationSuccessPage() {
                 </Button>
                 
                 <Button onClick={handleReturnHome} variant="default" size="lg">
-                  Return to Home
+                  Return to Student Page
                 </Button>
               </div>
             </CardContent>
