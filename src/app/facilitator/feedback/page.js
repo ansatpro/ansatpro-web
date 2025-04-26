@@ -343,7 +343,14 @@ export default function AllFeedback() {
         reviewComment: feedback.reviewComment,
         reviewScore: feedback.reviewScore,
         aiFeedbackDescriptions: feedback.aiFeedbackDescriptions || [],
+        flag_discussed_with_student: feedback.flag_discussed_with_student,
+        discussion_date: feedback.discussion_date,
       };
+
+      console.log("Storing feedback with discussion data:", {
+        flag_discussed_with_student: feedback.flag_discussed_with_student,
+        discussion_date: feedback.discussion_date
+      });
 
       // Store current clicked feedback details to localStorage
       localStorage.setItem(
@@ -445,8 +452,8 @@ export default function AllFeedback() {
                   </SelectContent>
                 </Select>
               </div>
-
-              <div>
+        
+        <div>
                 <label className="mb-2 block text-sm font-medium">
                   Clinic Area
                 </label>
@@ -468,7 +475,7 @@ export default function AllFeedback() {
                 </Select>
               </div>
 
-              <div>
+            <div>
                 <label className="mb-2 block text-sm font-medium">
                   Date Range
                 </label>
@@ -529,7 +536,7 @@ export default function AllFeedback() {
             >
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
-                  <div>
+            <div>
                     <CardTitle className="text-lg font-bold">
                       {feedback.studentName}
                     </CardTitle>
@@ -568,12 +575,12 @@ export default function AllFeedback() {
                   <Button size="sm" variant="outline" className="bg-white">
                     View Details
                   </Button>
-                </div>
+            </div>
               </CardFooter>
             </Card>
           ))}
-        </div>
+            </div>
       )}
-    </div>
+            </div>
   );
 }
