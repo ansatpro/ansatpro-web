@@ -1,5 +1,4 @@
 import { Client, Account, Functions, Storage } from 'appwrite';
-import { Client, Account, Functions } from "appwrite";
 
 export const client = new Client();
 
