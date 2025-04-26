@@ -28,6 +28,8 @@ import {
   Bell,
   Search,
   X,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { GetAllStudentsWithDetails } from "../../../../lib/HowToConnectToFunction";
@@ -44,6 +46,9 @@ export default function AllFeedback() {
   const [healthServiceFilter, setHealthServiceFilter] = useState("all");
   const [clinicAreaFilter, setClinicAreaFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9; // 每页显示9个卡片
 
   // Helper function to format date
   const formatDate = (dateString) => {
@@ -180,6 +185,7 @@ export default function AllFeedback() {
   // Update filtered results when feedback data changes
   useEffect(() => {
     setFilteredResults(feedbacks);
+    setCurrentPage(1); // 重置到第一页当数据改变时
   }, [feedbacks]);
 
   // Get unique filter values from feedback data
@@ -288,6 +294,7 @@ export default function AllFeedback() {
     }
 
     setFilteredResults(results);
+    setCurrentPage(1); // 重置到第一页当过滤条件改变时
   };
 
   // Search feedback
@@ -304,6 +311,7 @@ export default function AllFeedback() {
     );
 
     setFilteredResults(results);
+    setCurrentPage(1); // 重置到第一页当搜索条件改变时
   };
 
   // Clear all filters
@@ -372,6 +380,22 @@ export default function AllFeedback() {
       console.error("Error in handleFeedbackClick:", error);
       alert("There was an error processing this feedback. Please try again.");
     }
+  };
+
+  // 计算分页数据和总页数
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredResults.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredResults.length / itemsPerPage);
+
+  // 处理页面变化
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    // 滚动到页面顶部
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   return (
@@ -527,60 +551,143 @@ export default function AllFeedback() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredResults.map((feedback) => (
-            <Card
-              key={feedback.id}
-              className="w-full mb-4 hover:shadow-md transition-shadow cursor-pointer"
-              onClick={() => handleFeedbackClick(feedback)}
-            >
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-            <div>
-                    <CardTitle className="text-lg font-bold">
-                      {feedback.studentName}
-                    </CardTitle>
-                    <p className="text-sm text-gray-500">
-                      ID: {feedback.studentId}
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {currentItems.map((feedback) => (
+              <Card
+                key={feedback.id}
+                className="w-full mb-4 hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => handleFeedbackClick(feedback)}
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                <div>
+                        <CardTitle className="text-lg font-bold">
+                          {feedback.studentName}
+                        </CardTitle>
+                        <p className="text-sm text-gray-500">
+                          ID: {feedback.studentId}
+                        </p>
+                      </div>
+                      <Badge
+                        variant={feedback.is_marked ? "success" : "pending"}
+                        className={
+                          feedback.is_marked ? "bg-green-500" : "bg-amber-500"
+                        }
+                      >
+                        {feedback.is_marked ? "Reviewed" : "Pending"}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <div className="mb-2">
+                      <p className="text-sm">
+                        <span className="font-medium">Date:</span>{" "}
+                        {formatDate(feedback.date)}
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-medium">Preceptor:</span>{" "}
+                        {feedback.preceptor}
+                      </p>
+                    </div>
+                    <p className="text-sm line-clamp-3">
+                    <span className="font-medium">Feedback:</span>{" "}
+                      {feedback.content}
                     </p>
-                  </div>
-                  <Badge
-                    variant={feedback.is_marked ? "success" : "pending"}
-                    className={
-                      feedback.is_marked ? "bg-green-500" : "bg-amber-500"
-                    }
+                  </CardContent>
+                  <CardFooter>
+                    <div className="flex justify-between items-center w-full mt-2">
+                      <div className="text-xs text-gray-500">
+                        {feedback.university}
+                      </div>
+                      <Button size="sm" variant="outline" className="bg-white">
+                        View Details
+                      </Button>
+                </div>
+                  </CardFooter>
+                </Card>
+              ))}
+          </div>
+          
+          {/* 分页控件 - 使用基本组件实现 */}
+          {totalPages > 1 && (
+            <div className="mt-8 flex flex-col items-center gap-4">
+              <div className="text-sm text-muted-foreground">
+                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredResults.length)} of {filteredResults.length} items
+              </div>
+              <div className="flex items-center gap-1">
+                {/* 上一页按钮 */}
+                {currentPage > 1 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    className="flex items-center gap-1"
                   >
-                    {feedback.is_marked ? "Reviewed" : "Pending"}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="pb-2">
-                <div className="mb-2">
-                  <p className="text-sm">
-                    <span className="font-medium">Date:</span>{" "}
-                    {formatDate(feedback.date)}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-medium">Preceptor:</span>{" "}
-                    {feedback.preceptor}
-                  </p>
-                </div>
-                <p className="text-sm line-clamp-3">{feedback.content}</p>
-              </CardContent>
-              <CardFooter>
-                <div className="flex justify-between items-center w-full mt-2">
-                  <div className="text-xs text-gray-500">
-                    {feedback.university}
-                  </div>
-                  <Button size="sm" variant="outline" className="bg-white">
-                    View Details
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="hidden sm:inline">Previous</span>
                   </Button>
+                )}
+                
+                {/* 页码按钮 */}
+                <div className="flex items-center">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(page => {
+                      // 显示第一页、最后一页以及当前页面附近的页码
+                      return page === 1 || 
+                             page === totalPages || 
+                             (page >= currentPage - 1 && page <= currentPage + 1);
+                    })
+                    .map((page, index, array) => {
+                      // 如果页码之间有间隔，添加省略号
+                      if (index > 0 && array[index - 1] !== page - 1) {
+                        return (
+                          <React.Fragment key={`ellipsis-${page}`}>
+                            <span className="px-2 text-muted-foreground">...</span>
+                            <Button
+                              key={page}
+                              variant={currentPage === page ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handlePageChange(page)}
+                              className="mx-1 min-w-[32px]"
+                            >
+                              {page}
+                            </Button>
+                          </React.Fragment>
+                        );
+                      }
+                      
+                      return (
+                        <Button
+                          key={page}
+                          variant={currentPage === page ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handlePageChange(page)}
+                          className="mx-1 min-w-[32px]"
+                        >
+                          {page}
+                        </Button>
+                      );
+                    })}
+                </div>
+                
+                {/* 下一页按钮 */}
+                {currentPage < totalPages && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    className="flex items-center gap-1"
+                  >
+                    <span className="hidden sm:inline">Next</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
-              </CardFooter>
-            </Card>
-          ))}
-            </div>
+          )}
+        </>
       )}
-            </div>
+    </div>
   );
 }
