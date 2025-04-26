@@ -157,9 +157,9 @@ export default function SearchStudent() {
             </h2>
             <div className="space-y-2 text-gray-600 font-['Roboto']">
               <p>Student ID: {selectedStudent.student_id}</p>
-              <p>Institution: {selectedStudent.institution || 'Not assigned'}</p>
-              <p>Clinic Area: {selectedStudent.clinic_area || 'Not assigned'}</p>
-              <p>Email: {selectedStudent.email || 'Not available'}</p>
+              <p>University: {selectedStudent.university_id}</p>
+              <p>health_service: {selectedStudent.health_service_id || 'Not assigned'}</p>
+              <p>Clinic Area: {selectedStudent.clinic_area_id || 'Not assigned'}</p>
               <p>Start Date: {selectedStudent.start_date ? new Date(selectedStudent.start_date).toLocaleDateString() : 'Not set'}</p>
               <p>End Date: {selectedStudent.end_date ? new Date(selectedStudent.end_date).toLocaleDateString() : 'Not set'}</p>
             </div>
