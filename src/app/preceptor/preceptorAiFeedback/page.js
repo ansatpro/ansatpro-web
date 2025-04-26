@@ -30,6 +30,7 @@ export default function PreceptorAiFeedbackPage() {
         const fetchData = async () => {
           try {
             setIsLoading(true); // Start loading
+            console.log("Fetching assessment items...");
 
             const res = await functions.createExecution(
               process.env.NEXT_PUBLIC_FN_GUEST_REQUEST,
