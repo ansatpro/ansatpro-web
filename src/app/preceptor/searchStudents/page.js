@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { X } from "lucide-react";
 import { functions, account } from "../../appwrite";
-import PreceptorLayout from "@/components/layout/preceptorLayout"; // ✅ 恢复你的布局组件
+import PreceptorLayout from "@/components/layout/preceptorLayout"; // Restore your layout component
 import DotsLoading from "@/components/preceptorUI/SearchLoading";
 
 export default function SearchStudent() {
@@ -66,7 +66,7 @@ export default function SearchStudent() {
     if (!searchLoading && searchQuery.length >= 2 && students.length === 0) {
       const timeout = setTimeout(() => {
         setShowNoResults(true);
-      }, 500); // ⏱ Delay before showing the message
+      }, 500); // Delay before showing the message
 
       return () => clearTimeout(timeout); // cleanup if query changes
     } else {
@@ -94,7 +94,7 @@ export default function SearchStudent() {
     <PreceptorLayout>
       <main className="pt-10 px-6 max-w-3xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2 font-['Roboto']">STUDENT DETAIL</h1>
+          <h1 className="text-3xl font-bold mb-2 font-['Roboto']">Student Detail</h1>
         </div>
 
         {/* Search Box */}
@@ -176,11 +176,11 @@ export default function SearchStudent() {
                 </label>
               </div>
 
-              <div className="flex justify-end">
+              <div className="flex flex-col gap-4">
                 <Button
                   variant="outline"
                   onClick={clearSearch}
-                  className="mr-2 px-6 py-3 rounded-lg text-[#3A6784] border-[#3A6784] hover:bg-[#f0f4f8] text-base font-semibold font-['Roboto']"
+                  className="px-6 py-3 rounded-lg text-[#3A6784] border-[#3A6784] hover:bg-[#f0f4f8] text-base font-semibold font-['Roboto']"
                 >
                   Clear Selection
                 </Button>

@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { enGB } from "date-fns/locale"; // ✅ 加入英国 locale 实现 Mo → Su
+import { enGB } from "date-fns/locale"; // Add enGB locale to make Monday the first day
 import { cn } from "@/lib/utils";
 import { useRouter } from 'next/navigation';
 import PreceptorLayout from "@/components/layout/preceptorLayout";
@@ -26,7 +26,7 @@ export default function PreceptorFeedbackForm() {
     const [flagStudent, setFlagStudent] = useState(null);
     const [discussionDate, setDiscussionDate] = useState(null);
     const [status, setStatus] = useState(null);
-    const [calendarOpen, setCalendarOpen] = useState(false); // ✅ 控制弹窗收起
+    const [calendarOpen, setCalendarOpen] = useState(false); // Control popover open state
 
     useEffect(() => {
         const loadUser = async () => {
@@ -90,7 +90,7 @@ export default function PreceptorFeedbackForm() {
 
     return (
         <PreceptorLayout>
-            <main className="p-8">
+            <main className="p-8 pb-24 md:pb-8">
                 <div className="max-w-3xl mx-auto">
                     {/* Header */}
                     <div className="mb-8">
@@ -188,13 +188,11 @@ export default function PreceptorFeedbackForm() {
                                         </PopoverTrigger>
                                         <PopoverContent className="w-auto p-0" align="start">
                                             <Calendar
-                                                mode="single"
-                                                selected={discussionDate}
-                                                onSelect={(date) => {
+                                                value={discussionDate}
+                                                onChange={(date) => {
                                                     setDiscussionDate(date);
                                                     setCalendarOpen(false);
                                                 }}
-                                                initialFocus
                                             />
                                         </PopoverContent>
                                     </Popover>
@@ -205,7 +203,13 @@ export default function PreceptorFeedbackForm() {
                         <div className="flex justify-center">
                             <Button
                                 type="submit"
-                                className="w-full max-w-md px-6 py-3 rounded-lg bg-[#3A6784] hover:bg-[#2d5268] text-white text-base font-semibold font-['Roboto'] transition-transform duration-200 hover:scale-105"
+                                disabled={
+                                    !content ||
+                                    !flagFacilitator ||
+                                    !flagStudent ||
+                                    (flagStudent === 'yes' && !discussionDate)
+                                }
+                                className="w-full max-w-md px-6 py-3 rounded-lg bg-[#3A6784] hover:bg-[#2d5268] text-white text-base font-semibold font-['Roboto'] transition-transform duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Continue
                             </Button>

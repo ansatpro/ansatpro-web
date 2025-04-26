@@ -141,12 +141,12 @@ export default function SettingsPage() {
               </div>
 
               <div className="pt-2">
-                <Button
+                {/* <Button
                   onClick={handleLogout}
                   className="bg-[#3A6784] hover:bg-[#2d5268] text-white"
                 >
                   Logout
-                </Button>
+                </Button> */}
               </div>
             </div>
           </div>

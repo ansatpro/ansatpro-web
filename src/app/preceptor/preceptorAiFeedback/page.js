@@ -16,7 +16,7 @@ export default function PreceptorAiFeedbackPage() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [matchedIds, setMatchedIds] = useState([]);
   const [itemPositivity, setItemPositivity] = useState({});
-  const [isLoading, setIsLoading] = useState(true); // 💡 Control visibility
+  const [isLoading, setIsLoading] = useState(true); // Control visibility
 
 
   useEffect(() => {
@@ -112,7 +112,7 @@ export default function PreceptorAiFeedbackPage() {
       const result = JSON.parse(res.responseBody);
       if (result.status === "success") {
         localStorage.removeItem("preceptorPayload");
-        router.push("/preceptor/success"); // ✅ 成功后跳转
+        router.push("/preceptor/success"); // Redirect to success after submission
       } else {
         alert("❌ Submission failed: " + result.message);
       }
@@ -165,7 +165,7 @@ export default function PreceptorAiFeedbackPage() {
               </div>
 
               {/* 滚动容器区域 */}
-              <div className="max-h-[400px] overflow-y-auto pr-1 space-y-2 border-t pt-4 mb-6">
+              <div className="max-h-[330px] overflow-y-auto pr-1 space-y-2 border-t pt-4 mb-6">
                 {assessmentItems.map((item) => (
                   <label
                     key={item.item_id}
@@ -216,7 +216,8 @@ export default function PreceptorAiFeedbackPage() {
               <div className="mt-6 flex justify-center">
                 <Button
                   onClick={handleSubmit}
-                  className="px-8 py-3 bg-[#3A6784] hover:bg-[#2d5268] text-white font-medium rounded-lg shadow transition-colors"
+                  disabled={selectedIds.length === 0}
+                  className="px-8 py-3 bg-[#3A6784] hover:bg-[#2d5268] text-white font-medium rounded-lg shadow transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Confirm
                 </Button>

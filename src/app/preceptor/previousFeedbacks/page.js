@@ -88,7 +88,7 @@ export default function PreceptorFeedbacksPage() {
                         transition={{ duration: 0.5 }}
                         className="mb-6 text-center"
                     >
-                        <h1 className="text-2xl font-bold text-gray-800 mb-4">Previous Feedback</h1>
+                        <h1 className="text-3xl font-semibold mb-1 font-['Roboto'] text-center">Previous Feedback</h1>
                         <div className="flex justify-center">
                             <motion.input
                                 type="text"
