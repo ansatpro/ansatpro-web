@@ -94,26 +94,7 @@ export default function SettingsPage() {
 
       <main className="p-8 font-['Roboto']">
         <h1 className="text-3xl font-bold text-center mb-8">Settings</h1>
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Profile info */}
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-lg font-semibold mb-4">Profile information</h2>
-            <div className="border-t pt-2 space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Name</span>
-                <span>{user.name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Email Address</span>
-                <span>{user.email}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Role</span>
-                <span>{user.role}</span>
-              </div>
-            </div>
-          </div>
-
+        <div className="max-w-xl mx-auto">
           {/* General settings */}
           <div className="bg-white shadow-md rounded-lg p-6">
             <h2 className="text-lg font-semibold mb-4">General</h2>
@@ -138,15 +119,6 @@ export default function SettingsPage() {
                 <p className="text-sm text-gray-600">
                   This system is designed to support nursing education feedback workflows, aligned with ANSAT standards. Version 1.0.0.
                 </p>
-              </div>
-
-              <div className="pt-2">
-                {/* <Button
-                  onClick={handleLogout}
-                  className="bg-[#3A6784] hover:bg-[#2d5268] text-white"
-                >
-                  Logout
-                </Button> */}
               </div>
             </div>
           </div>

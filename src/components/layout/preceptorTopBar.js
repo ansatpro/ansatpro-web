@@ -34,8 +34,8 @@ export default function PreceptorTopBar() {
           <span className="ml-2 font-semibold text-[#3A6784]">ANSAT Pro</span>
         </Link>
         <div className="flex items-center gap-2">
-          <Link href="/preceptor/settings" className="hover:bg-gray-100 p-2 rounded-full">
-            <User className="h-6 w-6 text-gray-600" />
+          <Link href="/preceptor/profile" className="hover:bg-gray-100 p-2 rounded-full">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png" alt="Avatar" className="w-8 h-8 rounded-full object-cover" />
           </Link>
           <Button
             variant="outline"
