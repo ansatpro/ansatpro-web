@@ -19,12 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Search,
-  X,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { Search, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { GetAllStudentsWithDetails } from "../../../../lib/HowToConnectToFunction";
 
@@ -97,6 +92,9 @@ export default function AllFeedback() {
               preceptor_id,
               preceptor_name: preceptor,
               content,
+              flag_discussed_with_student:
+                preceptor_flag_discussed_with_student,
+              discussion_date: preceptor_discussion_date,
               review: is_marked,
               ai_feedback_items,
             } = feedback;
@@ -134,6 +132,8 @@ export default function AllFeedback() {
               preceptor_id,
               preceptor,
               content,
+              preceptor_flag_discussed_with_student,
+              preceptor_discussion_date,
               is_marked: !!is_marked,
               reviewComment,
               reviewScore,
@@ -351,7 +351,7 @@ export default function AllFeedback() {
 
       console.log("Storing feedback with discussion data:", {
         flag_discussed_with_student: feedback.flag_discussed_with_student,
-        discussion_date: feedback.discussion_date
+        discussion_date: feedback.discussion_date,
       });
 
       // Store current clicked feedback details to localStorage
@@ -388,7 +388,7 @@ export default function AllFeedback() {
     // 滚动到页面顶部
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   };
 
@@ -470,8 +470,8 @@ export default function AllFeedback() {
                   </SelectContent>
                 </Select>
               </div>
-        
-        <div>
+
+              <div>
                 <label className="mb-2 block text-sm font-medium">
                   Clinic Area
                 </label>
@@ -493,7 +493,7 @@ export default function AllFeedback() {
                 </Select>
               </div>
 
-            <div>
+              <div>
                 <label className="mb-2 block text-sm font-medium">
                   Date Range
                 </label>
@@ -555,60 +555,62 @@ export default function AllFeedback() {
               >
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
-                <div>
-                        <CardTitle className="text-lg font-bold">
-                          {feedback.studentName}
-                        </CardTitle>
-                        <p className="text-sm text-gray-500">
-                          ID: {feedback.studentId}
-                        </p>
-                      </div>
-                      <Badge
-                        variant={feedback.is_marked ? "success" : "pending"}
-                        className={
-                          feedback.is_marked ? "bg-green-500" : "bg-amber-500"
-                        }
-                      >
-                        {feedback.is_marked ? "Reviewed" : "Pending"}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <div className="mb-2">
-                      <p className="text-sm">
-                        <span className="font-medium">Date:</span>{" "}
-                        {formatDate(feedback.date)}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium">Preceptor:</span>{" "}
-                        {feedback.preceptor}
+                    <div>
+                      <CardTitle className="text-lg font-bold">
+                        {feedback.studentName}
+                      </CardTitle>
+                      <p className="text-sm text-gray-500">
+                        ID: {feedback.studentId}
                       </p>
                     </div>
-                    <p className="text-sm line-clamp-3">
-                    <span className="font-medium">Feedback:</span>{" "}
-                      {feedback.content}
+                    <Badge
+                      variant={feedback.is_marked ? "success" : "pending"}
+                      className={
+                        feedback.is_marked ? "bg-green-500" : "bg-amber-500"
+                      }
+                    >
+                      {feedback.is_marked ? "Reviewed" : "Pending"}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <div className="mb-2">
+                    <p className="text-sm">
+                      <span className="font-medium">Date:</span>{" "}
+                      {formatDate(feedback.date)}
                     </p>
-                  </CardContent>
-                  <CardFooter>
-                    <div className="flex justify-between items-center w-full mt-2">
-                      <div className="text-xs text-gray-500">
-                        {feedback.university}
-                      </div>
-                      <Button size="sm" variant="outline" className="bg-white">
-                        View Details
-                      </Button>
-                </div>
-                  </CardFooter>
-                </Card>
-              ))}
+                    <p className="text-sm">
+                      <span className="font-medium">Preceptor:</span>{" "}
+                      {feedback.preceptor}
+                    </p>
+                  </div>
+                  <p className="text-sm line-clamp-3">
+                    <span className="font-medium">Feedback:</span>{" "}
+                    {feedback.content}
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <div className="flex justify-between items-center w-full mt-2">
+                    <div className="text-xs text-gray-500">
+                      {feedback.university}
+                    </div>
+                    <Button size="sm" variant="outline" className="bg-white">
+                      View Details
+                    </Button>
+                  </div>
+                </CardFooter>
+              </Card>
+            ))}
           </div>
-          
+
           {/* 分页控件 - 使用基本组件实现 */}
           {totalPages > 1 && (
             <div className="mt-8 flex flex-col items-center gap-4">
               <div className="text-sm text-muted-foreground">
-                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredResults.length)} of {filteredResults.length} items
-            </div>
+                Showing {indexOfFirstItem + 1} to{" "}
+                {Math.min(indexOfLastItem, filteredResults.length)} of{" "}
+                {filteredResults.length} items
+              </div>
               <div className="flex items-center gap-1">
                 {/* 上一页按钮 */}
                 {currentPage > 1 && (
@@ -622,25 +624,31 @@ export default function AllFeedback() {
                     <span className="hidden sm:inline">Previous</span>
                   </Button>
                 )}
-                
+
                 {/* 页码按钮 */}
                 <div className="flex items-center">
                   {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter(page => {
+                    .filter((page) => {
                       // 显示第一页、最后一页以及当前页面附近的页码
-                      return page === 1 || 
-                             page === totalPages || 
-                             (page >= currentPage - 1 && page <= currentPage + 1);
+                      return (
+                        page === 1 ||
+                        page === totalPages ||
+                        (page >= currentPage - 1 && page <= currentPage + 1)
+                      );
                     })
                     .map((page, index, array) => {
                       // 如果页码之间有间隔，添加省略号
                       if (index > 0 && array[index - 1] !== page - 1) {
                         return (
                           <React.Fragment key={`ellipsis-${page}`}>
-                            <span className="px-2 text-muted-foreground">...</span>
+                            <span className="px-2 text-muted-foreground">
+                              ...
+                            </span>
                             <Button
                               key={page}
-                              variant={currentPage === page ? "default" : "outline"}
+                              variant={
+                                currentPage === page ? "default" : "outline"
+                              }
                               size="sm"
                               onClick={() => handlePageChange(page)}
                               className="mx-1 min-w-[32px]"
@@ -650,7 +658,7 @@ export default function AllFeedback() {
                           </React.Fragment>
                         );
                       }
-                      
+
                       return (
                         <Button
                           key={page}
@@ -663,8 +671,8 @@ export default function AllFeedback() {
                         </Button>
                       );
                     })}
-            </div>
-                
+                </div>
+
                 {/* 下一页按钮 */}
                 {currentPage < totalPages && (
                   <Button
