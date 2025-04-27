@@ -61,11 +61,17 @@ export default function FeedbackDetail() {
                   }
                   return "";
                 })(),
+                // 直接从 currentFeedback 获取 preceptor 讨论相关的字段
+                preceptor_flag_discussed_with_student: currentFeedback.preceptor_flag_discussed_with_student,
+                preceptor_discussion_date: currentFeedback.preceptor_discussion_date,
                 aiFeedbackItems: currentFeedback.aiFeedbackDescriptions || []
               });
               
               // Get all available items from both sources
-              console.log("Loaded feedback data from current_feedback localStorage");
+              console.log("Loaded feedback data from current_feedback localStorage:", {
+                preceptor_flag_discussed_with_student: currentFeedback.preceptor_flag_discussed_with_student,
+                preceptor_discussion_date: currentFeedback.preceptor_discussion_date
+              });
               setLoading(false);
               return;
             }
@@ -112,10 +118,16 @@ export default function FeedbackDetail() {
                   }
                   return "";
                 })(),
+                // 从 feedback 列表中获取 preceptor 讨论相关字段
+                preceptor_flag_discussed_with_student: feedback.preceptor_flag_discussed_with_student,
+                preceptor_discussion_date: feedback.preceptor_discussion_date,
                 aiFeedbackItems: feedback.aiFeedbackDescriptions || []
               });
               
-              console.log("Loaded feedback data from feedbacks list localStorage");
+              console.log("Loaded feedback data from feedbacks list localStorage:", {
+                preceptor_flag_discussed_with_student: feedback.preceptor_flag_discussed_with_student,
+                preceptor_discussion_date: feedback.preceptor_discussion_date
+              });
               setLoading(false);
               return;
             }
@@ -138,6 +150,8 @@ export default function FeedbackDetail() {
           reviewScore: [],
           flag_discussed_with_student: false,
           discussion_date: "",
+          preceptor_flag_discussed_with_student: false,
+          preceptor_discussion_date: "",
           aiFeedbackItems: []
         });
         
@@ -250,6 +264,47 @@ export default function FeedbackDetail() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Student discussion section */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-xl">Student Discussion (Preceptor)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {console.log("Debug discussion data:", {
+            preceptor_flag_discussed_with_student: feedbackData.preceptor_flag_discussed_with_student,
+            preceptor_discussion_date: feedbackData.preceptor_discussion_date
+          })}
+          {(() => {
+            // 明确检查数据类型和值
+            const wasDiscussed = 
+              feedbackData.preceptor_flag_discussed_with_student === true || 
+              feedbackData.preceptor_flag_discussed_with_student === "true" || 
+              feedbackData.preceptor_flag_discussed_with_student === "yes";
+            
+            const discussionDate = feedbackData.preceptor_discussion_date;
+            
+            return (
+              <div className={`p-4 border rounded-md ${wasDiscussed ? 'bg-green-50' : 'bg-amber-50'}`}>
+                {wasDiscussed && discussionDate ? (
+                  <p className="text-green-700">
+                    This feedback has been discussed with the student on {formatDate(discussionDate)}.
+                  </p>
+                ) : wasDiscussed ? (
+                  <p className="text-green-700">
+                    This feedback has been discussed with the student.
+                  </p>
+                ) : (
+                  <p className="text-amber-700">
+                    This feedback has not been discussed with the student.
+                  </p>
+                )}
+              </div>
+            );
+          })()}
+        </CardContent>
+      </Card>
+
       
       {/* Assessment Comments */}
       <Card className="mb-6">

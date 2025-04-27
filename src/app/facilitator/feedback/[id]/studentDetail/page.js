@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { ArrowLeft } from "lucide-react";
 
 export default function StudentDetail() {
   const router = useRouter();
@@ -168,6 +169,11 @@ export default function StudentDetail() {
     }
   };
 
+  // Handle back navigation
+  const handleBackClick = () => {
+    router.push("/facilitator/feedback");
+  };
+
   // Format date for display
   const formatDate = (dateString) => {
     try {
@@ -208,7 +214,16 @@ export default function StudentDetail() {
       <main className="flex-1 p-6">
         {/* Header */}
         <header className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4 mb-4">
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={handleBackClick}
+              className="h-9 w-9"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Back</span>
+            </Button>
             <h1 className="text-3xl font-bold">Student Details</h1>
           </div>
           
@@ -252,6 +267,42 @@ export default function StudentDetail() {
                   <p className="font-medium">{formatDate(selectedStudent.endDate)}</p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+          
+          {/* Student discussion section (Preceptor) */}
+          <Card className="mb-6 max-w-3xl">
+            <CardHeader>
+              <CardTitle className="text-xl">Student Discussion (Preceptor)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {(() => {
+                // 明确检查数据类型和值
+                const wasDiscussed = 
+                  feedbackData.preceptor_flag_discussed_with_student === true || 
+                  feedbackData.preceptor_flag_discussed_with_student === "true" || 
+                  feedbackData.preceptor_flag_discussed_with_student === "yes";
+                
+                const discussionDate = feedbackData.preceptor_discussion_date;
+                
+                return (
+                  <div className={`p-4 border rounded-md ${wasDiscussed ? 'bg-green-50' : 'bg-amber-50'}`}>
+                    {wasDiscussed && discussionDate ? (
+                      <p className="text-green-700">
+                        This feedback has been discussed with the student on {formatDate(discussionDate)}.
+                      </p>
+                    ) : wasDiscussed ? (
+                      <p className="text-green-700">
+                        This feedback has been discussed with the student.
+                      </p>
+                    ) : (
+                      <p className="text-amber-700">
+                        This feedback has not been discussed with the student.
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
             </CardContent>
           </Card>
           

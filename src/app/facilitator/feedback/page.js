@@ -347,11 +347,15 @@ export default function AllFeedback() {
         aiFeedbackDescriptions: feedback.aiFeedbackDescriptions || [],
         flag_discussed_with_student: feedback.flag_discussed_with_student,
         discussion_date: feedback.discussion_date,
+        preceptor_flag_discussed_with_student: feedback.preceptor_flag_discussed_with_student,
+        preceptor_discussion_date: feedback.preceptor_discussion_date
       };
 
       console.log("Storing feedback with discussion data:", {
         flag_discussed_with_student: feedback.flag_discussed_with_student,
         discussion_date: feedback.discussion_date,
+        preceptor_flag_discussed_with_student: feedback.preceptor_flag_discussed_with_student,
+        preceptor_discussion_date: feedback.preceptor_discussion_date
       });
 
       // Store current clicked feedback details to localStorage
