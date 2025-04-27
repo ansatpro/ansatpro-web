@@ -27,7 +27,7 @@ import {
 } from "../../../../lib/HowToConnectToFunction";
 import { useNotifications } from "@/context/NotificationsContext";
 
-// 本地存储键名
+// Local storage key for read status
 const STORAGE_KEY = "ansatpro_notification_read_status";
 
 export default function NotificationPage() {

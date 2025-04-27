@@ -13,7 +13,7 @@ export default function ExportPage() {
   const router = useRouter();
   const searchRef = useRef(null);
 
-  // 状态管理
+  // State management
   const [searchTerm, setSearchTerm] = useState("");
   const [students, setStudents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,7 +21,7 @@ export default function ExportPage() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
-  // 初始化数据
+  // Initialize data
   useEffect(() => {
     const initializeData = async () => {
       try {
@@ -151,7 +151,7 @@ export default function ExportPage() {
 
         console.log(sampleStudents);
 
-        // 存储到localStorage
+        // Store in localStorage
         localStorage.setItem(
           "ansatpro_students",
           JSON.stringify(sampleStudents)
@@ -160,7 +160,7 @@ export default function ExportPage() {
         setStudents(sampleStudents);
       } catch (err) {
         console.error("Error initializing data:", err);
-        // 如果发生错误，仍然尝试使用示例数据
+        // If an error occurs, still try to use sample data
         setStudents([]);
       } finally {
         setIsLoading(false);
@@ -169,7 +169,7 @@ export default function ExportPage() {
 
     initializeData();
 
-    // 添加点击外部关闭下拉框的事件
+    // Add event to close dropdown when clicking outside
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowDropdown(false);
@@ -182,7 +182,7 @@ export default function ExportPage() {
     };
   }, []);
 
-  // 处理搜索输入变化
+  // Handle search input changes
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
@@ -193,12 +193,12 @@ export default function ExportPage() {
       return;
     }
 
-    // 确保students数组存在且有内容
+    // Ensure students array exists and has content
     if (!students || students.length === 0) {
       return;
     }
 
-    // 根据学生ID或姓名进行搜索
+    // Search by student ID or name
     const lowercaseValue = value.toLowerCase();
     const results = students.filter((student) => {
       const studentIdMatch =
@@ -214,7 +214,7 @@ export default function ExportPage() {
     setShowDropdown(true);
   };
 
-  // 清除搜索
+  // Clear search
   const clearSearch = () => {
     setSearchTerm("");
     setSearchResults([]);
@@ -222,7 +222,7 @@ export default function ExportPage() {
     setSelectedStudent(null);
   };
 
-  // 选择学生
+  // Select student
   const selectStudent = (student) => {
     if (!student || !student.docId) {
       console.error("Invalid student data:", student);
@@ -233,10 +233,10 @@ export default function ExportPage() {
     setSearchTerm(student.studentName || "");
     setShowDropdown(false);
 
-    // 将所选学生存储到localStorage
+    // Store selected student in localStorage
     localStorage.setItem("ansatpro_selected_student", JSON.stringify(student));
 
-    // 跳转到学生详情页面 - 使用docId作为路由参数
+    // Navigate to student detail page - using docId as route parameter
     router.push(`/facilitator/export/${student.docId}/studentDetail`);
   };
 

@@ -8,8 +8,19 @@ import { CheckCircle } from "lucide-react";
 export default function ExportSuccessPage() {
   const router = useRouter();
 
+  // Get the docId of the selected student from localStorage
+  const selectedStudent = JSON.parse(localStorage.getItem("ansatpro_selected_student"));
+  const docId = selectedStudent?.docId;
+
   const handleAddAnother = () => {
-    router.push("/facilitator/export");
+    if (docId) {
+      // Use dynamic routing, replace [docId] with the actual docId
+      router.push(`/facilitator/export/${docId}/studentDetail`);
+    } else {
+      console.error("No docId found for selected student");
+      // If no docId is found, navigate to the default page or show an error
+      router.push("/facilitator/export");
+    }
   };
 
   const handleReturnHome = () => {
