@@ -190,15 +190,20 @@ export default function FeedbackDetail() {
   };
   
   // Format date for display
-  const formatDate = (dateString) => {
+  const formatDate = (dateString, includeTime = false) => {
     try {
       const date = new Date(dateString);
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0'); 
       const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      return `${year}-${month}-${day} ${hours}:${minutes}`;
+      
+      if (includeTime) {
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
+      }
+      
+      return `${year}-${month}-${day}`;
     } catch (e) {
       return dateString;
     }
@@ -263,38 +268,18 @@ export default function FeedbackDetail() {
         <CardContent className="space-y-6">
           {/* Student Information Section */}
           <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-md mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-md mb-6">
               <div>
                 <p className="text-sm text-muted-foreground">Date and Time</p>
-                <p className="font-medium">{formatDate(feedbackData.date)}</p>
+                <p className="font-medium">{formatDate(feedbackData.date, true)}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Student Name</p>
                 <p className="font-medium">{feedbackData.studentName}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Preceptor</p>
+                <p className="text-sm text-muted-foreground">Preceptor Name</p>
                 <p className="font-medium">{feedbackData.preceptor}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">University</p>
-                <p className="font-medium">{feedbackData.university}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Health Service</p>
-                <p className="font-medium">{feedbackData.healthService}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Clinic Area</p>
-                <p className="font-medium">{feedbackData.clinicArea}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Start Date</p>
-                <p className="font-medium">{formatDate(feedbackData.startDate)}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">End Date</p>
-                <p className="font-medium">{formatDate(feedbackData.endDate)}</p>
               </div>
             </div>
           </div>

@@ -25,9 +25,6 @@ export default function ExportPage() {
   useEffect(() => {
     const initializeData = async () => {
       try {
-        // 模拟加载延迟
-        // await new Promise((resolve) => setTimeout(resolve, 800));
-
         // Get all students created by the facilitator
         const response = await GetAllStudentsWithDetails();
         console.log(response);
@@ -49,13 +46,21 @@ export default function ExportPage() {
             preceptorFeedbackList,
           } = student;
 
-          preceptorFeedbackList.forEach((feedback) => {
+          // Sort preceptorFeedbackList by date
+          const sortedFeedbackList = [...preceptorFeedbackList].sort(
+            (a, b) => new Date(a.$createdAt) - new Date(b.$createdAt)
+          );
+
+          // Add feedback index for sequential naming
+          sortedFeedbackList.forEach((feedback, index) => {
             const {
               $id: preceptorFeedback_DocId,
               $createdAt: preceptorFeedback_date,
               preceptor_id,
               preceptor_name: preceptor,
               content,
+              flag_discussed_with_student: preceptor_flag_discussed_with_student,
+              discussion_date: preceptor_discussion_date,
               review: is_marked,
               ai_feedback_items,
             } = feedback;
@@ -74,6 +79,11 @@ export default function ExportPage() {
                 item_id: score.item_id,
                 score: score.score,
               })) || [];
+            
+            const flag_discussed_with_student = 
+              is_marked?.flag_discussed_with_student ?? false;
+            const discussion_date = is_marked?.discussion_date || null;
+            const reviewDate = is_marked?.$createdAt || null;
 
             // Push transformed feedback to sampleFeedbacks
             sampleFeedbacks.push({
@@ -90,30 +100,52 @@ export default function ExportPage() {
               preceptor_id,
               preceptor,
               content,
+              preceptor_flag_discussed_with_student,
+              preceptor_discussion_date,
               is_marked: !!is_marked,
               reviewComment,
               reviewScore,
               aiFeedbackDescriptions,
+              flag_discussed_with_student,
+              discussion_date,
+              reviewDate,
+              feedbackIndex: index + 1, // 1-based index for feedback numbering
+              feedbackName: `Feedback ${index + 1}`, // Name as "Feedback 1", "Feedback 2", etc.
+              totalFeedbacks: preceptorFeedbackList.length,
             });
           });
         });
 
         console.log(sampleFeedbacks);
 
-        // concert sampleFeedbacks to sampleStudents
+        // convert sampleFeedbacks to sampleStudents
         const sampleStudents = [];
+        const studentFeedbackMap = new Map();
 
-        const seenStudentIds = new Set();
-
+        // Group feedbacks by student ID
         sampleFeedbacks.forEach((feedback) => {
-          if (!seenStudentIds.has(feedback.studentId)) {
+          if (!studentFeedbackMap.has(feedback.studentId)) {
+            studentFeedbackMap.set(feedback.studentId, []);
+          }
+          studentFeedbackMap.get(feedback.studentId).push(feedback);
+        });
+
+        // Create student entries with all their feedbacks
+        studentFeedbackMap.forEach((feedbacks, studentId) => {
+          if (feedbacks.length > 0) {
+            const firstFeedback = feedbacks[0];
             sampleStudents.push({
-              docId: feedback.student_DocId,
-              studentId: feedback.studentId,
-              studentName: feedback.studentName,
-              studentUniversity: feedback.university,
+              docId: firstFeedback.student_DocId,
+              studentId: firstFeedback.studentId,
+              studentName: firstFeedback.studentName,
+              studentUniversity: firstFeedback.university,
+              healthService: firstFeedback.healthService,
+              clinicArea: firstFeedback.clinicArea,
+              startDate: firstFeedback.startDate,
+              endDate: firstFeedback.endDate,
+              feedbacks: feedbacks, // Store all feedbacks for this student
+              totalFeedbacks: feedbacks.length,
             });
-            seenStudentIds.add(feedback.studentId);
           }
         });
 
@@ -129,7 +161,7 @@ export default function ExportPage() {
       } catch (err) {
         console.error("Error initializing data:", err);
         // 如果发生错误，仍然尝试使用示例数据
-        setStudents(sampleStudents);
+        setStudents([]);
       } finally {
         setIsLoading(false);
       }
@@ -210,7 +242,7 @@ export default function ExportPage() {
 
   return (
     <div className="container mx-auto px-4 py-4">
-      <h1 className="text-2xl font-bold mb-6 text-left">Export Data</h1>
+      <h1 className="text-3xl font-bold">Export Data</h1>
 
       {isLoading ? (
         <div className="py-6">
@@ -218,6 +250,7 @@ export default function ExportPage() {
         </div>
       ) : (
         <>
+          <br />
           <Card className="mb-6">
             <CardHeader>
               <h2 className="text-xl font-semibold">Search for a Student</h2>
@@ -261,6 +294,9 @@ export default function ExportPage() {
                           <span>ID: {student.studentId}</span>
                           <span>{student.studentUniversity}</span>
                         </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {student.totalFeedbacks} feedback(s) available
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -290,6 +326,9 @@ export default function ExportPage() {
                     </p>
                     <p className="text-sm text-gray-500">
                       {selectedStudent.studentUniversity}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {selectedStudent.totalFeedbacks} feedback(s) available
                     </p>
                   </div>
                   <Button
