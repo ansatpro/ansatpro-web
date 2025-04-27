@@ -201,7 +201,7 @@ export default function NotificationPage() {
   };
 
   // Mark all notifications as read
-  const markAllAsRead = () => {
+  const markAllAsRead = async () => {
     try {
       // 已读状态映射
       const readStatusMap = loadReadStatus();
@@ -217,6 +217,13 @@ export default function NotificationPage() {
 
       // 保存更新后的状态到localStorage
       saveReadStatus(readStatusMap);
+
+      // Update each notification in the backend
+      for (const notification of finalNotification) {
+        if (!notification.read) {
+          await UpdateNotification(notification.notification_DocId);
+        }
+      }
     } catch (error) {
       console.error("Error marking all as read:", error);
     }
