@@ -191,9 +191,12 @@ export default function NotificationPage() {
   };
 
   // Mark a single notification as read without navigation
-  const markAsRead = (notification, e) => {
+  const markAsRead = async (notification, e) => {
     e.stopPropagation(); // Prevent card click event
     try {
+      // Update backend first
+      await UpdateNotification(notification.notification_DocId);
+      // Then update local state
       markAsReadInternal(notification.notification_DocId);
     } catch (error) {
       console.error("Error marking notification as read:", error);
