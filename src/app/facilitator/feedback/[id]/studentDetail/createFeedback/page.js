@@ -18,6 +18,7 @@ import {
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { PostFacilitatorComments } from "../../../../../../../lib/HowToConnectToFunction";
+import { ArrowLeft } from "lucide-react";
 
 export default function ReviewFeedback() {
   const router = useRouter();
@@ -58,6 +59,12 @@ export default function ReviewFeedback() {
               date: currentFeedback.date,
               studentName: currentFeedback.studentName,
               originalFeedback: currentFeedback.content,
+              preceptor: currentFeedback.preceptor,
+              university: currentFeedback.university,
+              healthService: currentFeedback.healthService,
+              clinicArea: currentFeedback.clinicArea,
+              startDate: currentFeedback.startDate,
+              endDate: currentFeedback.endDate,
             });
 
             setLoading(false);
@@ -82,6 +89,12 @@ export default function ReviewFeedback() {
               date: feedback.date,
               studentName: feedback.studentName,
               originalFeedback: feedback.content,
+              preceptor: feedback.preceptor,
+              university: feedback.university,
+              healthService: feedback.healthService,
+              clinicArea: feedback.clinicArea,
+              startDate: feedback.startDate,
+              endDate: feedback.endDate,
             });
 
             setLoading(false);
@@ -245,15 +258,26 @@ export default function ReviewFeedback() {
     <div className="flex min-h-screen bg-background">
       {/* Main content area */}
       <main className="flex-1 p-6 overflow-auto">
-        {/* Page title */}
+        {/* Page title and back button */}
         <header className="mb-8">
-          <h1 className="text-3xl font-bold">Review Feedback</h1>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => router.back()}
+              className="h-9 w-9"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Back</span>
+            </Button>
+            <h1 className="text-3xl font-bold">Review Feedback</h1>
+          </div>
         </header>
 
-        {/* Student information card */}
+        {/* Feedback information card */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-xl">Student Information</CardTitle>
+            <CardTitle className="text-xl">Feedback Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -266,6 +290,34 @@ export default function ReviewFeedback() {
               <div>
                 <p className="text-sm text-muted-foreground">Student Name</p>
                 <p className="font-medium">{feedbackData.studentName}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Preceptor Name</p>
+                <p className="font-medium">{feedbackData.preceptor}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">University</p>
+                <p className="font-medium">{feedbackData.university}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Health Service</p>
+                <p className="font-medium">{feedbackData.healthService}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Clinic Area</p>
+                <p className="font-medium">{feedbackData.clinicArea}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Start Date</p>
+                <p className="font-medium">
+                  {format(new Date(feedbackData.startDate), "yyyy-MM-dd")}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">End Date</p>
+                <p className="font-medium">
+                  {format(new Date(feedbackData.endDate), "yyyy-MM-dd")}
+                </p>
               </div>
             </div>
           </CardContent>

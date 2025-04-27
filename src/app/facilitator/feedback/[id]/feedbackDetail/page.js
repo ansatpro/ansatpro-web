@@ -41,6 +41,12 @@ export default function FeedbackDetail() {
                 is_marked: !!currentFeedback.is_marked,
                 reviewComment: currentFeedback.reviewComment || "",
                 reviewScore: currentFeedback.reviewScore || [],
+                preceptor: currentFeedback.preceptor || "Unknown Preceptor",
+                university: currentFeedback.university || "Unknown University",
+                healthService: currentFeedback.healthService || "Unknown Health Service",
+                clinicArea: currentFeedback.clinicArea || "Unknown Clinic Area",
+                startDate: currentFeedback.startDate || "Unknown Start Date",
+                endDate: currentFeedback.endDate || "Unknown End Date",
                 flag_discussed_with_student: (() => {
                   // 确保从各种可能的位置和格式正确获取讨论状态
                   if (currentFeedback.flag_discussed_with_student !== undefined) {
@@ -98,6 +104,12 @@ export default function FeedbackDetail() {
                 is_marked: !!feedback.is_marked,
                 reviewComment: feedback.reviewComment || "",
                 reviewScore: feedback.reviewScore || [],
+                preceptor: feedback.preceptor || "Unknown Preceptor",
+                university: feedback.university || "Unknown University",
+                healthService: feedback.healthService || "Unknown Health Service",
+                clinicArea: feedback.clinicArea || "Unknown Clinic Area",
+                startDate: feedback.startDate || "Unknown Start Date",
+                endDate: feedback.endDate || "Unknown End Date",
                 flag_discussed_with_student: (() => {
                   // 确保从各种可能的位置和格式正确获取讨论状态
                   if (feedback.flag_discussed_with_student !== undefined) {
@@ -148,6 +160,12 @@ export default function FeedbackDetail() {
           is_marked: false,
           reviewComment: "",
           reviewScore: [],
+          preceptor: "Unknown Preceptor",
+          university: "Unknown University",
+          healthService: "Unknown Health Service",
+          clinicArea: "Unknown Clinic Area",
+          startDate: "Unknown Start Date",
+          endDate: "Unknown End Date",
           flag_discussed_with_student: false,
           discussion_date: "",
           preceptor_flag_discussed_with_student: false,
@@ -174,8 +192,13 @@ export default function FeedbackDetail() {
   // Format date for display
   const formatDate = (dateString) => {
     try {
-      const options = { year: 'numeric', month: 'long', day: 'numeric' };
-      return new Date(dateString).toLocaleDateString(undefined, options);
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); 
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day} ${hours}:${minutes}`;
     } catch (e) {
       return dateString;
     }
@@ -232,220 +255,230 @@ export default function FeedbackDetail() {
         </div>
       )}
 
-      {/* Student information card */}
+      {/* Single card containing all information */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-xl">Student Information</CardTitle>
+          <CardTitle className="text-xl">Feedback Information</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Date and Time</p>
-              <p className="font-medium">{formatDate(feedbackData.date)}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Student Name</p>
-              <p className="font-medium">{feedbackData.studentName}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Original feedback */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-xl">Preceptor Feedback</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="p-4 border rounded-md">
-            <p className="text-muted-foreground">
-              {feedbackData.originalFeedback}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Student discussion section */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-xl">Student Discussion (Preceptor)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {console.log("Debug discussion data:", {
-            preceptor_flag_discussed_with_student: feedbackData.preceptor_flag_discussed_with_student,
-            preceptor_discussion_date: feedbackData.preceptor_discussion_date
-          })}
-          {(() => {
-            // 明确检查数据类型和值
-            const wasDiscussed = 
-              feedbackData.preceptor_flag_discussed_with_student === true || 
-              feedbackData.preceptor_flag_discussed_with_student === "true" || 
-              feedbackData.preceptor_flag_discussed_with_student === "yes";
-            
-            const discussionDate = feedbackData.preceptor_discussion_date;
-            
-            return (
-              <div className={`p-4 border rounded-md ${wasDiscussed ? 'bg-green-50' : 'bg-amber-50'}`}>
-                {wasDiscussed && discussionDate ? (
-                  <p className="text-green-700">
-                    This feedback has been discussed with the student on {formatDate(discussionDate)}.
-                  </p>
-                ) : wasDiscussed ? (
-                  <p className="text-green-700">
-                    This feedback has been discussed with the student.
-                  </p>
-                ) : (
-                  <p className="text-amber-700">
-                    This feedback has not been discussed with the student.
-                  </p>
-                )}
+        <CardContent className="space-y-6">
+          {/* Student Information Section */}
+          <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-md mb-6">
+              <div>
+                <p className="text-sm text-muted-foreground">Date and Time</p>
+                <p className="font-medium">{formatDate(feedbackData.date)}</p>
               </div>
-            );
-          })()}
-        </CardContent>
-      </Card>
-
-      
-      {/* Assessment Comments */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-xl">Facilitator Review</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="p-4 border rounded-md">
-            {feedbackData.reviewComment ? (
-              <p>{feedbackData.reviewComment}</p>
-            ) : (
-              <p className="text-muted-foreground">No comments provided</p>
-            )}
+              <div>
+                <p className="text-sm text-muted-foreground">Student Name</p>
+                <p className="font-medium">{feedbackData.studentName}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Preceptor</p>
+                <p className="font-medium">{feedbackData.preceptor}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">University</p>
+                <p className="font-medium">{feedbackData.university}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Health Service</p>
+                <p className="font-medium">{feedbackData.healthService}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Clinic Area</p>
+                <p className="font-medium">{feedbackData.clinicArea}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Start Date</p>
+                <p className="font-medium">{formatDate(feedbackData.startDate)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">End Date</p>
+                <p className="font-medium">{formatDate(feedbackData.endDate)}</p>
+              </div>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+          
+          {/* Original Feedback Section */}
+          <div>
+            <h3 className="text-lg font-medium mb-4">Preceptor Feedback</h3>
+            <div className="p-4 border rounded-md mb-6">
+              <p className="text-muted-foreground">
+                {feedbackData.originalFeedback}
+              </p>
+            </div>
+          </div>
 
-      {/* Assessment Items and Marks */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-xl">Assessment Items</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {(() => {
-            // Combine AI items and review scores for comprehensive item listing
-            const allItems = new Map();
-            
-            // Add AI feedback items to the map
-            if (feedbackData.aiFeedbackItems && feedbackData.aiFeedbackItems.length > 0) {
-              feedbackData.aiFeedbackItems.forEach(item => {
-                allItems.set(item.item_id, {
-                  itemId: item.item_id,
-                  description: item.description || "",
-                  isPositive: item.is_positive,
-                  rating: null
-                });
-              });
-            }
-            
-            // Add or update with review scores
-            if (feedbackData.reviewScore && feedbackData.reviewScore.length > 0) {
-              feedbackData.reviewScore.forEach(item => {
-                if (allItems.has(item.item_id)) {
-                  // Update existing item with rating
-                  const existingItem = allItems.get(item.item_id);
-                  existingItem.rating = item.score;
-                  allItems.set(item.item_id, existingItem);
-                } else {
-                  // Add new item with just the rating
+          {/* Student Discussion (Preceptor) Section */}
+          <div>
+            <h3 className="text-lg font-medium mb-4">Student Discussion (Preceptor)</h3>
+            <div>
+              {console.log("Debug discussion data:", {
+                preceptor_flag_discussed_with_student: feedbackData.preceptor_flag_discussed_with_student,
+                preceptor_discussion_date: feedbackData.preceptor_discussion_date
+              })}
+              {(() => {
+                // 明确检查数据类型和值
+                const wasDiscussed = 
+                  feedbackData.preceptor_flag_discussed_with_student === true || 
+                  feedbackData.preceptor_flag_discussed_with_student === "true" || 
+                  feedbackData.preceptor_flag_discussed_with_student === "yes";
+                
+                const discussionDate = feedbackData.preceptor_discussion_date;
+                
+                return (
+                  <div className={`p-4 border rounded-md mb-6 ${wasDiscussed ? 'bg-green-50' : 'bg-amber-50'}`}>
+                    {wasDiscussed && discussionDate ? (
+                      <p className="text-green-700">
+                        This feedback has been discussed with the student on {formatDate(discussionDate)}.
+                      </p>
+                    ) : wasDiscussed ? (
+                      <p className="text-green-700">
+                        This feedback has been discussed with the student.
+                      </p>
+                    ) : (
+                      <p className="text-amber-700">
+                        This feedback has not been discussed with the student.
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+          
+          {/* Assessment Comments Section */}
+          <div>
+            <h3 className="text-lg font-medium mb-4">Facilitator Review</h3>
+            <div className="p-4 border rounded-md mb-6">
+              {feedbackData.reviewComment ? (
+                <p>{feedbackData.reviewComment}</p>
+              ) : (
+                <p className="text-muted-foreground">No comments provided</p>
+              )}
+            </div>
+          </div>
+
+          {/* Assessment Items and Marks Section */}
+          <div>
+            <h3 className="text-lg font-medium mb-4">Assessment Items</h3>
+            {(() => {
+              // Combine AI items and review scores for comprehensive item listing
+              const allItems = new Map();
+              
+              // Add AI feedback items to the map
+              if (feedbackData.aiFeedbackItems && feedbackData.aiFeedbackItems.length > 0) {
+                feedbackData.aiFeedbackItems.forEach(item => {
                   allItems.set(item.item_id, {
                     itemId: item.item_id,
-                    description: "",
-                    isPositive: null,
-                    rating: item.score
+                    description: item.description || "",
+                    isPositive: item.is_positive,
+                    rating: null
                   });
-                }
-              });
-            }
-            
-            // Convert map to array for rendering
-            const combinedItems = Array.from(allItems.values());
-            
-            if (combinedItems.length === 0) {
+                });
+              }
+              
+              // Add or update with review scores
+              if (feedbackData.reviewScore && feedbackData.reviewScore.length > 0) {
+                feedbackData.reviewScore.forEach(item => {
+                  if (allItems.has(item.item_id)) {
+                    // Update existing item with rating
+                    const existingItem = allItems.get(item.item_id);
+                    existingItem.rating = item.score;
+                    allItems.set(item.item_id, existingItem);
+                  } else {
+                    // Add new item with just the rating
+                    allItems.set(item.item_id, {
+                      itemId: item.item_id,
+                      description: "",
+                      isPositive: null,
+                      rating: item.score
+                    });
+                  }
+                });
+              }
+              
+              // Convert map to array for rendering
+              const combinedItems = Array.from(allItems.values());
+              
+              if (combinedItems.length === 0) {
+                return (
+                  <div className="p-4 border rounded-md mb-6">
+                    <p className="text-muted-foreground">No assessment items available</p>
+                  </div>
+                );
+              }
+              
               return (
-                <div className="p-4 border rounded-md">
-                  <p className="text-muted-foreground">No assessment items available</p>
+                <div className="border rounded-md overflow-hidden mb-6">
+                  <div className="grid grid-cols-12 bg-gray-100 p-3 border-b">
+                    <div className="col-span-2 font-medium">Item ID</div>
+                    <div className="col-span-6 font-medium">Description</div>
+                    <div className="col-span-2 font-medium">Type</div>
+                    <div className="col-span-2 font-medium">Rating</div>
+                  </div>
+                  <div className="divide-y">
+                    {combinedItems.map((item, index) => (
+                      <div key={`item-${index}`} className="grid grid-cols-12 p-3">
+                        <div className="col-span-2">{item.itemId || `Item-${index + 1}`}</div>
+                        <div className="col-span-6">{item.description || "-"}</div>
+                        <div className="col-span-2">
+                          {item.isPositive !== null ? (
+                            <span className={item.isPositive ? "text-green-600" : "text-amber-600"}>
+                              {item.isPositive ? "Strength" : "Improvement"}
+                            </span>
+                          ) : (
+                            "-"
+                          )}
+                        </div>
+                        <div className="col-span-2">
+                          {item.rating ? getRatingLabel(item.rating) : "-"}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               );
-            }
-            
-            return (
-              <div className="border rounded-md overflow-hidden">
-                <div className="grid grid-cols-12 bg-gray-100 p-3 border-b">
-                  <div className="col-span-2 font-medium">Item ID</div>
-                  <div className="col-span-6 font-medium">Description</div>
-                  <div className="col-span-2 font-medium">Type</div>
-                  <div className="col-span-2 font-medium">Rating</div>
-                </div>
-                <div className="divide-y">
-                  {combinedItems.map((item, index) => (
-                    <div key={`item-${index}`} className="grid grid-cols-12 p-3">
-                      <div className="col-span-2">{item.itemId || `Item-${index + 1}`}</div>
-                      <div className="col-span-6">{item.description || "-"}</div>
-                      <div className="col-span-2">
-                        {item.isPositive !== null ? (
-                          <span className={item.isPositive ? "text-green-600" : "text-amber-600"}>
-                            {item.isPositive ? "Strength" : "Improvement"}
-                          </span>
-                        ) : (
-                          "-"
-                        )}
-                      </div>
-                      <div className="col-span-2">
-                        {item.rating ? getRatingLabel(item.rating) : "-"}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
-        </CardContent>
-      </Card>
+            })()}
+          </div>
 
-      {/* Student discussion section */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-xl">Student Discussion (Facilitator)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {console.log("Debug discussion data:", {
-            flag_discussed_with_student: feedbackData.flag_discussed_with_student,
-            discussion_date: feedbackData.discussion_date
-          })}
-          {(() => {
-            // 明确检查数据类型和值
-            const wasDiscussed = 
-              feedbackData.flag_discussed_with_student === true || 
-              feedbackData.flag_discussed_with_student === "true" || 
-              feedbackData.flag_discussed_with_student === "yes";
-            
-            const discussionDate = feedbackData.discussion_date;
-            
-            return (
-              <div className={`p-4 border rounded-md ${wasDiscussed ? 'bg-green-50' : 'bg-amber-50'}`}>
-                {wasDiscussed && discussionDate ? (
-                  <p className="text-green-700">
-                    This feedback has been discussed with the student on {formatDate(discussionDate)}.
-                  </p>
-                ) : wasDiscussed ? (
-                  <p className="text-green-700">
-                    This feedback has been discussed with the student.
-                  </p>
-                ) : (
-                  <p className="text-amber-700">
-                    This feedback has not been discussed with the student.
-                  </p>
-                )}
-              </div>
-            );
-          })()}
+          {/* Student Discussion (Facilitator) Section */}
+          <div>
+            <h3 className="text-lg font-medium mb-4">Student Discussion (Facilitator)</h3>
+            <div>
+              {console.log("Debug discussion data:", {
+                flag_discussed_with_student: feedbackData.flag_discussed_with_student,
+                discussion_date: feedbackData.discussion_date
+              })}
+              {(() => {
+                // 明确检查数据类型和值
+                const wasDiscussed = 
+                  feedbackData.flag_discussed_with_student === true || 
+                  feedbackData.flag_discussed_with_student === "true" || 
+                  feedbackData.flag_discussed_with_student === "yes";
+                
+                const discussionDate = feedbackData.discussion_date;
+                
+                return (
+                  <div className={`p-4 border rounded-md ${wasDiscussed ? 'bg-green-50' : 'bg-amber-50'}`}>
+                    {wasDiscussed && discussionDate ? (
+                      <p className="text-green-700">
+                        This feedback has been discussed with the student on {formatDate(discussionDate)}.
+                      </p>
+                    ) : wasDiscussed ? (
+                      <p className="text-green-700">
+                        This feedback has been discussed with the student.
+                      </p>
+                    ) : (
+                      <p className="text-amber-700">
+                        This feedback has not been discussed with the student.
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
         </CardContent>
       </Card>
       

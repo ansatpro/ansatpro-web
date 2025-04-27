@@ -474,8 +474,8 @@ export default function AllFeedback() {
                   </SelectContent>
                 </Select>
               </div>
-
-              <div>
+        
+        <div>
                 <label className="mb-2 block text-sm font-medium">
                   Clinic Area
                 </label>
@@ -497,7 +497,7 @@ export default function AllFeedback() {
                 </Select>
               </div>
 
-              <div>
+            <div>
                 <label className="mb-2 block text-sm font-medium">
                   Date Range
                 </label>
@@ -559,7 +559,7 @@ export default function AllFeedback() {
               >
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
-                    <div>
+            <div>
                       <CardTitle className="text-lg font-bold">
                         {feedback.studentName}
                       </CardTitle>
@@ -614,7 +614,7 @@ export default function AllFeedback() {
                 Showing {indexOfFirstItem + 1} to{" "}
                 {Math.min(indexOfLastItem, filteredResults.length)} of{" "}
                 {filteredResults.length} items
-              </div>
+            </div>
               <div className="flex items-center gap-1">
                 {/* 上一页按钮 */}
                 {currentPage > 1 && (
@@ -675,7 +675,7 @@ export default function AllFeedback() {
                         </Button>
                       );
                     })}
-                </div>
+            </div>
 
                 {/* 下一页按钮 */}
                 {currentPage < totalPages && (
