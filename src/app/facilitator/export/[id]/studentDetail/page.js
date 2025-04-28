@@ -34,6 +34,7 @@ import {
 } from "@react-pdf/renderer";
 import { pdf } from '@react-pdf/renderer';
 import { saveAs } from 'file-saver';
+import { GetAllStudentsWithDetails } from "../../../../../../lib/HowToConnectToFunction";
 
 // Register fonts
 Font.register({
@@ -155,7 +156,27 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#666666',
     textAlign: 'center'
-  }
+  },
+  infoRow: {
+    marginBottom: 8,
+  },
+  assessmentHeader: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#dddddd',
+    paddingBottom: 5,
+    marginBottom: 5,
+  },
+  assessmentRow: {
+    flexDirection: 'row',
+    paddingVertical: 3,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#eeeeee',
+  },
+  assessmentCell: {
+    fontSize: 10,
+    padding: 2,
+  },
 });
 
 // Custom toast implementation for notifications
@@ -188,60 +209,85 @@ const toast = {
   }
 };
 
+// Helper function to format date as YYYY-MM-DD
+const formatDateToYMD = (dateString) => {
+  if (!dateString) return "Not Available";
+  
+  try {
+    // Handle ISO date format from API (split at T to get just the date part)
+    if (typeof dateString === 'string' && dateString.includes('T')) {
+      dateString = dateString.split('T')[0];
+      // If we now have a valid YYYY-MM-DD format, return it
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        return dateString;
+      }
+    }
+    
+    // Try to parse the date
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      // If invalid date but still a string with something, return it
+      return typeof dateString === 'string' && dateString.trim() ? dateString : "Not Available";
+    }
+    
+    // Format date to YYYY-MM-DD
+    return format(date, "yyyy-MM-dd");
+  } catch (e) {
+    console.error("Date formatting error:", e, "for date:", dateString);
+    // Return original if processing fails
+    return typeof dateString === 'string' ? dateString : "Not Available";
+  }
+};
+
 // PDF document component for reports
 const ReportPDF = ({ student, reportType, reportContent }) => {
-  // Generate mock feedback data based on report type
-  const generateMockFeedback = () => {
-    if (reportType === "Preceptor Feedback") {
-      return [
-        {
-          id: "pf1",
-          date: "2023-02-15",
-          preceptor: "Dr. Sarah Johnson",
-          content: "Student demonstrates good clinical reasoning skills and shows initiative. Communication with patients is excellent, but could work on time management during busy clinic sessions."
-        },
-        {
-          id: "pf2",
-          date: "2023-03-10",
-          preceptor: "Dr. Michael Chen",
-          content: "Shows improvement in procedural skills. Documentation is thorough and well-structured. Would benefit from more confidence when presenting cases during rounds."
-        },
-        {
-          id: "pf3",
-          date: "2023-04-05",
-          preceptor: "Dr. Emily Rodriguez",
-          content: "Excellent rapport with patients and families. Clinical knowledge is solid and applies it appropriately. Continue to work on differential diagnosis development."
-        }
-      ];
-    } else if (reportType === "Facilitator Review") {
-      return [
-        {
-          id: "fr1",
-          date: "2023-02-20",
-          facilitator: "Prof. James Wilson",
-          content: "Student is progressing well in the clinical placement. Demonstrates good theoretical knowledge and is beginning to apply it effectively in practice. Reflective practice is developing nicely."
-        },
-        {
-          id: "fr2",
-          date: "2023-03-25",
-          facilitator: "Prof. Amanda Lee",
-          content: "Mid-term review shows good progress. Critical thinking skills are improving, and the student is becoming more confident in clinical decision-making. Documentation has improved significantly."
-        },
-        {
-          id: "fr3",
-          date: "2023-04-20",
-          facilitator: "Prof. James Wilson",
-          content: "Final review indicates the student has met all learning objectives for this placement. Professional behavior consistently excellent. Clinical skills have developed well with good integration of theory and practice."
-        }
-      ];
+  // Format date consistently for PDF - with time for main date
+  const formatPdfDate = (dateString, includeTime = false) => {
+    try {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); 
+      const day = String(date.getDate()).padStart(2, '0');
+      
+      if (includeTime) {
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
+      }
+      
+      return `${year}-${month}-${day}`;
+    } catch (e) {
+      return dateString || "Not Available";
     }
-    return [];
   };
 
-  const feedbackData = generateMockFeedback();
+  // Get feedbacks in chronological order
+  const getFeedbacksInOrder = () => {
+    // Ensure student object has feedbacks array
+    if (!student.feedbacks || !Array.isArray(student.feedbacks)) {
+      console.warn("No feedbacks available for student", student.studentName);
+      return [];
+    }
 
+    // Sort feedbacks by date
+    return [...student.feedbacks].sort(
+      (a, b) => new Date(a.preceptorFeedback_date) - new Date(b.preceptorFeedback_date)
+    );
+  };
+
+  // Get all feedbacks in chronological order
+  const orderedFeedbacks = getFeedbacksInOrder();
+  
+  // Group feedbacks for Preceptor Report (2 per page)
+  const groupedFeedbacks = [];
+  for (let i = 0; i < orderedFeedbacks.length; i += 2) {
+    groupedFeedbacks.push(orderedFeedbacks.slice(i, i + 2));
+  }
+
+  // Create a document with multiple pages
   return (
     <Document>
+      {/* First page: Student Information */}
       <Page size="A4" style={styles.page}>
         {/* Document title */}
         <View style={styles.header}>
@@ -263,61 +309,373 @@ const ReportPDF = ({ student, reportType, reportContent }) => {
             </View>
             <View style={styles.tableRow}>
               <Text style={styles.tableLabel}>University:</Text>
-              <Text style={styles.tableValue}>{student.studentUniversity}</Text>
+              <Text style={styles.tableValue}>{student.university || student.studentUniversity}</Text>
             </View>
-            {student.healthService && (
-              <View style={styles.tableRow}>
-                <Text style={styles.tableLabel}>Health Service:</Text>
-                <Text style={styles.tableValue}>{student.healthService}</Text>
-              </View>
-            )}
-            {student.clinicArea && (
-              <View style={styles.tableRow}>
-                <Text style={styles.tableLabel}>Clinic Area:</Text>
-                <Text style={styles.tableValue}>{student.clinicArea}</Text>
-              </View>
-            )}
-            {student.startDate && student.endDate && (
-              <View style={styles.tableRow}>
-                <Text style={styles.tableLabel}>Period:</Text>
-                <Text style={styles.tableValue}>{student.startDate} to {student.endDate}</Text>
-              </View>
-            )}
+            <View style={styles.tableRow}>
+              <Text style={styles.tableLabel}>Health Service:</Text>
+              <Text style={styles.tableValue}>{student.healthService || "Not Available"}</Text>
+            </View>
+            <View style={styles.tableRow}>
+              <Text style={styles.tableLabel}>Clinic Area:</Text>
+              <Text style={styles.tableValue}>{student.clinicArea || "Not Available"}</Text>
+            </View>
+            <View style={styles.tableRow}>
+              <Text style={styles.tableLabel}>Placement Period:</Text>
+              <Text style={styles.tableValue}>
+                {formatPdfDate(student.startDate)} to {formatPdfDate(student.endDate)}
+              </Text>
+            </View>
           </View>
         </View>
         
-        {/* Report content section */}
-        <View style={styles.contentContainer}>
-          <Text style={styles.sectionTitle}>{reportType} Content</Text>
-          
-          {feedbackData.length > 0 ? (
-            feedbackData.map((item, index) => (
-              <View key={item.id} style={styles.contentBox}>
-                <View style={styles.feedbackMeta}>
-                  <Text style={styles.feedbackTitle}>
-                    {reportType === "Preceptor Feedback" 
-                      ? `Feedback from ${item.preceptor}` 
-                      : `Review by ${item.facilitator}`}
-                  </Text>
-                  <Text style={styles.feedbackDate}>{item.date}</Text>
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text>ANSAT Pro - Confidential Document - {formatPdfDate(new Date())}</Text>
+        </View>
+      </Page>
+      
+      {/* Feedback content pages based on report type */}
+      {reportType === "Preceptor Feedback" ? (
+        // For Preceptor Feedback: two feedbacks per page
+        groupedFeedbacks.map((group, groupIndex) => (
+          <Page key={`group-${groupIndex}`} size="A4" style={styles.page}>
+            <View style={styles.contentContainer}>
+              <Text style={styles.sectionTitle}>{reportType} Content</Text>
+              
+              {group.map((feedback, index) => (
+                <View key={`feedback-${feedback.preceptorFeedback_DocId || index}`} style={{ marginBottom: 20 }}>
+                  <View style={{ textAlign: 'center', marginBottom: 10 }}>
+                    <Text style={{ fontSize: 16, fontWeight: 'bold' }}>
+                      Feedback {groupIndex * 2 + index + 1} - {formatPdfDate(feedback.preceptorFeedback_date)}
+                    </Text>
+                  </View>
+                  
+                  <View style={styles.contentBox}>
+                    {/* Feedback Information */}
+                    <View style={styles.feedbackItem}>
+                      <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Feedback Information:</Text>
+                      <Text style={styles.feedbackText}>
+                        Date: {formatPdfDate(feedback.preceptorFeedback_date, true)} | Preceptor: {feedback.preceptor} | Student: {feedback.studentName}
+                      </Text>
+                    </View>
+                    
+                    {/* Preceptor Feedback Content */}
+                    <View style={styles.feedbackItem}>
+                      <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Preceptor Feedback:</Text>
+                      <Text style={styles.feedbackText}>{feedback.content}</Text>
+                    </View>
+
+                    {/* Student Discussion (Preceptor) */}
+                    <View style={styles.feedbackItem}>
+                      <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Student Discussion (Preceptor):</Text>
+                      {feedback.preceptor_flag_discussed_with_student ? (
+                        feedback.preceptor_discussion_date ? (
+                          <Text style={styles.feedbackText}>
+                            This feedback has been discussed with the student on {formatPdfDate(feedback.preceptor_discussion_date)}.
+                          </Text>
+                        ) : (
+                          <Text style={styles.feedbackText}>
+                            This feedback has been discussed with the student.
+                          </Text>
+                        )
+                      ) : (
+                        <Text style={styles.feedbackText}>
+                          This feedback has not been discussed with the student.
+                        </Text>
+                      )}
+                    </View>
+                  </View>
                 </View>
-                <Text style={styles.feedbackText}>{item.content}</Text>
+              ))}
+            </View>
+          </Page>
+        ))
+      ) : (
+        // For Facilitator Review and All Feedback: one feedback per page
+        orderedFeedbacks.map((feedback, index) => (
+          <Page key={`feedback-page-${feedback.preceptorFeedback_DocId || index}`} size="A4" style={styles.page}>
+            <View style={styles.contentContainer}>
+              <Text style={styles.sectionTitle}>{reportType} Content</Text>
+              
+              <View style={{ textAlign: 'center', marginBottom: 10 }}>
+                <Text style={{ fontSize: 16, fontWeight: 'bold' }}>
+                  Feedback {index + 1} - {formatPdfDate(feedback.preceptorFeedback_date)}
+                </Text>
               </View>
-            ))
-          ) : (
+              
+              <View style={styles.contentBox}>
+                {reportType === "Facilitator Review" ? (
+                  // Content for Facilitator Review report - all in one card
+                  <View>
+                    {/* Only show review details if the feedback has been marked */}
+                    {feedback.is_marked ? (
+                      <>
+                        {/* Feedback Information */}
+                        <View style={styles.feedbackItem}>
+                          <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Feedback Information:</Text>
+                          <Text style={styles.feedbackText}>
+                            Date: {formatPdfDate(feedback.preceptorFeedback_date, true)} | Preceptor: {feedback.preceptor} | Student: {feedback.studentName}
+                          </Text>
+                        </View>
+                        
+                        {/* Facilitator Review Comments */}
+                        <View style={styles.feedbackItem}>
+                          <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Facilitator Review:</Text>
+                          {feedback.reviewComment ? (
+                            <Text style={styles.feedbackText}>{feedback.reviewComment}</Text>
+                          ) : (
+                            <Text style={styles.feedbackText}>No comments provided</Text>
+                          )}
+                        </View>
+
+                        {/* Assessment Items */}
+                        <View style={styles.feedbackItem}>
+                          <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Assessment Items:</Text>
+                          {feedback.reviewScore && feedback.reviewScore.length > 0 ? (
+                            <View>
+                              {/* Header for the assessment items table */}
+                              <View style={styles.assessmentHeader}>
+                                <Text style={[styles.assessmentCell, { width: '15%', fontWeight: 'bold' }]}>Item ID</Text>
+                                <Text style={[styles.assessmentCell, { width: '55%', fontWeight: 'bold' }]}>Description</Text>
+                                <Text style={[styles.assessmentCell, { width: '15%', fontWeight: 'bold' }]}>Type</Text>
+                                <Text style={[styles.assessmentCell, { width: '15%', fontWeight: 'bold' }]}>Rating</Text>
+                              </View>
+                              
+                              {(() => {
+                                const itemsMap = new Map();
+                                
+                                if (feedback.aiFeedbackDescriptions && Array.isArray(feedback.aiFeedbackDescriptions)) {
+                                  feedback.aiFeedbackDescriptions.forEach(item => {
+                                    itemsMap.set(item.item_id, {
+                                      itemId: item.item_id,
+                                      description: item.description || "",
+                                      isPositive: item.is_positive,
+                                      rating: null
+                                    });
+                                  });
+                                }
+                                
+                                feedback.reviewScore.forEach(score => {
+                                  const itemId = score.item_id;
+                                  if (itemsMap.has(itemId)) {
+                                    const item = itemsMap.get(itemId);
+                                    item.rating = score.score;
+                                    itemsMap.set(itemId, item);
+                                  } else {
+                                    itemsMap.set(itemId, {
+                                      itemId: itemId,
+                                      description: "",
+                                      isPositive: null,
+                                      rating: score.score
+                                    });
+                                  }
+                                });
+                                
+                                return Array.from(itemsMap.values()).map((item, idx) => (
+                                  <View key={idx} style={styles.assessmentRow}>
+                                    <Text style={[styles.assessmentCell, { width: '15%' }]}>{item.itemId}</Text>
+                                    <Text style={[styles.assessmentCell, { width: '55%' }]}>{item.description || "-"}</Text>
+                                    <Text style={[styles.assessmentCell, { width: '15%' }]}>
+                                      {item.isPositive !== null ? (
+                                        item.isPositive ? "Strength" : "Improvement"
+                                      ) : "-"}
+                                    </Text>
+                                    <Text style={[styles.assessmentCell, { width: '15%' }]}>{item.rating || "-"}</Text>
+                                  </View>
+                                ));
+                              })()}
+                            </View>
+                          ) : (
+                            <Text style={styles.feedbackText}>No assessment items available</Text>
+                          )}
+                        </View>
+
+                        {/* Student Discussion (Facilitator) */}
+                        <View style={styles.feedbackItem}>
+                          <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Student Discussion (Facilitator):</Text>
+                          {feedback.flag_discussed_with_student ? (
+                            feedback.discussion_date ? (
+                              <Text style={styles.feedbackText}>
+                                This feedback has been discussed with the student on {formatPdfDate(feedback.discussion_date)}.
+                              </Text>
+                            ) : (
+                              <Text style={styles.feedbackText}>
+                                This feedback has been discussed with the student.
+                              </Text>
+                            )
+                          ) : (
+                            <Text style={styles.feedbackText}>
+                              This feedback has not been discussed with the student.
+                            </Text>
+                          )}
+                        </View>
+                      </>
+                    ) : (
+                      <View style={styles.feedbackItem}>
+                        <Text style={styles.feedbackText}>
+                          This feedback has not been reviewed by a facilitator yet.
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                ) : (
+                  // Content for complete feedback report (all details)
+                  <View>
+                    {/* Feedback Information */}
+                    <View style={styles.feedbackItem}>
+                      <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Feedback Information:</Text>
+                      <Text style={styles.feedbackText}>
+                        Date: {formatPdfDate(feedback.preceptorFeedback_date, true)} | Preceptor: {feedback.preceptor} | Student: {feedback.studentName}
+                      </Text>
+                    </View>
+                    
+                    {/* Preceptor Feedback */}
+                    <View style={styles.feedbackItem}>
+                      <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Preceptor Feedback:</Text>
+                      <Text style={styles.feedbackText}>{feedback.content}</Text>
+                    </View>
+                    
+                    {/* Student Discussion (Preceptor) */}
+                    <View style={styles.feedbackItem}>
+                      <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Student Discussion (Preceptor):</Text>
+                      {feedback.preceptor_flag_discussed_with_student ? (
+                        feedback.preceptor_discussion_date ? (
+                          <Text style={styles.feedbackText}>
+                            This feedback has been discussed with the student on {formatPdfDate(feedback.preceptor_discussion_date)}.
+                          </Text>
+                        ) : (
+                          <Text style={styles.feedbackText}>
+                            This feedback has been discussed with the student.
+                          </Text>
+                        )
+                      ) : (
+                        <Text style={styles.feedbackText}>
+                          This feedback has not been discussed with the student.
+                        </Text>
+                      )}
+                    </View>
+                    
+                    {/* Display Facilitator Review content only if marked */}
+                    {feedback.is_marked && (
+                      <>
+                        {/* Facilitator Review */}
+                        <View style={styles.feedbackItem}>
+                          <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Facilitator Review:</Text>
+                          {feedback.reviewComment ? (
+                            <Text style={styles.feedbackText}>{feedback.reviewComment}</Text>
+                          ) : (
+                            <Text style={styles.feedbackText}>No comments provided</Text>
+                          )}
+                        </View>
+                        
+                        {/* Assessment Items */}
+                        <View style={styles.feedbackItem}>
+                          <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Assessment Items:</Text>
+                          {feedback.reviewScore && feedback.reviewScore.length > 0 ? (
+                            <View>
+                              {/* Header for the assessment items table */}
+                              <View style={styles.assessmentHeader}>
+                                <Text style={[styles.assessmentCell, { width: '15%', fontWeight: 'bold' }]}>Item ID</Text>
+                                <Text style={[styles.assessmentCell, { width: '55%', fontWeight: 'bold' }]}>Description</Text>
+                                <Text style={[styles.assessmentCell, { width: '15%', fontWeight: 'bold' }]}>Type</Text>
+                                <Text style={[styles.assessmentCell, { width: '15%', fontWeight: 'bold' }]}>Rating</Text>
+                              </View>
+                              
+                              {(() => {
+                                const itemsMap = new Map();
+                                
+                                if (feedback.aiFeedbackDescriptions && Array.isArray(feedback.aiFeedbackDescriptions)) {
+                                  feedback.aiFeedbackDescriptions.forEach(item => {
+                                    itemsMap.set(item.item_id, {
+                                      itemId: item.item_id,
+                                      description: item.description || "",
+                                      isPositive: item.is_positive,
+                                      rating: null
+                                    });
+                                  });
+                                }
+                                
+                                feedback.reviewScore.forEach(score => {
+                                  const itemId = score.item_id;
+                                  if (itemsMap.has(itemId)) {
+                                    const item = itemsMap.get(itemId);
+                                    item.rating = score.score;
+                                    itemsMap.set(itemId, item);
+                                  } else {
+                                    itemsMap.set(itemId, {
+                                      itemId: itemId,
+                                      description: "",
+                                      isPositive: null,
+                                      rating: score.score
+                                    });
+                                  }
+                                });
+                                
+                                return Array.from(itemsMap.values()).map((item, idx) => (
+                                  <View key={idx} style={styles.assessmentRow}>
+                                    <Text style={[styles.assessmentCell, { width: '15%' }]}>{item.itemId}</Text>
+                                    <Text style={[styles.assessmentCell, { width: '55%' }]}>{item.description || "-"}</Text>
+                                    <Text style={[styles.assessmentCell, { width: '15%' }]}>
+                                      {item.isPositive !== null ? (
+                                        item.isPositive ? "Strength" : "Improvement"
+                                      ) : "-"}
+                                    </Text>
+                                    <Text style={[styles.assessmentCell, { width: '15%' }]}>{item.rating || "-"}</Text>
+                                  </View>
+                                ));
+                              })()}
+                            </View>
+                          ) : (
+                            <Text style={styles.feedbackText}>No assessment items available</Text>
+                          )}
+                        </View>
+                        
+                        {/* Student Discussion (Facilitator) */}
+                        <View style={styles.feedbackItem}>
+                          <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Student Discussion (Facilitator):</Text>
+                          {feedback.flag_discussed_with_student ? (
+                            feedback.discussion_date ? (
+                              <Text style={styles.feedbackText}>
+                                This feedback has been discussed with the student on {formatPdfDate(feedback.discussion_date)}.
+                              </Text>
+                            ) : (
+                              <Text style={styles.feedbackText}>
+                                This feedback has been discussed with the student.
+                              </Text>
+                            )
+                          ) : (
+                            <Text style={styles.feedbackText}>
+                              This feedback has not been discussed with the student.
+                            </Text>
+                          )}
+                        </View>
+                      </>
+                    )}
+                  </View>
+                )}
+              </View>
+            </View>
+          </Page>
+        ))
+      )}
+      
+      {/* Special case for no feedback data */}
+      {orderedFeedbacks.length === 0 && (
+        <Page size="A4" style={styles.page}>
+          <View style={styles.contentContainer}>
+            <Text style={styles.sectionTitle}>{reportType} Content</Text>
             <View style={styles.contentBox}>
               <Text style={styles.paragraph}>
                 No {reportType.toLowerCase()} data available for this student.
               </Text>
             </View>
-          )}
-        </View>
-        
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text>ANSAT Pro - Confidential Document - {format(new Date(), "yyyy-MM-dd")}</Text>
-        </View>
-      </Page>
+          </View>
+          
+          <View style={styles.footer}>
+            <Text>ANSAT Pro - Confidential Document - {formatPdfDate(new Date())}</Text>
+          </View>
+        </Page>
+      )}
     </Document>
   );
 };
@@ -336,7 +694,7 @@ export default function StudentDetailPage() {
   
   // Load student data
   useEffect(() => {
-    const loadStudentData = () => {
+    const loadStudentData = async () => {
       try {
         if (!docId) {
           setError("Invalid document ID");
@@ -352,7 +710,10 @@ export default function StudentDetailPage() {
             const selectedStudent = JSON.parse(selectedStudentJson);
             if (selectedStudent.docId === docId) {
               console.log("Found matching student in localStorage:", selectedStudent);
-              setStudent(selectedStudent);
+              
+              // Try to get additional student data from API
+              const enrichedStudent = await enrichStudentData(selectedStudent);
+              setStudent(enrichedStudent);
               setLoading(false);
               return;
             }
@@ -371,7 +732,10 @@ export default function StudentDetailPage() {
               
               if (foundStudent) {
                 console.log("Found matching student in student list:", foundStudent);
-                setStudent(foundStudent);
+                
+                // Try to get additional student data from API
+                const enrichedStudent = await enrichStudentData(foundStudent);
+                setStudent(enrichedStudent);
                 setLoading(false);
                 return;
               }
@@ -385,17 +749,64 @@ export default function StudentDetailPage() {
           console.error("No student list data in localStorage");
         }
         
+        // If still not found, try to fetch from API
+        try {
+          const response = await GetAllStudentsWithDetails();
+          console.log("API Response:", response);
+          
+          if (response && Array.isArray(response)) {
+            const foundStudent = response.find(s => 
+              s.$id === docId || 
+              s.student_id === docId
+            );
+            
+            if (foundStudent) {
+              console.log("Found student from API:", foundStudent);
+              
+              // Extract and format dates 
+              const startDate = foundStudent.start_date ? foundStudent.start_date : null;
+              const endDate = foundStudent.end_date ? foundStudent.end_date : null;
+              
+              const mappedStudent = {
+                docId: foundStudent.$id || docId,
+                studentId: foundStudent.student_id,
+                studentName: `${foundStudent.first_name} ${foundStudent.last_name}`,
+                university: foundStudent.university_id,
+                studentUniversity: foundStudent.university_id, // For backward compatibility
+                healthService: foundStudent.health_service_id,
+                clinicArea: foundStudent.clinic_area_id,
+                startDate: startDate,
+                endDate: endDate,
+                courses: [], // Default empty courses array
+                feedbacks: [] // Default empty feedbacks array
+              };
+              
+              setStudent(mappedStudent);
+              setLoading(false);
+              return;
+            }
+          }
+        } catch (apiError) {
+          console.error("Error fetching student data from API:", apiError);
+        }
+        
         // If still not found, use mock data
         console.log("No matching student found, using mock data");
         setStudent({
           docId: docId,
           studentId: "S1000",
           studentName: "Unknown Student",
+          university: "Unknown University",
           studentUniversity: "Unknown University",
+          healthService: "General Hospital",
+          clinicArea: "General Practice",
+          startDate: "2023-01-15",
+          endDate: "2023-06-30",
           courses: [
             { code: "MED101", name: "Introduction to Medicine", year: "2023" },
             { code: "BIO240", name: "Human Anatomy", year: "2023" }
-          ]
+          ],
+          feedbacks: []
         });
         setLoading(false);
       } catch (error) {
@@ -407,6 +818,55 @@ export default function StudentDetailPage() {
     
     loadStudentData();
   }, [docId]);
+
+  // Helper function to ensure student data has all required fields
+  const enrichStudentData = async (studentData) => {
+    console.log("Enriching student data:", studentData);
+    
+    // Try to get missing data from the API, especially for dates and other fields
+    if (!studentData.healthService || !studentData.clinicArea || 
+        !studentData.startDate || !studentData.endDate) {
+      try {
+        console.log("Trying to get additional data from API for student:", studentData.studentId);
+        const response = await GetAllStudentsWithDetails();
+        
+        if (response && Array.isArray(response)) {
+          const foundStudent = response.find(s => 
+            s.$id === studentData.docId || 
+            s.student_id === studentData.studentId
+          );
+          
+          if (foundStudent) {
+            console.log("Found student in API:", foundStudent);
+            
+            // Update student data with API data if available
+            studentData = {
+              ...studentData,
+              healthService: studentData.healthService || foundStudent.health_service_id,
+              clinicArea: studentData.clinicArea || foundStudent.clinic_area_id,
+              startDate: studentData.startDate || foundStudent.start_date,
+              endDate: studentData.endDate || foundStudent.end_date,
+              university: studentData.university || foundStudent.university_id
+            };
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data from API:", error);
+      }
+    }
+    
+    // Format dates consistently
+    const formattedStudent = {
+      ...studentData,
+      startDate: formatDateToYMD(studentData.startDate),
+      endDate: formatDateToYMD(studentData.endDate),
+      university: studentData.university || studentData.studentUniversity
+    };
+    
+    console.log("Formatted student data:", formattedStudent);
+    
+    return formattedStudent;
+  };
   
   // Navigate back to search page
   const handleBackClick = () => {
@@ -435,11 +895,16 @@ export default function StudentDetailPage() {
   
   // Handle export action
   const handleExport = (type) => {
+    if (!student || !student.feedbacks) {
+      toast.error(`Cannot export ${type}. Student data or feedbacks are missing.`);
+      return;
+    }
+    
     setExportType(type);
     setShowExportDialog(true);
   };
   
-  // Confirm export report
+  // Export confirmation dialog
   const confirmExport = async () => {
     if (!exportType) {
       toast.error("No export type selected");
@@ -465,7 +930,6 @@ export default function StudentDetailPage() {
         <ReportPDF 
           student={student} 
           reportType={exportType}
-          reportContent=""
         />
       ).toBlob();
       
@@ -476,6 +940,11 @@ export default function StudentDetailPage() {
       
       // Close dialog
       setShowExportDialog(false);
+      
+      // Navigate to success page after brief delay to ensure file download starts
+      setTimeout(() => {
+        router.push("/facilitator/export/success");
+      }, 500);
     } catch (error) {
       console.error("Export error:", error);
       toast.error(`There was an error exporting the ${exportType}. Please try again.`);
@@ -543,13 +1012,13 @@ export default function StudentDetailPage() {
             </div>
             
             <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
+              <FileText className="h-5 w-5 text-muted-foreground" />
               <div>
                 <p className="text-sm text-muted-foreground">University</p>
-                <p className="font-medium">{student.studentUniversity}</p>
+                <p className="font-medium">{student.university || student.studentUniversity}</p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <FileText className="h-5 w-5 text-muted-foreground" />
               <div>
@@ -557,6 +1026,40 @@ export default function StudentDetailPage() {
                 <p className="font-medium">{student.docId}</p>
               </div>
             </div>
+            
+            <div className="flex items-center gap-3">
+              <FileText className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Health Service</p>
+                <p className="font-medium">{student.healthService || "Not Available"}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <FileText className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Clinic Area</p>
+                <p className="font-medium">{student.clinicArea || "Not Available"}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Start Date</p>
+                <p className="font-medium">{formatDateToYMD(student.startDate)}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">End Date</p>
+                <p className="font-medium">{formatDateToYMD(student.endDate)}</p>
+              </div>
+            </div>
+            
+            
           </div>
         </CardContent>
       </Card>
@@ -569,7 +1072,7 @@ export default function StudentDetailPage() {
         <CardContent className="space-y-6">
           <p className="text-muted-foreground">Choose an export option for {student.studentName}'s reports:</p>
           
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col md:flex-row gap-4 flex-wrap">
             {/* AI Summary Button - Different color */}
             <Button 
               variant="default" 
@@ -615,6 +1118,22 @@ export default function StudentDetailPage() {
                 <>
                   <Download className="mr-2 h-4 w-4" />
                   Export All Facilitator Review
+                </>
+              )}
+            </Button>
+            
+            {/* Export All Feedback Button */}
+            <Button 
+              variant="outline"
+              onClick={() => handleExport("All Feedback")}
+              disabled={exportLoading["All Feedback"]}
+            >
+              {exportLoading["All Feedback"] ? (
+                "Exporting..."
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" />
+                  Export All Feedback
                 </>
               )}
             </Button>

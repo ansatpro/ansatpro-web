@@ -19,16 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Home,
-  MessageSquareText,
-  Settings,
-  Users,
-  Download,
-  Bell,
-  Search,
-  X,
-} from "lucide-react";
+import { Search, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { GetAllStudentsWithDetails } from "../../../../lib/HowToConnectToFunction";
 
@@ -44,6 +35,9 @@ export default function AllFeedback() {
   const [healthServiceFilter, setHealthServiceFilter] = useState("all");
   const [clinicAreaFilter, setClinicAreaFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9; // 9 items per page
 
   // Helper function to format date
   const formatDate = (dateString) => {
@@ -98,6 +92,9 @@ export default function AllFeedback() {
               preceptor_id,
               preceptor_name: preceptor,
               content,
+              flag_discussed_with_student:
+                preceptor_flag_discussed_with_student,
+              discussion_date: preceptor_discussion_date,
               review: is_marked,
               ai_feedback_items,
             } = feedback;
@@ -135,6 +132,8 @@ export default function AllFeedback() {
               preceptor_id,
               preceptor,
               content,
+              preceptor_flag_discussed_with_student,
+              preceptor_discussion_date,
               is_marked: !!is_marked,
               reviewComment,
               reviewScore,
@@ -180,6 +179,7 @@ export default function AllFeedback() {
   // Update filtered results when feedback data changes
   useEffect(() => {
     setFilteredResults(feedbacks);
+    setCurrentPage(1); // 重置到第一页当数据改变时
   }, [feedbacks]);
 
   // Get unique filter values from feedback data
@@ -288,6 +288,7 @@ export default function AllFeedback() {
     }
 
     setFilteredResults(results);
+    setCurrentPage(1); // reset to first page when filters change
   };
 
   // Search feedback
@@ -304,6 +305,7 @@ export default function AllFeedback() {
     );
 
     setFilteredResults(results);
+    setCurrentPage(1); // reset to first page when search is applied
   };
 
   // Clear all filters
@@ -343,7 +345,18 @@ export default function AllFeedback() {
         reviewComment: feedback.reviewComment,
         reviewScore: feedback.reviewScore,
         aiFeedbackDescriptions: feedback.aiFeedbackDescriptions || [],
+        flag_discussed_with_student: feedback.flag_discussed_with_student,
+        discussion_date: feedback.discussion_date,
+        preceptor_flag_discussed_with_student: feedback.preceptor_flag_discussed_with_student,
+        preceptor_discussion_date: feedback.preceptor_discussion_date
       };
+
+      console.log("Storing feedback with discussion data:", {
+        flag_discussed_with_student: feedback.flag_discussed_with_student,
+        discussion_date: feedback.discussion_date,
+        preceptor_flag_discussed_with_student: feedback.preceptor_flag_discussed_with_student,
+        preceptor_discussion_date: feedback.preceptor_discussion_date
+      });
 
       // Store current clicked feedback details to localStorage
       localStorage.setItem(
@@ -365,6 +378,22 @@ export default function AllFeedback() {
       console.error("Error in handleFeedbackClick:", error);
       alert("There was an error processing this feedback. Please try again.");
     }
+  };
+
+  // Calculate pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredResults.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredResults.length / itemsPerPage);
+
+  // Handle page change
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    // Scroll to top of the page
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   return (
@@ -445,8 +474,8 @@ export default function AllFeedback() {
                   </SelectContent>
                 </Select>
               </div>
-
-              <div>
+        
+        <div>
                 <label className="mb-2 block text-sm font-medium">
                   Clinic Area
                 </label>
@@ -468,7 +497,7 @@ export default function AllFeedback() {
                 </Select>
               </div>
 
-              <div>
+            <div>
                 <label className="mb-2 block text-sm font-medium">
                   Date Range
                 </label>
@@ -520,59 +549,150 @@ export default function AllFeedback() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredResults.map((feedback) => (
-            <Card
-              key={feedback.id}
-              className="w-full mb-4 hover:shadow-md transition-shadow cursor-pointer"
-              onClick={() => handleFeedbackClick(feedback)}
-            >
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-lg font-bold">
-                      {feedback.studentName}
-                    </CardTitle>
-                    <p className="text-sm text-gray-500">
-                      ID: {feedback.studentId}
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {currentItems.map((feedback) => (
+              <Card
+                key={feedback.id}
+                className="w-full mb-4 hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => handleFeedbackClick(feedback)}
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+            <div>
+                      <CardTitle className="text-lg font-bold">
+                        {feedback.studentName}
+                      </CardTitle>
+                      <p className="text-sm text-gray-500">
+                        ID: {feedback.studentId}
+                      </p>
+                    </div>
+                    <Badge
+                      variant={feedback.is_marked ? "success" : "pending"}
+                      className={
+                        feedback.is_marked ? "bg-green-500" : "bg-amber-500"
+                      }
+                    >
+                      {feedback.is_marked ? "Reviewed" : "Pending"}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <div className="mb-2">
+                    <p className="text-sm">
+                      <span className="font-medium">Date:</span>{" "}
+                      {formatDate(feedback.date)}
+                    </p>
+                    <p className="text-sm">
+                      <span className="font-medium">Preceptor:</span>{" "}
+                      {feedback.preceptor}
                     </p>
                   </div>
-                  <Badge
-                    variant={feedback.is_marked ? "success" : "pending"}
-                    className={
-                      feedback.is_marked ? "bg-green-500" : "bg-amber-500"
-                    }
-                  >
-                    {feedback.is_marked ? "Reviewed" : "Pending"}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="pb-2">
-                <div className="mb-2">
-                  <p className="text-sm">
-                    <span className="font-medium">Date:</span>{" "}
-                    {formatDate(feedback.date)}
+                  <p className="text-sm line-clamp-3">
+                    <span className="font-medium">Feedback:</span>{" "}
+                    {feedback.content}
                   </p>
-                  <p className="text-sm">
-                    <span className="font-medium">Preceptor:</span>{" "}
-                    {feedback.preceptor}
-                  </p>
-                </div>
-                <p className="text-sm line-clamp-3">{feedback.content}</p>
-              </CardContent>
-              <CardFooter>
-                <div className="flex justify-between items-center w-full mt-2">
-                  <div className="text-xs text-gray-500">
-                    {feedback.university}
+                </CardContent>
+                <CardFooter>
+                  <div className="flex justify-between items-center w-full mt-2">
+                    <div className="text-xs text-gray-500">
+                      {feedback.university}
+                    </div>
+                    <Button size="sm" variant="outline" className="bg-white">
+                      View Details
+                    </Button>
                   </div>
-                  <Button size="sm" variant="outline" className="bg-white">
-                    View Details
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+
+          {/* Pagination */} 
+          {totalPages > 1 && (
+            <div className="mt-8 flex flex-col items-center gap-4">
+              <div className="text-sm text-muted-foreground">
+                Showing {indexOfFirstItem + 1} to{" "}
+                {Math.min(indexOfLastItem, filteredResults.length)} of{" "}
+                {filteredResults.length} items
+            </div>
+              <div className="flex items-center gap-1">
+                {/* previous page button */}
+                {currentPage > 1 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    className="flex items-center gap-1"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="hidden sm:inline">Previous</span>
                   </Button>
-                </div>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+                )}
+
+                {/* Page numbers */}
+                <div className="flex items-center">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((page) => {
+                      // Display only relevant pages
+                      return (
+                        page === 1 ||
+                        page === totalPages ||
+                        (page >= currentPage - 1 && page <= currentPage + 1)
+                      );
+                    })
+                    .map((page, index, array) => {
+                      // If there are gaps in the page numbers, show ellipsis
+                      if (index > 0 && array[index - 1] !== page - 1) {
+                        return (
+                          <React.Fragment key={`ellipsis-${page}`}>
+                            <span className="px-2 text-muted-foreground">
+                              ...
+                            </span>
+                            <Button
+                              key={page}
+                              variant={
+                                currentPage === page ? "default" : "outline"
+                              }
+                              size="sm"
+                              onClick={() => handlePageChange(page)}
+                              className="mx-1 min-w-[32px]"
+                            >
+                              {page}
+                            </Button>
+                          </React.Fragment>
+                        );
+                      }
+
+                      return (
+                        <Button
+                          key={page}
+                          variant={currentPage === page ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handlePageChange(page)}
+                          className="mx-1 min-w-[32px]"
+                        >
+                          {page}
+                        </Button>
+                      );
+                    })}
+            </div>
+
+                {/* next page button */}
+                {currentPage < totalPages && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    className="flex items-center gap-1"
+                  >
+                    <span className="hidden sm:inline">Next</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
