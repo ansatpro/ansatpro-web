@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NavigationProvider } from "@/context/NavigationContext";
+import { NotificationsProvider } from "@/context/NotificationsContext";
 import ClientSideJWTRefresher from "@/components/ClientSideJWTRefresher"; // path to the client-only component
 import ClientSideRoleGuard from "@/components/ClientSideRoleGuard"; // ⬅️ Add this
 
@@ -22,8 +23,16 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <NavigationProvider>{children}</NavigationProvider>
+        <NavigationProvider>
+          <NotificationsProvider>{children}</NotificationsProvider>
+        </NavigationProvider>
         <ClientSideJWTRefresher /> {/* ✅ Client-only logic here */}
         <ClientSideRoleGuard /> {/* ✅ Add role guard globally */}
       </body>

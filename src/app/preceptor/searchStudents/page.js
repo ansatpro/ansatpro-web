@@ -115,8 +115,13 @@ export default function SearchStudent() {
               placeholder="Enter student name"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="py-6 pl-4 pr-10 bg-gray-50 rounded-lg"
+              className="text-base leading-6 px-4 py-3 bg-gray-50 rounded-lg"
+              inputMode="text"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck="false"
             />
+
 
             {/* Clear Button */}
             {searchQuery && (

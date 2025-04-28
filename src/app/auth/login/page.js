@@ -15,7 +15,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 // import TextPressure from './TextPressure';
 import dynamic from "next/dynamic";
 
@@ -29,11 +29,13 @@ const handleAnimationComplete = () => {
 
 const LoginPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -41,7 +43,38 @@ const LoginPage = () => {
 
   useEffect(() => {
     setHasMounted(true);
-  }, []);
+    // Check if redirected from registration
+    if (searchParams.get("registered") === "true") {
+      setSuccess(
+        "A verification link has been sent to your email. Please check your inbox to verify your account."
+      );
+    }
+  }, [searchParams]);
+
+  // Verify email
+
+  if (typeof window !== "undefined") {
+    // Get URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const secret = urlParams.get("secret");
+    const userId = urlParams.get("userId");
+
+    if (secret && userId) {
+      try {
+        const response = account.updateVerification(userId, secret);
+        console.log("Verify successfully"); // Log successful response
+      } catch (error) {
+        console.error("Verification failed:", error); // Log error message
+      }
+    } else {
+      // console.log("This URL doesn't come from email directly");
+      // Do nothing
+    }
+  } else {
+    console.log(
+      "This code is running on the server-side, window object is not available."
+    );
+  }
 
   // Handle login
   const handleLogin = async (e) => {
@@ -66,6 +99,15 @@ const LoginPage = () => {
       localStorage.setItem("jwt", jwt);
       const user = await account.get();
 
+      // Check if the email is verified
+      if (!user.emailVerification) {
+        setError(
+          "Please verify your email before logging in. Check your email inbox for the verification link."
+        );
+        await account.deleteSession("current");
+        return;
+      }
+
       const execution = await functions.createExecution(
         process.env.NEXT_PUBLIC_FN_USER_METADATA,
         JSON.stringify({
@@ -89,12 +131,6 @@ const LoginPage = () => {
       }
 
       console.log("🪵 Raw response body:", execution.responseBody);
-
-      // const result = JSON.parse(execution.responseBody);
-
-      // setLoggedInUser(user);
-      // // Redirect directly to preceptor home page
-      // window.location.href = '/preceptor/home';
     } catch (err) {
       console.error("Login failed:", err);
       setError(
@@ -149,6 +185,13 @@ const LoginPage = () => {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
+
+            {success && (
+              <Alert className="mb-4 rounded-xl border-l-4 border-green-600 bg-green-50">
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
+
             {hasMounted && (
               <form className="space-y-6" onSubmit={handleLogin}>
                 {/* Email */}

@@ -8,12 +8,14 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { account, realtimeClient } from "@/app/appwrite";
 import { GetAllNotifications } from "../../../lib/HowToConnectToFunction";
+import { useNotifications } from "@/context/NotificationsContext";
 
 export default function FacilitatorTopBar() {
   const router = useRouter(); // Initialize useRouter
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [hasNotifications, setHasNotifications] = useState(false);
+  const { hasNotifications, setHasNotifications, setFinalNotification } =
+    useNotifications();
   const [currentUser, setCurrentUser] = useState();
   // const [notifications, setNotifications] = useState([]);
   const [triggerGetNotifications, setTriggerGetNotifications] = useState(false);
@@ -56,11 +58,14 @@ export default function FacilitatorTopBar() {
       } else {
         setHasNotifications(false);
       }
+
+      // Update the finalNotification in context
+      setFinalNotification(finalNotification);
       setTriggerGetNotifications(false);
     };
 
     fetchNotifications();
-  }, [triggerGetNotifications]);
+  }, [triggerGetNotifications, setHasNotifications, setFinalNotification]);
 
   // Use realtime to check for notifications
   useEffect(() => {
