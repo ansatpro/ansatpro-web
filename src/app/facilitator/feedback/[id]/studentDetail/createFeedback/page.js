@@ -161,12 +161,12 @@ export default function ReviewFeedback() {
     const hasRatings = Object.keys(itemRatings).length > 0;
 
     if (!hasRatings) {
-      alert("请至少为一个ANSAT项目进行评分");
+      alert("Please rate at least one ANSAT item");
       return;
     }
 
     if (discussedWithStudent === "yes" && !discussionDate) {
-      alert("请选择与学生讨论的日期");
+      alert("Please select a discussion date with the student");
       return;
     }
 
@@ -182,7 +182,7 @@ export default function ReviewFeedback() {
       discussionDate: discussedWithStudent === "yes" ? discussionDate : null,
     };
 
-    console.log("提交数据:", submissionData);
+    console.log("Submitting data:", submissionData);
 
     // In a real application, this would call an API
     try {
@@ -236,13 +236,13 @@ export default function ReviewFeedback() {
         }
       }
 
-      // 跳转到成功页面
+      // Navigate to success page
       router.push(
         `/facilitator/feedback/${feedbackId}/studentDetail/createFeedback/success`
       );
     } catch (error) {
-      console.error("提交失败:", error);
-      alert("提交失败，请重试");
+      console.error("Submission failed:", error);
+      alert("Submission failed, please try again");
     }
   };
 

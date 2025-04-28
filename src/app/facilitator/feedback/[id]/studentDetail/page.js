@@ -277,7 +277,7 @@ export default function StudentDetail() {
             </CardHeader>
             <CardContent>
               {(() => {
-                // 明确检查数据类型和值
+                // Clarify data type and value checks
                 const wasDiscussed = 
                   feedbackData.preceptor_flag_discussed_with_student === true || 
                   feedbackData.preceptor_flag_discussed_with_student === "true" || 

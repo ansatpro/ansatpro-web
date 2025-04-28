@@ -396,7 +396,7 @@ export default function AISummaryPage() {
         // If still not found, try to fetch from API
         try {
           const response = await GetAllStudentsWithDetails();
-          console.log("API Response:", response); // 打印API返回数据以便调试
+          console.log("API Response:", response); // Debugging line
           
           if (response && Array.isArray(response)) {
             const foundStudent = response.find(s => s.$id === docId || s.student_id === docId);
@@ -404,7 +404,7 @@ export default function AISummaryPage() {
             if (foundStudent) {
               console.log("Found student from API:", foundStudent);
               
-              // 添加日期处理逻辑，确保正确提取日期值
+              // Additional date handling
               const startDate = foundStudent.start_date ? foundStudent.start_date : null;
               const endDate = foundStudent.end_date ? foundStudent.end_date : null;
               

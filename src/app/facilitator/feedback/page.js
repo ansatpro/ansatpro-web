@@ -37,7 +37,7 @@ export default function AllFeedback() {
   const [dateFilter, setDateFilter] = useState("all");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 9; // 每页显示9个卡片
+  const itemsPerPage = 9; // 9 items per page
 
   // Helper function to format date
   const formatDate = (dateString) => {
@@ -288,7 +288,7 @@ export default function AllFeedback() {
     }
 
     setFilteredResults(results);
-    setCurrentPage(1); // 重置到第一页当过滤条件改变时
+    setCurrentPage(1); // reset to first page when filters change
   };
 
   // Search feedback
@@ -305,7 +305,7 @@ export default function AllFeedback() {
     );
 
     setFilteredResults(results);
-    setCurrentPage(1); // 重置到第一页当搜索条件改变时
+    setCurrentPage(1); // reset to first page when search is applied
   };
 
   // Clear all filters
@@ -380,16 +380,16 @@ export default function AllFeedback() {
     }
   };
 
-  // 计算分页数据和总页数
+  // Calculate pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredResults.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredResults.length / itemsPerPage);
 
-  // 处理页面变化
+  // Handle page change
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-    // 滚动到页面顶部
+    // Scroll to top of the page
     window.scrollTo({
       top: 0,
       behavior: "smooth",
@@ -607,7 +607,7 @@ export default function AllFeedback() {
             ))}
           </div>
 
-          {/* 分页控件 - 使用基本组件实现 */}
+          {/* Pagination */} 
           {totalPages > 1 && (
             <div className="mt-8 flex flex-col items-center gap-4">
               <div className="text-sm text-muted-foreground">
@@ -616,7 +616,7 @@ export default function AllFeedback() {
                 {filteredResults.length} items
             </div>
               <div className="flex items-center gap-1">
-                {/* 上一页按钮 */}
+                {/* previous page button */}
                 {currentPage > 1 && (
                   <Button
                     variant="outline"
@@ -629,11 +629,11 @@ export default function AllFeedback() {
                   </Button>
                 )}
 
-                {/* 页码按钮 */}
+                {/* Page numbers */}
                 <div className="flex items-center">
                   {Array.from({ length: totalPages }, (_, i) => i + 1)
                     .filter((page) => {
-                      // 显示第一页、最后一页以及当前页面附近的页码
+                      // Display only relevant pages
                       return (
                         page === 1 ||
                         page === totalPages ||
@@ -641,7 +641,7 @@ export default function AllFeedback() {
                       );
                     })
                     .map((page, index, array) => {
-                      // 如果页码之间有间隔，添加省略号
+                      // If there are gaps in the page numbers, show ellipsis
                       if (index > 0 && array[index - 1] !== page - 1) {
                         return (
                           <React.Fragment key={`ellipsis-${page}`}>
@@ -677,7 +677,7 @@ export default function AllFeedback() {
                     })}
             </div>
 
-                {/* 下一页按钮 */}
+                {/* next page button */}
                 {currentPage < totalPages && (
                   <Button
                     variant="outline"

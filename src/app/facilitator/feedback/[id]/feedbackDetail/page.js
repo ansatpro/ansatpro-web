@@ -48,7 +48,7 @@ export default function FeedbackDetail() {
                 startDate: currentFeedback.startDate || "Unknown Start Date",
                 endDate: currentFeedback.endDate || "Unknown End Date",
                 flag_discussed_with_student: (() => {
-                  // 确保从各种可能的位置和格式正确获取讨论状态
+                  // Make sure to get the discussion status from various possible locations and formats
                   if (currentFeedback.flag_discussed_with_student !== undefined) {
                     return currentFeedback.flag_discussed_with_student;
                   }
@@ -58,7 +58,7 @@ export default function FeedbackDetail() {
                   return false;
                 })(),
                 discussion_date: (() => {
-                  // 确保从各种可能的位置正确获取讨论日期
+                  // Make sure to get the discussion date from various possible locations
                   if (currentFeedback.discussion_date) {
                     return currentFeedback.discussion_date;
                   }
@@ -67,7 +67,7 @@ export default function FeedbackDetail() {
                   }
                   return "";
                 })(),
-                // 直接从 currentFeedback 获取 preceptor 讨论相关的字段
+                // Get preceptor discussion related fields from current feedback
                 preceptor_flag_discussed_with_student: currentFeedback.preceptor_flag_discussed_with_student,
                 preceptor_discussion_date: currentFeedback.preceptor_discussion_date,
                 aiFeedbackItems: currentFeedback.aiFeedbackDescriptions || []
@@ -111,7 +111,7 @@ export default function FeedbackDetail() {
                 startDate: feedback.startDate || "Unknown Start Date",
                 endDate: feedback.endDate || "Unknown End Date",
                 flag_discussed_with_student: (() => {
-                  // 确保从各种可能的位置和格式正确获取讨论状态
+                  // Make sure to get the discussion status from various possible locations and formats
                   if (feedback.flag_discussed_with_student !== undefined) {
                     return feedback.flag_discussed_with_student;
                   }
@@ -121,7 +121,7 @@ export default function FeedbackDetail() {
                   return false;
                 })(),
                 discussion_date: (() => {
-                  // 确保从各种可能的位置正确获取讨论日期
+                  // Make sure to get the discussion date from various possible locations
                   if (feedback.discussion_date) {
                     return feedback.discussion_date;
                   }
@@ -130,7 +130,7 @@ export default function FeedbackDetail() {
                   }
                   return "";
                 })(),
-                // 从 feedback 列表中获取 preceptor 讨论相关字段
+                // Get preceptor discussion related fields from feedback
                 preceptor_flag_discussed_with_student: feedback.preceptor_flag_discussed_with_student,
                 preceptor_discussion_date: feedback.preceptor_discussion_date,
                 aiFeedbackItems: feedback.aiFeedbackDescriptions || []
@@ -190,15 +190,20 @@ export default function FeedbackDetail() {
   };
   
   // Format date for display
-  const formatDate = (dateString) => {
+  const formatDate = (dateString, includeTime = false) => {
     try {
       const date = new Date(dateString);
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0'); 
       const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      return `${year}-${month}-${day} ${hours}:${minutes}`;
+      
+      if (includeTime) {
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
+      }
+      
+      return `${year}-${month}-${day}`;
     } catch (e) {
       return dateString;
     }
@@ -263,38 +268,18 @@ export default function FeedbackDetail() {
         <CardContent className="space-y-6">
           {/* Student Information Section */}
           <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-md mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-md mb-6">
               <div>
                 <p className="text-sm text-muted-foreground">Date and Time</p>
-                <p className="font-medium">{formatDate(feedbackData.date)}</p>
+                <p className="font-medium">{formatDate(feedbackData.date, true)}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Student Name</p>
                 <p className="font-medium">{feedbackData.studentName}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Preceptor</p>
+                <p className="text-sm text-muted-foreground">Preceptor Name</p>
                 <p className="font-medium">{feedbackData.preceptor}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">University</p>
-                <p className="font-medium">{feedbackData.university}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Health Service</p>
-                <p className="font-medium">{feedbackData.healthService}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Clinic Area</p>
-                <p className="font-medium">{feedbackData.clinicArea}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Start Date</p>
-                <p className="font-medium">{formatDate(feedbackData.startDate)}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">End Date</p>
-                <p className="font-medium">{formatDate(feedbackData.endDate)}</p>
               </div>
             </div>
           </div>
@@ -318,7 +303,7 @@ export default function FeedbackDetail() {
                 preceptor_discussion_date: feedbackData.preceptor_discussion_date
               })}
               {(() => {
-                // 明确检查数据类型和值
+                // Clarify data type and value checks
                 const wasDiscussed = 
                   feedbackData.preceptor_flag_discussed_with_student === true || 
                   feedbackData.preceptor_flag_discussed_with_student === "true" || 
@@ -451,7 +436,7 @@ export default function FeedbackDetail() {
                 discussion_date: feedbackData.discussion_date
               })}
               {(() => {
-                // 明确检查数据类型和值
+                // Clarify data type and value checks
                 const wasDiscussed = 
                   feedbackData.flag_discussed_with_student === true || 
                   feedbackData.flag_discussed_with_student === "true" || 
