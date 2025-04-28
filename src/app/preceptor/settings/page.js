@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Preceptor Settings Page Component
+ * @description This component handles user settings including password change, help & support, and about information.
+ */
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -6,6 +11,11 @@ import { account } from "@/app/appwrite";
 import PreceptorLayout from "@/components/layout/preceptorLayout";
 import { Button } from "@/components/ui/button";
 
+/**
+ * @function SettingsPage
+ * @description Main component for the Preceptor's settings page
+ * @returns {JSX.Element} The rendered settings page component
+ */
 export default function SettingsPage() {
   const router = useRouter();
   const [user, setUser] = useState({ name: "", email: "", role: "" });
@@ -14,6 +24,10 @@ export default function SettingsPage() {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
+  /**
+   * @function useEffect
+   * @description Fetches and sets the current user's information when the component mounts
+   */
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -31,6 +45,11 @@ export default function SettingsPage() {
     fetchUser();
   }, []);
 
+  /**
+   * @function handleLogout
+   * @description Handles user logout by clearing session and redirecting to login page
+   * @async
+   */
   const handleLogout = async () => {
     try {
       await account.deleteSession("current");

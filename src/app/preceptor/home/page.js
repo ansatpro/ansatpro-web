@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Preceptor Home Page Component
+ * @description This is the main home page for preceptors, providing navigation to add feedback and view previous feedbacks.
+ */
+
 "use client";
 
 import Link from "next/link";
@@ -5,13 +10,25 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import PreceptorLayout from "@/components/layout/preceptorLayout";
 
-
+/**
+ * @function PreceptorHome
+ * @description Main component for the Preceptor's home page
+ * @returns {JSX.Element} The rendered home page component
+ */
 export default function PreceptorHome() {
+  /**
+   * @function handleAnimationComplete
+   * @description Callback function triggered when animation completes
+   */
   const handleAnimationComplete = () => {
     console.log('All letters have animated!');
   };
   const router = useRouter();
 
+  /**
+   * @function handleAddFeedback
+   * @description Navigates to the student search page for adding new feedback
+   */
   const handleAddFeedback = () => {
     router.push("/preceptor/searchStudents");
   };
