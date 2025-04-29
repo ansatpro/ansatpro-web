@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Select Components
+ * @description A collection of select components for dropdown selection.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -6,24 +11,51 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 
 import { cn } from "../../../lib/utils"
 
+/**
+ * @function Select
+ * @description Main select component
+ * @param {Object} props - Component props
+ * @returns {JSX.Element} Select component
+ */
 function Select({
   ...props
 }) {
   return <SelectPrimitive.Root data-slot="select" {...props} />;
 }
 
+/**
+ * @function SelectGroup
+ * @description Group component for select options
+ * @param {Object} props - Component props
+ * @returns {JSX.Element} Select group
+ */
 function SelectGroup({
   ...props
 }) {
   return <SelectPrimitive.Group data-slot="select-group" {...props} />;
 }
 
+/**
+ * @function SelectValue
+ * @description Component for displaying selected value
+ * @param {Object} props - Component props
+ * @returns {JSX.Element} Select value display
+ */
 function SelectValue({
   ...props
 }) {
   return <SelectPrimitive.Value data-slot="select-value" {...props} />;
 }
 
+/**
+ * @function SelectTrigger
+ * @description Trigger component for select dropdown
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @param {string} props.size - Size variant
+ * @param {React.ReactNode} props.children - Trigger content
+ * @returns {JSX.Element} Select trigger
+ */
 function SelectTrigger({
   className,
   size = "default",
@@ -47,6 +79,15 @@ function SelectTrigger({
   );
 }
 
+/**
+ * @function SelectContent
+ * @description Content component for select dropdown
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @param {React.ReactNode} props.children - Dropdown content
+ * @param {string} props.position - Positioning strategy
+ * @returns {JSX.Element} Select content
+ */
 function SelectContent({
   className,
   children,
@@ -77,6 +118,13 @@ function SelectContent({
   );
 }
 
+/**
+ * @function SelectLabel
+ * @description Label component for select
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Select label
+ */
 function SelectLabel({
   className,
   ...props
@@ -89,6 +137,14 @@ function SelectLabel({
   );
 }
 
+/**
+ * @function SelectItem
+ * @description Individual option component
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @param {React.ReactNode} props.children - Option content
+ * @returns {JSX.Element} Select item
+ */
 function SelectItem({
   className,
   children,
@@ -112,6 +168,13 @@ function SelectItem({
   );
 }
 
+/**
+ * @function SelectSeparator
+ * @description Separator component for select options
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Select separator
+ */
 function SelectSeparator({
   className,
   ...props
@@ -124,6 +187,13 @@ function SelectSeparator({
   );
 }
 
+/**
+ * @function SelectScrollUpButton
+ * @description Button for scrolling up in select dropdown
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Scroll up button
+ */
 function SelectScrollUpButton({
   className,
   ...props
@@ -138,6 +208,13 @@ function SelectScrollUpButton({
   );
 }
 
+/**
+ * @function SelectScrollDownButton
+ * @description Button for scrolling down in select dropdown
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Scroll down button
+ */
 function SelectScrollDownButton({
   className,
   ...props

@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Basic Calendar Component
+ * @description A simple calendar component for date selection with month and year navigation.
+ */
+
 "use client";
 
 import * as React from "react";
@@ -5,6 +10,15 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils"; // Keep consistent with your project style
 
+/**
+ * @function Calendar
+ * @description Basic calendar component with date selection functionality
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @param {Date} props.value - Selected date
+ * @param {Function} props.onChange - Callback when date selection changes
+ * @returns {JSX.Element} Calendar component
+ */
 function Calendar({ className, value, onChange, ...props }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(value || null);

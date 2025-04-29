@@ -1,7 +1,33 @@
+/**
+ * @fileoverview Text Pressure Component
+ * @description A component that creates interactive text with variable font properties based on cursor position.
+ */
+
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
 
+/**
+ * @function TextPressure
+ * @description Component that creates interactive text with variable font properties
+ * @param {Object} props - Component props
+ * @param {string} props.text - Text to display
+ * @param {string} props.fontFamily - Font family name
+ * @param {string} props.fontUrl - URL to the variable font file
+ * @param {boolean} props.width - Whether to vary font width
+ * @param {boolean} props.weight - Whether to vary font weight
+ * @param {boolean} props.italic - Whether to vary font italic
+ * @param {boolean} props.alpha - Whether to vary text opacity
+ * @param {boolean} props.flex - Whether to use flex layout
+ * @param {boolean} props.stroke - Whether to add text stroke
+ * @param {boolean} props.scale - Whether to scale text to container
+ * @param {string} props.textColor - Text color
+ * @param {string} props.strokeColor - Stroke color
+ * @param {number} props.strokeWidth - Stroke width
+ * @param {string} props.className - Additional CSS classes
+ * @param {number} props.minFontSize - Minimum font size
+ * @returns {JSX.Element} The interactive text component
+ */
 const TextPressure = ({
     text = 'Compressa',
     fontFamily = 'Compressa VF',
@@ -38,12 +64,23 @@ const TextPressure = ({
 
     const chars = text.split('');
 
+    /**
+     * @function dist
+     * @description Calculates distance between two points
+     * @param {Object} a - First point {x, y}
+     * @param {Object} b - Second point {x, y}
+     * @returns {number} Distance between points
+     */
     const dist = (a, b) => {
         const dx = b.x - a.x;
         const dy = b.y - a.y;
         return Math.sqrt(dx * dx + dy * dy);
     };
 
+    /**
+     * @function useEffect
+     * @description Sets up mouse/touch event listeners and initializes cursor position
+     */
     useEffect(() => {
         const handleMouseMove = (e) => {
             cursorRef.current.x = e.clientX;
@@ -72,6 +109,10 @@ const TextPressure = ({
         };
     }, []);
 
+    /**
+     * @function setSize
+     * @description Calculates and sets appropriate font size and scaling
+     */
     const setSize = () => {
         if (!containerRef.current || !titleRef.current) return;
 
@@ -96,12 +137,20 @@ const TextPressure = ({
         });
     };
 
+    /**
+     * @function useEffect
+     * @description Sets up resize listener and initial size calculation
+     */
     useEffect(() => {
         setSize();
         window.addEventListener('resize', setSize);
         return () => window.removeEventListener('resize', setSize);
     }, [scale, text]);
 
+    /**
+     * @function useEffect
+     * @description Animates text properties based on cursor position
+     */
     useEffect(() => {
         let rafId;
         const animate = () => {
@@ -123,6 +172,14 @@ const TextPressure = ({
 
                     const d = dist(mouseRef.current, charCenter);
 
+                    /**
+                     * @function getAttr
+                     * @description Calculates attribute value based on distance
+                     * @param {number} distance - Distance from cursor
+                     * @param {number} minVal - Minimum attribute value
+                     * @param {number} maxVal - Maximum attribute value
+                     * @returns {number} Calculated attribute value
+                     */
                     const getAttr = (distance, minVal, maxVal) => {
                         const val = maxVal - Math.abs((maxVal * distance) / maxDist);
                         return Math.max(minVal, val + minVal);

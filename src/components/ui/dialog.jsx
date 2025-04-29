@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Dialog Components
+ * @description A collection of components for creating modal dialogs.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -6,30 +11,61 @@ import { XIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @function Dialog
+ * @description Main dialog container component
+ * @param {Object} props - Component props
+ * @returns {JSX.Element} Dialog container
+ */
 function Dialog({
   ...props
 }) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
+/**
+ * @function DialogTrigger
+ * @description Component that triggers the dialog
+ * @param {Object} props - Component props
+ * @returns {JSX.Element} Dialog trigger
+ */
 function DialogTrigger({
   ...props
 }) {
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
 }
 
+/**
+ * @function DialogPortal
+ * @description Portal component for dialog content
+ * @param {Object} props - Component props
+ * @returns {JSX.Element} Dialog portal
+ */
 function DialogPortal({
   ...props
 }) {
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
 }
 
+/**
+ * @function DialogClose
+ * @description Component for closing the dialog
+ * @param {Object} props - Component props
+ * @returns {JSX.Element} Dialog close button
+ */
 function DialogClose({
   ...props
 }) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
+/**
+ * @function DialogOverlay
+ * @description Overlay component for dialog background
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Dialog overlay
+ */
 function DialogOverlay({
   className,
   ...props
@@ -45,6 +81,14 @@ function DialogOverlay({
   );
 }
 
+/**
+ * @function DialogContent
+ * @description Main content component for dialog
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @param {React.ReactNode} props.children - Dialog content
+ * @returns {JSX.Element} Dialog content
+ */
 function DialogContent({
   className,
   children,
@@ -71,6 +115,13 @@ function DialogContent({
   );
 }
 
+/**
+ * @function DialogHeader
+ * @description Header section of the dialog
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Dialog header
+ */
 function DialogHeader({
   className,
   ...props
@@ -83,6 +134,13 @@ function DialogHeader({
   );
 }
 
+/**
+ * @function DialogFooter
+ * @description Footer section of the dialog
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Dialog footer
+ */
 function DialogFooter({
   className,
   ...props
@@ -95,6 +153,13 @@ function DialogFooter({
   );
 }
 
+/**
+ * @function DialogTitle
+ * @description Title component for the dialog
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Dialog title
+ */
 function DialogTitle({
   className,
   ...props
@@ -107,6 +172,13 @@ function DialogTitle({
   );
 }
 
+/**
+ * @function DialogDescription
+ * @description Description component for the dialog
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Dialog description
+ */
 function DialogDescription({
   className,
   ...props

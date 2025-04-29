@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Tooltip Components
+ * @description A collection of tooltip components for displaying additional information on hover.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -5,6 +10,13 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @function TooltipProvider
+ * @description Provider component for tooltip functionality
+ * @param {Object} props - Component props
+ * @param {number} props.delayDuration - Delay before showing tooltip (ms)
+ * @returns {JSX.Element} Tooltip provider
+ */
 function TooltipProvider({
   delayDuration = 0,
   ...props
@@ -12,6 +24,12 @@ function TooltipProvider({
   return (<TooltipPrimitive.Provider data-slot="tooltip-provider" delayDuration={delayDuration} {...props} />);
 }
 
+/**
+ * @function Tooltip
+ * @description Main tooltip component
+ * @param {Object} props - Component props
+ * @returns {JSX.Element} Tooltip component
+ */
 function Tooltip({
   ...props
 }) {
@@ -22,12 +40,27 @@ function Tooltip({
   );
 }
 
+/**
+ * @function TooltipTrigger
+ * @description Component that triggers the tooltip
+ * @param {Object} props - Component props
+ * @returns {JSX.Element} Tooltip trigger
+ */
 function TooltipTrigger({
   ...props
 }) {
   return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
 }
 
+/**
+ * @function TooltipContent
+ * @description Content component for tooltip
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @param {number} props.sideOffset - Offset from the trigger element
+ * @param {React.ReactNode} props.children - Tooltip content
+ * @returns {JSX.Element} Tooltip content
+ */
 function TooltipContent({
   className,
   sideOffset = 0,

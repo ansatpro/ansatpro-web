@@ -1,10 +1,19 @@
+/**
+ * @fileoverview ANSAT Items Review Component
+ * @description Component for reviewing and selecting ANSAT (Australian Nursing Standards Assessment Tool) items.
+ */
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
-// 7 个大项代表的编号和描述
+/**
+ * @constant {Array} ansatItems
+ * @description List of ANSAT items with their codes and descriptions
+ * @type {Array<{code: string, text: string}>}
+ */
 const ansatItems = [
   { code: "1", text: "Thinks critically and analyses nursing practice" },
   { code: "2", text: "Engages in therapeutic and professional relationships" },
@@ -15,18 +24,33 @@ const ansatItems = [
   { code: "7", text: "Evaluates outcomes to inform nursing practice" }
 ];
 
+/**
+ * @function AnsatItemsReview
+ * @description Component for reviewing and selecting ANSAT items with optional negative marking
+ * @param {Object} props - Component props
+ * @param {Array<string>} props.aiResults - Array of recommended ANSAT item codes
+ * @param {Function} props.onConfirm - Callback function when items are confirmed
+ * @returns {JSX.Element} The ANSAT items review interface
+ */
 export default function AnsatItemsReview({ aiResults = [], onConfirm }) {
   const [selectedItems, setSelectedItems] = useState([]);
   const [isNegative, setIsNegative] = useState({});
 
-  // 初始化时设置推荐项
+  /**
+   * @function useEffect
+   * @description Initializes selected items with AI recommendations
+   */
   useEffect(() => {
     if (aiResults.length > 0) {
       setSelectedItems(aiResults);
     }
   }, [aiResults]);
 
-  // 切换是否选中某个大项
+  /**
+   * @function toggleItem
+   * @description Toggles the selection of an ANSAT item
+   * @param {string} code - The ANSAT item code to toggle
+   */
   const toggleItem = (code) => {
     setSelectedItems((prev) =>
       prev.includes(code)
@@ -37,13 +61,17 @@ export default function AnsatItemsReview({ aiResults = [], onConfirm }) {
     setIsNegative((prev) => {
       const updated = { ...prev };
       if (selectedItems.includes(code)) {
-        delete updated[code]; // 取消选择时也移除负面标记
+        delete updated[code]; // Remove negative mark when unselected
       }
       return updated;
     });
   };
 
-  // 切换某项是否为负面
+  /**
+   * @function toggleNegative
+   * @description Toggles the negative status of a selected ANSAT item
+   * @param {string} code - The ANSAT item code to toggle negative status
+   */
   const toggleNegative = (code) => {
     setIsNegative((prev) => ({
       ...prev,
@@ -51,7 +79,10 @@ export default function AnsatItemsReview({ aiResults = [], onConfirm }) {
     }));
   };
 
-  // 提交结构：{ "1": false, "2": true, ... }
+  /**
+   * @function handleConfirm
+   * @description Handles the confirmation of selected items and their negative status
+   */
   const handleConfirm = () => {
     const finalPayload = {};
     selectedItems.forEach((code) => {

@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Rotating Text Component
+ * @description A component that animates text rotation with various customization options.
+ */
+
 "use client";
 
 import {
@@ -10,10 +15,40 @@ import {
 } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+/**
+ * @function cn
+ * @description Utility function to combine class names
+ * @param {...string} classes - Class names to combine
+ * @returns {string} Combined class names
+ */
 function cn(...classes) {
     return classes.filter(Boolean).join(" ");
 }
 
+/**
+ * @function RotatingText
+ * @description Component that animates text rotation with customizable transitions and effects
+ * @param {Object} props - Component props
+ * @param {Array<string>} props.texts - Array of texts to rotate through
+ * @param {Object} props.transition - Framer Motion transition configuration
+ * @param {Object} props.initial - Initial animation state
+ * @param {Object} props.animate - Animation state
+ * @param {Object} props.exit - Exit animation state
+ * @param {string} props.animatePresenceMode - AnimatePresence mode
+ * @param {boolean} props.animatePresenceInitial - Whether to animate on initial render
+ * @param {number} props.rotationInterval - Time between rotations in milliseconds
+ * @param {number} props.staggerDuration - Duration of stagger effect
+ * @param {string} props.staggerFrom - Starting point for stagger effect
+ * @param {boolean} props.loop - Whether to loop through texts
+ * @param {boolean} props.auto - Whether to auto-rotate
+ * @param {string} props.splitBy - How to split text for animation
+ * @param {Function} props.onNext - Callback when text changes
+ * @param {string} props.mainClassName - Main container class name
+ * @param {string} props.splitLevelClassName - Split level class name
+ * @param {string} props.elementLevelClassName - Element level class name
+ * @param {React.Ref} ref - Forwarded ref
+ * @returns {JSX.Element} The rotating text component
+ */
 const RotatingText = forwardRef((props, ref) => {
     const {
         texts,
@@ -38,6 +73,12 @@ const RotatingText = forwardRef((props, ref) => {
 
     const [currentTextIndex, setCurrentTextIndex] = useState(0);
 
+    /**
+     * @function splitIntoCharacters
+     * @description Splits text into individual characters using Intl.Segmenter if available
+     * @param {string} text - Text to split
+     * @returns {Array<string>} Array of characters
+     */
     const splitIntoCharacters = (text) => {
         if (typeof Intl !== "undefined" && Intl.Segmenter) {
             const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" });
@@ -46,6 +87,10 @@ const RotatingText = forwardRef((props, ref) => {
         return Array.from(text);
     };
 
+    /**
+     * @function useMemo
+     * @description Memoizes the split text elements
+     */
     const elements = useMemo(() => {
         const currentText = texts[currentTextIndex];
         if (splitBy === "characters") {
@@ -74,6 +119,13 @@ const RotatingText = forwardRef((props, ref) => {
         }));
     }, [texts, currentTextIndex, splitBy]);
 
+    /**
+     * @function getStaggerDelay
+     * @description Calculates stagger delay based on index and configuration
+     * @param {number} index - Current element index
+     * @param {number} totalChars - Total number of characters
+     * @returns {number} Stagger delay in milliseconds
+     */
     const getStaggerDelay = useCallback(
         (index, totalChars) => {
             const total = totalChars;
@@ -92,6 +144,11 @@ const RotatingText = forwardRef((props, ref) => {
         [staggerFrom, staggerDuration]
     );
 
+    /**
+     * @function handleIndexChange
+     * @description Handles text index changes
+     * @param {number} newIndex - New text index
+     */
     const handleIndexChange = useCallback(
         (newIndex) => {
             setCurrentTextIndex(newIndex);
@@ -100,6 +157,10 @@ const RotatingText = forwardRef((props, ref) => {
         [onNext]
     );
 
+    /**
+     * @function next
+     * @description Moves to the next text
+     */
     const next = useCallback(() => {
         const nextIndex =
             currentTextIndex === texts.length - 1
@@ -112,6 +173,10 @@ const RotatingText = forwardRef((props, ref) => {
         }
     }, [currentTextIndex, texts.length, loop, handleIndexChange]);
 
+    /**
+     * @function previous
+     * @description Moves to the previous text
+     */
     const previous = useCallback(() => {
         const prevIndex =
             currentTextIndex === 0
@@ -124,6 +189,11 @@ const RotatingText = forwardRef((props, ref) => {
         }
     }, [currentTextIndex, texts.length, loop, handleIndexChange]);
 
+    /**
+     * @function jumpTo
+     * @description Jumps to a specific text index
+     * @param {number} index - Target index
+     */
     const jumpTo = useCallback(
         (index) => {
             const validIndex = Math.max(0, Math.min(index, texts.length - 1));
@@ -134,6 +204,10 @@ const RotatingText = forwardRef((props, ref) => {
         [texts.length, currentTextIndex, handleIndexChange]
     );
 
+    /**
+     * @function reset
+     * @description Resets to the first text
+     */
     const reset = useCallback(() => {
         if (currentTextIndex !== 0) {
             handleIndexChange(0);
@@ -151,6 +225,10 @@ const RotatingText = forwardRef((props, ref) => {
         [next, previous, jumpTo, reset]
     );
 
+    /**
+     * @function useEffect
+     * @description Sets up auto-rotation interval
+     */
     useEffect(() => {
         if (!auto) return;
         const intervalId = setInterval(next, rotationInterval);

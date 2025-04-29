@@ -1,14 +1,33 @@
+/**
+ * @fileoverview Client Side Role Guard Component
+ * @description Component that handles client-side role-based access control and routing.
+ */
+
 "use client";
 
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { functions } from "@/app/appwrite";
 
+/**
+ * @function ClientSideRoleGuard
+ * @description Guards routes based on user roles and redirects unauthorized access
+ * @returns {null} This component does not render anything
+ */
 export default function ClientSideRoleGuard() {
     const router = useRouter();
     const pathname = usePathname();
 
+    /**
+     * @function useEffect
+     * @description Checks user role and access permissions on route changes
+     */
     useEffect(() => {
+        /**
+         * @function checkAccess
+         * @description Verifies user role and redirects if unauthorized
+         * @async
+         */
         const checkAccess = async () => {
             // Skip role check for auth-related pages
             if (pathname.startsWith('/auth/')) {

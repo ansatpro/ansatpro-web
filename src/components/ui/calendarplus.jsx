@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Enhanced Calendar Component
+ * @description A customizable calendar component that supports single date and date range selection.
+ */
+
 "use client";
 
 import * as React from "react";
@@ -5,6 +10,16 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils"; // 保持你原来的样式风格
 
+/**
+ * @function CalendarPlus
+ * @description Enhanced calendar component with single and range selection modes
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @param {string} props.mode - Selection mode ('single' or 'range')
+ * @param {Date|Object} props.value - Selected date or date range
+ * @param {Function} props.onChange - Callback when selection changes
+ * @returns {JSX.Element} Calendar component
+ */
 function CalendarPlus({ className, mode = "single", value, onChange, ...props }) {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());

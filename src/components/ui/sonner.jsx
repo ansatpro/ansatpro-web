@@ -1,8 +1,19 @@
+/**
+ * @fileoverview Toast Notification Component
+ * @description A toast notification component using Sonner library with theme support.
+ */
+
 "use client"
 
 import { useTheme } from "next-themes"
 import { Toaster as Sonner } from "sonner";
 
+/**
+ * @function Toaster
+ * @description Toast notification component with theme support
+ * @param {Object} props - Component props
+ * @returns {JSX.Element} Toast notification component
+ */
 const Toaster = ({
   ...props
 }) => {
