@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { account, realtimeClient } from "@/app/appwrite";
-import { GetAllNotifications } from "../../../lib/HowToConnectToFunction";
+import { GetAllNotifications } from "../../../functions/HowToConnectToFunction";
 import { useNotifications } from "@/context/NotificationsContext";
 
 export default function FacilitatorTopBar() {
