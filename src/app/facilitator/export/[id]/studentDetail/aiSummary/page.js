@@ -31,7 +31,7 @@ import { saveAs } from "file-saver";
 import {
   AIsummary,
   GetAllStudentsWithDetails,
-} from "../../../../../../../lib/HowToConnectToFunction";
+} from "../../../../../../../functions/HowToConnectToFunction";
 
 // Register fonts
 Font.register({
@@ -652,9 +652,8 @@ export default function AISummaryPage() {
     
 ${aiSummary}
     
-This summary is based on ${student.feedbacks.length} feedback report${
-          student.feedbacks.length > 1 ? "s" : ""
-        } collected between ${student.startDate} and ${student.endDate}.`;
+This summary is based on ${student.feedbacks.length} feedback report${student.feedbacks.length > 1 ? "s" : ""
+          } collected between ${student.startDate} and ${student.endDate}.`;
 
         setAiSummary(summary);
       } else {
@@ -751,9 +750,8 @@ This summary is based on ${student.feedbacks.length} feedback report${
     
 ${aiSummary}
     
-This summary is based on ${student.feedbacks.length} feedback report${
-          student.feedbacks.length > 1 ? "s" : ""
-        } collected between ${student.startDate} and ${student.endDate}.`;
+This summary is based on ${student.feedbacks.length} feedback report${student.feedbacks.length > 1 ? "s" : ""
+          } collected between ${student.startDate} and ${student.endDate}.`;
 
         setAiSummary(summary);
       } else {

@@ -17,14 +17,14 @@ import { useRouter } from "next/navigation";
 import {
   GetAllStudents,
   DeleteStudent,
-} from "../../../../../lib/HowToConnectToFunction";
+} from "../../../../../functions/HowToConnectToFunction";
 
 export default function StudentList() {
   const router = useRouter();
   const [students, setStudents] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   useEffect(() => {
     const fetchStudents = async () => {
       try {
@@ -134,7 +134,7 @@ export default function StudentList() {
       );
 
       // If search term exists, apply name/ID search
-      const matchesSearch = searchTerm.trim() === "" ? true : 
+      const matchesSearch = searchTerm.trim() === "" ? true :
         student.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         student.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         student.studentId.includes(searchTerm);
@@ -172,22 +172,22 @@ export default function StudentList() {
       const studentToDelete = students.find(
         (student) => student.studentId === studentId
       );
-      
+
       if (!studentToDelete) return;
-      
+
       const documentID = studentToDelete.documentID;
       await DeleteStudent(documentID);
-      
+
       // Remove the student from both lists
       const updatedStudents = students.filter(
         (student) => student.studentId !== studentId
       );
-      
+
       setStudents(updatedStudents);
       setFilteredResults(
         filteredResults.filter((student) => student.studentId !== studentId)
       );
-      
+
       console.log(`Deleted student with ID: ${studentId}`);
     } catch (error) {
       console.error("Error deleting student:", error);
@@ -199,8 +199,8 @@ export default function StudentList() {
       {/* Header with back button */}
       <header className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="icon"
             onClick={() => router.push("/facilitator/student")}
             className="h-9 w-9"
@@ -216,7 +216,7 @@ export default function StudentList() {
       <Card className="mb-6">
         <CardContent className="p-6">
           <div className="space-y-4">
-            
+
             {/* Search - Single row */}
             <div className="flex gap-2">
               <div className="flex-1">
@@ -329,13 +329,13 @@ export default function StudentList() {
 
                 {/* Clear Filters Button - Top right */}
                 <br />
-                <div className="flex justify-end"> 
+                <div className="flex justify-end">
                   <Button
                     onClick={clearFilters}
                     variant="outline"
                     className="flex items-center gap-1"
                   >
-                  <X className="h-4 w-4" />
+                    <X className="h-4 w-4" />
                     Clear Filters
                   </Button>
                 </div>

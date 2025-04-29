@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { PostFacilitatorComments } from "../../../../../../../lib/HowToConnectToFunction";
+import { PostFacilitatorComments } from "../../../../../../../functions/HowToConnectToFunction";
 import { ArrowLeft } from "lucide-react";
 
 export default function ReviewFeedback() {
@@ -385,11 +385,10 @@ export default function ReviewFeedback() {
                         Item {item.item_id}: {item.title}
                       </h3>
                       <span
-                        className={`text-sm ml-3 px-2 py-1 rounded ${
-                          item.is_positive
+                        className={`text-sm ml-3 px-2 py-1 rounded ${item.is_positive
                             ? "bg-green-100 text-green-800"
                             : "bg-amber-100 text-amber-800"
-                        } font-medium`}
+                          } font-medium`}
                       >
                         {item.is_positive ? "Positive" : "Improvement needed"}
                       </span>
@@ -429,16 +428,15 @@ export default function ReviewFeedback() {
                             <p>
                               {rating === "N/A"
                                 ? "Not assessed"
-                                : `Rating ${rating}: ${
-                                    [
-                                      "",
-                                      "Not performed",
-                                      "Below standard",
-                                      "Satisfactory",
-                                      "Proficient",
-                                      "Excellent",
-                                    ][rating]
-                                  }`}
+                                : `Rating ${rating}: ${[
+                                  "",
+                                  "Not performed",
+                                  "Below standard",
+                                  "Satisfactory",
+                                  "Proficient",
+                                  "Excellent",
+                                ][rating]
+                                }`}
                             </p>
                           </TooltipContent>
                         </Tooltip>

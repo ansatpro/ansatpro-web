@@ -1,6 +1,6 @@
 "use client";
 import { ExecutionMethod } from "appwrite";
-import { FUNCTION1_ID, functions } from "../../lib/appwrite"; // 根据实际路径调整
+import { FUNCTION1_ID, functions } from "../../functions/appwrite"; // 根据实际路径调整
 import { useState } from "react";
 
 // This is the document

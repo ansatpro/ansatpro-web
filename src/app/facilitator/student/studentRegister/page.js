@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { CreateStudent } from "../../../../../lib/HowToConnectToFunction";
+import { CreateStudent } from "../../../../../functions/HowToConnectToFunction";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { functions } from "../../../../../lib/appwrite";
+import { functions } from "../../../../../functions/appwrite";
 
 export default function RegisterStudentPage() {
   const router = useRouter();

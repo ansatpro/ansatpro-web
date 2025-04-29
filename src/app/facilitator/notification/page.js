@@ -24,7 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   GetAllNotifications,
   UpdateNotification,
-} from "../../../../lib/HowToConnectToFunction";
+} from "../../../../functions/HowToConnectToFunction";
 import { useNotifications } from "@/context/NotificationsContext";
 
 // Local storage key for read status
@@ -315,12 +315,10 @@ export default function NotificationPage() {
         </div>
         <div className="text-sm text-muted-foreground">
           {showReadNotifications
-            ? `${readNotifications.length} read notification${
-                readNotifications.length !== 1 ? "s" : ""
-              }`
-            : `${unreadCount} unread notification${
-                unreadCount !== 1 ? "s" : ""
-              }`}
+            ? `${readNotifications.length} read notification${readNotifications.length !== 1 ? "s" : ""
+            }`
+            : `${unreadCount} unread notification${unreadCount !== 1 ? "s" : ""
+            }`}
         </div>
       </div>
 
@@ -380,23 +378,20 @@ export default function NotificationPage() {
           displayedNotifications.map((notification) => (
             <Card
               key={notification.notification_DocId}
-              className={`cursor-pointer transition-all duration-200 hover:shadow-md bg-card border ${
-                !notification.read ? "border-l-4 border-l-blue-500" : ""
-              }`}
+              className={`cursor-pointer transition-all duration-200 hover:shadow-md bg-card border ${!notification.read ? "border-l-4 border-l-blue-500" : ""
+                }`}
               onClick={() => handleNotificationClick(notification)}
             >
               <CardContent className="p-4">
                 <div className="flex flex-col md:flex-row items-start justify-between gap-4">
                   <div className="flex items-start gap-3 w-full md:w-auto">
                     <div
-                      className={`mt-1 p-2 rounded-full ${
-                        !notification.read ? "bg-blue-100" : "bg-gray-100"
-                      }`}
+                      className={`mt-1 p-2 rounded-full ${!notification.read ? "bg-blue-100" : "bg-gray-100"
+                        }`}
                     >
                       <MessageSquare
-                        className={`h-5 w-5 ${
-                          !notification.read ? "text-blue-600" : "text-gray-600"
-                        }`}
+                        className={`h-5 w-5 ${!notification.read ? "text-blue-600" : "text-gray-600"
+                          }`}
                       />
                     </div>
 

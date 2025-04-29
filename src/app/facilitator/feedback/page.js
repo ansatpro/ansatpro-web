@@ -21,7 +21,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Search, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { GetAllStudentsWithDetails } from "../../../../lib/HowToConnectToFunction";
+import { GetAllStudentsWithDetails } from "../../../../functions/HowToConnectToFunction";
 
 export default function AllFeedback() {
   const router = useRouter();
@@ -93,7 +93,7 @@ export default function AllFeedback() {
               preceptor_name: preceptor,
               content,
               flag_discussed_with_student:
-                preceptor_flag_discussed_with_student,
+              preceptor_flag_discussed_with_student,
               discussion_date: preceptor_discussion_date,
               review: is_marked,
               ai_feedback_items,
@@ -474,8 +474,8 @@ export default function AllFeedback() {
                   </SelectContent>
                 </Select>
               </div>
-        
-        <div>
+
+              <div>
                 <label className="mb-2 block text-sm font-medium">
                   Clinic Area
                 </label>
@@ -497,7 +497,7 @@ export default function AllFeedback() {
                 </Select>
               </div>
 
-            <div>
+              <div>
                 <label className="mb-2 block text-sm font-medium">
                   Date Range
                 </label>
@@ -559,7 +559,7 @@ export default function AllFeedback() {
               >
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
-            <div>
+                    <div>
                       <CardTitle className="text-lg font-bold">
                         {feedback.studentName}
                       </CardTitle>
@@ -607,14 +607,14 @@ export default function AllFeedback() {
             ))}
           </div>
 
-          {/* Pagination */} 
+          {/* Pagination */}
           {totalPages > 1 && (
             <div className="mt-8 flex flex-col items-center gap-4">
               <div className="text-sm text-muted-foreground">
                 Showing {indexOfFirstItem + 1} to{" "}
                 {Math.min(indexOfLastItem, filteredResults.length)} of{" "}
                 {filteredResults.length} items
-            </div>
+              </div>
               <div className="flex items-center gap-1">
                 {/* previous page button */}
                 {currentPage > 1 && (
@@ -675,7 +675,7 @@ export default function AllFeedback() {
                         </Button>
                       );
                     })}
-            </div>
+                </div>
 
                 {/* next page button */}
                 {currentPage < totalPages && (

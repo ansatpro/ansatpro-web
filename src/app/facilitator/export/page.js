@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Search, X, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { GetAllStudentsWithDetails } from "../../../../lib/HowToConnectToFunction";
+import { GetAllStudentsWithDetails } from "../../../../functions/HowToConnectToFunction";
 
 export default function ExportPage() {
   const router = useRouter();
@@ -79,8 +79,8 @@ export default function ExportPage() {
                 item_id: score.item_id,
                 score: score.score,
               })) || [];
-            
-            const flag_discussed_with_student = 
+
+            const flag_discussed_with_student =
               is_marked?.flag_discussed_with_student ?? false;
             const discussion_date = is_marked?.discussion_date || null;
             const reviewDate = is_marked?.$createdAt || null;
