@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Separator Component
+ * @description A visual separator component for dividing content.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -5,6 +10,15 @@ import * as SeparatorPrimitive from "@radix-ui/react-separator"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @function Separator
+ * @description Visual separator component
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @param {string} props.orientation - Separator orientation ('horizontal' or 'vertical')
+ * @param {boolean} props.decorative - Whether the separator is decorative
+ * @returns {JSX.Element} Separator component
+ */
 function Separator({
   className,
   orientation = "horizontal",

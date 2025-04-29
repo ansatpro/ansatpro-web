@@ -1,9 +1,21 @@
+/**
+ * @fileoverview Table Components
+ * @description A collection of reusable table components for data display.
+ */
+
 "use client"
 
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @function Table
+ * @description Main table container component
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Table container
+ */
 function Table({
   className,
   ...props
@@ -18,6 +30,13 @@ function Table({
   );
 }
 
+/**
+ * @function TableHeader
+ * @description Table header component
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Table header
+ */
 function TableHeader({
   className,
   ...props
@@ -30,6 +49,13 @@ function TableHeader({
   );
 }
 
+/**
+ * @function TableBody
+ * @description Table body component
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Table body
+ */
 function TableBody({
   className,
   ...props
@@ -42,6 +68,13 @@ function TableBody({
   );
 }
 
+/**
+ * @function TableFooter
+ * @description Table footer component
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Table footer
+ */
 function TableFooter({
   className,
   ...props
@@ -54,6 +87,13 @@ function TableFooter({
   );
 }
 
+/**
+ * @function TableRow
+ * @description Table row component
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Table row
+ */
 function TableRow({
   className,
   ...props
@@ -69,6 +109,13 @@ function TableRow({
   );
 }
 
+/**
+ * @function TableHead
+ * @description Table header cell component
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Table header cell
+ */
 function TableHead({
   className,
   ...props
@@ -84,6 +131,13 @@ function TableHead({
   );
 }
 
+/**
+ * @function TableCell
+ * @description Table cell component
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Table cell
+ */
 function TableCell({
   className,
   ...props
@@ -99,6 +153,13 @@ function TableCell({
   );
 }
 
+/**
+ * @function TableCaption
+ * @description Table caption component
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Table caption
+ */
 function TableCaption({
   className,
   ...props

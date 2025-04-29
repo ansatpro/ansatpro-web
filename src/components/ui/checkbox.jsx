@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Checkbox Component
+ * @description A checkbox component for boolean input selection.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -6,6 +11,13 @@ import { CheckIcon } from "lucide-react"
 
 import { cn } from "../../../functions/utils"
 
+/**
+ * @function Checkbox
+ * @description Checkbox input component
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Checkbox component
+ */
 function Checkbox({
   className,
   ...props

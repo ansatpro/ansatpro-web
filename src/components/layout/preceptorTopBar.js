@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Preceptor Top Bar Component
+ * @description Navigation bar component for the preceptor interface, containing logo, avatar and logout functionality.
+ */
+
 "use client";
 import Link from "next/link";
 import Image from "next/image";
@@ -7,7 +12,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { account, storage } from "@/app/appwrite";
 
-// Helper: Add cache buster
+/**
+ * @function addCacheBuster
+ * @description Adds a cache buster parameter to a URL to prevent caching
+ * @param {string} url - The URL to add cache buster to
+ * @returns {string} The URL with cache buster parameter
+ */
 function addCacheBuster(url) {
   if (url.includes("?")) {
     return url + `&cb=${Date.now()}`;
@@ -16,13 +26,22 @@ function addCacheBuster(url) {
   }
 }
 
+/**
+ * @function PreceptorTopBar
+ * @description Top navigation bar component for preceptor interface
+ * @returns {JSX.Element} The top bar component with logo, avatar and logout button
+ */
 export default function PreceptorTopBar() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
 
-  // ✅ Move fetchAvatar outside
+  /**
+   * @function fetchAvatar
+   * @description Fetches and sets the user's avatar image
+   * @async
+   */
   const fetchAvatar = async () => {
     try {
       const user = await account.get();
@@ -48,10 +67,18 @@ export default function PreceptorTopBar() {
     }
   };
 
+  /**
+   * @function useEffect
+   * @description Initial avatar fetch when component mounts
+   */
   useEffect(() => {
     fetchAvatar(); // First load
   }, []);
 
+  /**
+   * @function useEffect
+   * @description Sets up event listener for avatar refresh
+   */
   useEffect(() => {
     const handleAvatarRefresh = () => {
       fetchAvatar();
@@ -64,7 +91,10 @@ export default function PreceptorTopBar() {
     };
   }, []);
 
-
+  /**
+   * @function handleLogout
+   * @description Handles user logout process
+   */
   const handleLogout = () => {
     setIsLoading(true);
     setError("");

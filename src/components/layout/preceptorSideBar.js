@@ -1,8 +1,18 @@
+/**
+ * @fileoverview Preceptor Side Bar Component
+ * @description Navigation sidebar component for the preceptor interface, providing navigation links to different sections.
+ */
+
 "use client";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Home, PlusCircle, FileText, Settings } from "lucide-react";
 
+/**
+ * @constant {Array} navItems
+ * @description Navigation items configuration for the sidebar
+ * @type {Array<{label: string, icon: React.Component, path: string, isButton?: boolean}>}
+ */
 const navItems = [
   { label: "Home", icon: Home, path: "/preceptor/home" },
   { label: "Add", icon: PlusCircle, path: "/preceptor/searchStudents", isButton: true },
@@ -10,6 +20,11 @@ const navItems = [
   { label: "Settings", icon: Settings, path: "/preceptor/settings" },
 ];
 
+/**
+ * @function PreceptorSideBar
+ * @description Sidebar navigation component for preceptor interface
+ * @returns {JSX.Element} The sidebar component with navigation links
+ */
 export default function PreceptorSideBar() {
   const router = useRouter();
   const pathname = usePathname();

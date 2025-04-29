@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Popover Components
+ * @description A collection of popover components for displaying floating content.
+ */
+
 "use client";
 
 import * as React from "react";
@@ -5,14 +10,35 @@ import * as PopoverPrimitive from "@radix-ui/react-popover";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * @function Popover
+ * @description Main popover component
+ * @param {Object} props - Component props
+ * @returns {JSX.Element} Popover component
+ */
 function Popover({ ...props }) {
   return <PopoverPrimitive.Root data-slot="popover" {...props} />;
 }
 
+/**
+ * @function PopoverTrigger
+ * @description Component that triggers the popover
+ * @param {Object} props - Component props
+ * @returns {JSX.Element} Popover trigger
+ */
 function PopoverTrigger({ ...props }) {
   return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />;
 }
 
+/**
+ * @function PopoverContent
+ * @description Content component for popover
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @param {string} props.align - Content alignment
+ * @param {number} props.sideOffset - Offset from the trigger element
+ * @returns {JSX.Element} Popover content
+ */
 function PopoverContent({
   className,
   align = "center",
@@ -35,6 +61,12 @@ function PopoverContent({
   );
 }
 
+/**
+ * @function PopoverAnchor
+ * @description Anchor component for popover positioning
+ * @param {Object} props - Component props
+ * @returns {JSX.Element} Popover anchor
+ */
 function PopoverAnchor({ ...props }) {
   return <PopoverPrimitive.Anchor data-slot="popover-anchor" {...props} />;
 }

@@ -1,9 +1,22 @@
+/**
+ * @fileoverview Card Components
+ * @description A collection of card components for content containers.
+ */
+
 "use client"
 
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @function Card
+ * @description Main card container component
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @param {React.Ref} ref - Forwarded ref
+ * @returns {JSX.Element} Card container
+ */
 const Card = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
@@ -16,6 +29,14 @@ const Card = React.forwardRef(({ className, ...props }, ref) => (
 ))
 Card.displayName = "Card"
 
+/**
+ * @function CardHeader
+ * @description Header section of the card
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @param {React.Ref} ref - Forwarded ref
+ * @returns {JSX.Element} Card header
+ */
 const CardHeader = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
@@ -25,6 +46,14 @@ const CardHeader = React.forwardRef(({ className, ...props }, ref) => (
 ))
 CardHeader.displayName = "CardHeader"
 
+/**
+ * @function CardTitle
+ * @description Title component for the card
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @param {React.Ref} ref - Forwarded ref
+ * @returns {JSX.Element} Card title
+ */
 const CardTitle = React.forwardRef(({ className, ...props }, ref) => (
   <h3
     ref={ref}
@@ -37,6 +66,14 @@ const CardTitle = React.forwardRef(({ className, ...props }, ref) => (
 ))
 CardTitle.displayName = "CardTitle"
 
+/**
+ * @function CardDescription
+ * @description Description component for the card
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @param {React.Ref} ref - Forwarded ref
+ * @returns {JSX.Element} Card description
+ */
 const CardDescription = React.forwardRef(({ className, ...props }, ref) => (
   <p
     ref={ref}
@@ -46,11 +83,27 @@ const CardDescription = React.forwardRef(({ className, ...props }, ref) => (
 ))
 CardDescription.displayName = "CardDescription"
 
+/**
+ * @function CardContent
+ * @description Main content section of the card
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @param {React.Ref} ref - Forwarded ref
+ * @returns {JSX.Element} Card content
+ */
 const CardContent = React.forwardRef(({ className, ...props }, ref) => (
   <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
 ))
 CardContent.displayName = "CardContent"
 
+/**
+ * @function CardFooter
+ * @description Footer section of the card
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @param {React.Ref} ref - Forwarded ref
+ * @returns {JSX.Element} Card footer
+ */
 const CardFooter = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}

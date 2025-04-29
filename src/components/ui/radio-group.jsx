@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Radio Group Components
+ * @description A collection of radio group components for single selection from multiple options.
+ */
+
 "use client";
 
 import * as React from "react";
@@ -6,6 +11,13 @@ import { CircleIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * @function RadioGroup
+ * @description Container component for radio group
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Radio group container
+ */
 function RadioGroup({ className, ...props }) {
   return (
     <RadioGroupPrimitive.Root
@@ -16,6 +28,13 @@ function RadioGroup({ className, ...props }) {
   );
 }
 
+/**
+ * @function RadioGroupItem
+ * @description Individual radio button component
+ * @param {Object} props - Component props
+ * @param {string} props.className - Additional CSS classes
+ * @returns {JSX.Element} Radio button
+ */
 function RadioGroupItem({ className, ...props }) {
   return (
     <RadioGroupPrimitive.Item
