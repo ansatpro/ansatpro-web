@@ -1,3 +1,9 @@
+/*
+ * This is the main component for the student search page.
+ * It allows preceptors to search and select students for feedback.
+ * The component includes search functionality, student list display, and selection confirmation.
+ */
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -10,6 +16,11 @@ import { functions, account } from "../../appwrite";
 import PreceptorLayout from "@/components/layout/preceptorLayout";
 import DotsLoading from "@/components/preceptorUI/SearchLoading";
 
+/*
+ * The main component that manages student search functionality.
+ * It handles search queries, student selection, and data fetching.
+ * The component includes loading states and error handling.
+ */
 export default function SearchStudent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -19,14 +30,24 @@ export default function SearchStudent() {
   const [error, setError] = useState(null);
   const [searchLoading, setSearchLoading] = useState(false);
   const [showNoResults, setShowNoResults] = useState(false);
-  const [hasHydrated, setHasHydrated] = useState(false); // ✅ Hydration flag
+  const [hasHydrated, setHasHydrated] = useState(false);
 
   const shouldShowStudentList = !searchLoading && students.length > 0 && !selectedStudent;
 
+  /*
+   * Effect hook to mark component hydration status.
+   * This helps prevent hydration mismatches in the UI.
+   * The hook runs once when the component mounts.
+   */
   useEffect(() => {
-    setHasHydrated(true); // ✅ Mark after hydration
+    setHasHydrated(true);
   }, []);
 
+  /*
+   * Effect hook to handle student search functionality.
+   * It fetches student data based on the search query.
+   * The hook includes error handling and loading states.
+   */
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -66,6 +87,11 @@ export default function SearchStudent() {
     }
   }, [searchQuery]);
 
+  /*
+   * Effect hook to handle "no results" display timing.
+   * It shows the no results message after a short delay.
+   * The hook manages the display timing of search results.
+   */
   useEffect(() => {
     if (!searchLoading && searchQuery.length >= 2 && students.length === 0) {
       const timeout = setTimeout(() => {
@@ -77,12 +103,22 @@ export default function SearchStudent() {
     }
   }, [searchLoading, students, searchQuery]);
 
+  /*
+   * Function to clear the search input and selection.
+   * It resets the search state to its initial values.
+   * The function clears both the search query and selected student.
+   */
   const clearSearch = () => {
     setSearchQuery("");
     setSelectedStudent(null);
     setIsConfirmed(false);
   };
 
+  /*
+   * Function to handle navigation to feedback form.
+   * It stores the selected student data and redirects.
+   * The function includes validation before navigation.
+   */
   const handleContinue = () => {
     if (selectedStudent) {
       localStorage.setItem('selectedStudent', JSON.stringify(selectedStudent));
@@ -90,6 +126,11 @@ export default function SearchStudent() {
     }
   };
 
+  /*
+   * Error display component.
+   * Shows error message when data fetching fails.
+   * The component displays error messages in a user-friendly format.
+   */
   if (error) {
     return (
       <PreceptorLayout>
@@ -100,6 +141,11 @@ export default function SearchStudent() {
     );
   }
 
+  /*
+   * Main render function that displays the search interface.
+   * It includes search input, results display, and student details.
+   * The component handles different states of the search process.
+   */
   return (
     <PreceptorLayout>
       <main className="pt-10 px-6 max-w-3xl mx-auto">
@@ -107,7 +153,6 @@ export default function SearchStudent() {
           <h1 className="text-3xl font-bold mb-2 font-['Roboto']">Student Detail</h1>
         </div>
 
-        {/* Search Box */}
         <div className="relative mb-8 flex justify-center">
           <div className="relative w-[400px]">
             <Input
@@ -122,8 +167,6 @@ export default function SearchStudent() {
               spellCheck="false"
             />
 
-
-            {/* Clear Button */}
             {searchQuery && (
               <button
                 onClick={clearSearch}
@@ -133,7 +176,6 @@ export default function SearchStudent() {
               </button>
             )}
 
-            {/* Search Results */}
             {hasHydrated && searchQuery.length >= 2 && shouldShowStudentList && (
               <div className="absolute w-full mt-1 bg-white border rounded-lg shadow-lg z-10">
                 {students.map((student) => (
@@ -148,14 +190,12 @@ export default function SearchStudent() {
               </div>
             )}
 
-            {/* Loading animation */}
             {hasHydrated && searchQuery.length >= 2 && searchLoading && (
               <div className="absolute left-1/2 top-full mt-2 -translate-x-1/2 z-20">
                 <DotsLoading />
               </div>
             )}
 
-            {/* No Results */}
             {hasHydrated && searchQuery.length >= 2 && showNoResults && !selectedStudent && (
               <div className="absolute w-full mt-1 bg-white border rounded-lg shadow-lg z-10">
                 <p className="px-4 py-3 text-gray-500 text-center">No student found matching your search.</p>
@@ -164,7 +204,6 @@ export default function SearchStudent() {
           </div>
         </div>
 
-        {/* Student Details */}
         {hasHydrated && selectedStudent && (
           <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
             <h2 className="text-xl font-semibold mb-4 font-['Roboto']">

@@ -1,3 +1,9 @@
+/*
+ * This is the main component for the AI feedback processing page.
+ * It handles the display and processing of preceptor feedback with AI assistance.
+ * The component manages assessment items selection and AI-generated feedback matching.
+ */
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,6 +14,11 @@ import LoadingScreen from '@/components/preceptorUI/LoadingScreen';
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
+/*
+ * The main component that manages the AI feedback process.
+ * It handles state for payload, assessment items, and user selections.
+ * The component includes loading states and AI feedback processing.
+ */
 export default function PreceptorAiFeedbackPage() {
   const router = useRouter();
 
@@ -16,9 +27,13 @@ export default function PreceptorAiFeedbackPage() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [matchedIds, setMatchedIds] = useState([]);
   const [itemPositivity, setItemPositivity] = useState({});
-  const [isLoading, setIsLoading] = useState(true); // Control visibility
+  const [isLoading, setIsLoading] = useState(true);
 
-
+  /*
+   * Effect hook to load stored payload and fetch assessment items.
+   * It processes AI feedback based on the payload content.
+   * The hook runs once when the component mounts.
+   */
   useEffect(() => {
     const stored = localStorage.getItem("preceptorPayload");
 
@@ -29,7 +44,7 @@ export default function PreceptorAiFeedbackPage() {
 
         const fetchData = async () => {
           try {
-            setIsLoading(true); // Start loading
+            setIsLoading(true);
             console.log("Fetching assessment items...");
 
             const res = await functions.createExecution(
@@ -56,7 +71,7 @@ export default function PreceptorAiFeedbackPage() {
             setMatchedIds(matched);
             setSelectedIds(matched);
 
-            setIsLoading(false); // Stop loading
+            setIsLoading(false);
 
           } catch (err) {
             console.error("❌ Error fetching data:", err);
@@ -70,6 +85,11 @@ export default function PreceptorAiFeedbackPage() {
     }
   }, []);
 
+  /*
+   * Function to toggle selection of assessment items.
+   * It updates both the selected IDs and their positivity state.
+   * The function handles both selection and deselection of items.
+   */
   const toggleSelection = (itemId) => {
     setSelectedIds((prev) => {
       const isSelected = prev.includes(itemId);
@@ -91,18 +111,21 @@ export default function PreceptorAiFeedbackPage() {
     });
   };
 
+  /*
+   * Function to handle form submission.
+   * It processes the selected items and sends them to the server.
+   * The function includes error handling and success redirection.
+   */
   const handleSubmit = async () => {
     if (!payload) return;
 
     try {
       const jwt = localStorage.getItem("jwt");
 
-      // 🔥 New logic: build final positivity mapping
       const finalItemPositivity = {};
 
       selectedIds.forEach((id) => {
         finalItemPositivity[id] = itemPositivity[id] ?? true;
-        // If user selected positivity, use it; otherwise default true
       });
 
       const fullPayload = {
@@ -132,8 +155,10 @@ export default function PreceptorAiFeedbackPage() {
     }
   };
 
-
-  // Show loading animation
+  /*
+   * Loading screen component when data is being fetched.
+   * It displays a loading animation while data is being processed.
+   */
   if (isLoading) {
     return <motion.div
       key="loading"
@@ -146,7 +171,10 @@ export default function PreceptorAiFeedbackPage() {
     </motion.div>;
   }
 
-
+  /*
+   * Main render function that displays the feedback form and assessment items.
+   * It includes the list of assessment items, selection controls, and submission button.
+   */
   return (
     <>
       {isLoading ? (
@@ -174,7 +202,6 @@ export default function PreceptorAiFeedbackPage() {
                 </p>
               </div>
 
-              {/* 滚动容器区域 */}
               <div className="max-h-[330px] overflow-y-auto pr-1 space-y-2 border-t pt-4 mb-6">
                 {assessmentItems.map((item) => (
                   <label
@@ -222,7 +249,6 @@ export default function PreceptorAiFeedbackPage() {
                 ))}
               </div>
 
-              {/* 提交按钮 */}
               <div className="mt-6 flex justify-center">
                 <Button
                   onClick={handleSubmit}
@@ -237,6 +263,5 @@ export default function PreceptorAiFeedbackPage() {
         </PreceptorLayout>
       )}
     </>
-
   );
 }
