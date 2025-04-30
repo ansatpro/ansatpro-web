@@ -1,5 +1,6 @@
 ### **Project Architecture Diagram (Facilitator)**
 
+
 ```
 facilitator/
 ├── layout.js                # Root layout for the facilitator section
