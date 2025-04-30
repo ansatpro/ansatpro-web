@@ -46,7 +46,7 @@ export default function NotificationPage() {
     setIsLoading(false); // Set loading to false when we have notifications
   }, [finalNotification]);
 
-  // 从localStorage加载已读状态
+  // Load the read state from localStorage.
   const loadReadStatus = () => {
     try {
       const savedData = localStorage.getItem(STORAGE_KEY);
@@ -59,7 +59,7 @@ export default function NotificationPage() {
     return {};
   };
 
-  // 保存已读状态到localStorage
+  // Save read state to localStorage
   const saveReadStatus = (readStatusMap) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(readStatusMap));
@@ -151,7 +151,7 @@ export default function NotificationPage() {
   const handleNotificationClick = (notification) => {
     try {
       if (!notification.is_read) {
-        // 更新通知状态
+        // Update Notification Status
         markAsReadInternal(notification.notification_DocId);
 
         // update in the backend
@@ -174,7 +174,7 @@ export default function NotificationPage() {
 
   // Internal function to mark notification as read
   const markAsReadInternal = (notificationId) => {
-    // 更新状态中的通知
+    // Update Notifications in the Status
     const updatedNotifications = finalNotification.map((item) =>
       item.notification_DocId === notificationId
         ? { ...item, read: true }
@@ -184,7 +184,7 @@ export default function NotificationPage() {
     // Update the context state
     setFinalNotification(updatedNotifications);
 
-    // 更新本地存储
+    // Update Local Storage
     const readStatusMap = loadReadStatus();
     readStatusMap[notificationId] = true;
     saveReadStatus(readStatusMap);
@@ -206,10 +206,10 @@ export default function NotificationPage() {
   // Mark all notifications as read
   const markAllAsRead = async () => {
     try {
-      // 已读状态映射
+      // Read Status Mapping
       const readStatusMap = loadReadStatus();
 
-      // 更新所有通知为已读
+      // Mark All Notifications as Read
       const updatedNotifications = finalNotification.map((item) => {
         readStatusMap[item.notification_DocId] = true;
         return { ...item, read: true };
@@ -218,7 +218,7 @@ export default function NotificationPage() {
       // Update the context state
       setFinalNotification(updatedNotifications);
 
-      // 保存更新后的状态到localStorage
+      // Save the Updated State to localStorage
       saveReadStatus(readStatusMap);
 
       // Update each notification in the backend
@@ -232,7 +232,7 @@ export default function NotificationPage() {
     }
   };
 
-  // 重新加载通知
+  // Reload Notifications
   const refreshNotifications = () => {
     // No need to fetch notifications as they come from context
   };
@@ -403,7 +403,7 @@ export default function NotificationPage() {
                     <div className="space-y-1 overflow-hidden">
                       {/* Message content */}
                       <p className="text-base font-normal text-foreground break-words">
-                        {/* 直接显示消息内容，不再尝试分离学生信息 */}
+                        {/* Directly display the message content without attempting to separate student information. */}
                         {notification.message}
                         {!notification.read && (
                           <Badge
