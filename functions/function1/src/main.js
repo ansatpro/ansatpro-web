@@ -22,8 +22,8 @@ export default async ({ req, res, log, error }) => {
   const COLLECTION_ID_FACILITATOR_REVIEWS = process.env.facilitator_reviews;
   const COLLECTION_ID_FACILITATOR_REVIEW_SCORES =
     process.env.facilitator_review_scores;
-
-
+  const GROQ_API_KEY = process.env.GROQ_API_KEY;
+  
   const db = new Databases(client);
 
   try {
@@ -710,4 +710,100 @@ export default async ({ req, res, log, error }) => {
         });
     }
   }
+
+  // AI Summary
+  const groq = new Groq({ apiKey: GROQ_API_KEY });
+
+  async function getGroqChatCompletion(prompt) {
+    return groq.chat.completions.create({
+      messages: [{ role: 'user', content: prompt }],
+      model: 'llama-3.3-70b-versatile',
+    });
+  }
+
+  // Process incoming requests
+  if (req.path === '/facilitator/AIsummary') {
+    switch (req.method) {
+      case 'POST':
+        const prompt = req.bodyJson?.prompt; // Array of feedback prompts
+
+        // Prepare structured input to AI model
+        const aiPrompt = createAIPrompt(prompt);
+
+        try {
+          // Get AI summary based on prompt
+          const chatCompletion = await getGroqChatCompletion(aiPrompt);
+
+          return res.json({
+            message: 'Generate AI Summary Successfully',
+            aiAnswer:
+              chatCompletion.choices[0]?.message?.content || 'No AI answer',
+          });
+        } catch (error) {
+          console.error('Groq error:', error);
+          return res.json({ error: error.message || 'Unknown error' });
+        }
+    }
+  }
+
+  // Function to generate the structured AI prompt
+  function createAIPrompt(feedbackData) {
+    const studentName = 'This student';
+
+    // Combine all feedback content
+    let feedbackContent = feedbackData
+      .map((item, index) => {
+        return `
+      ### Feedback Report ${index + 1}
+      **Content**: ${item.content}
+      **Review Comment**: ${item.reviewComment}
+      **Review Score**: ${item.reviewScore.map((score) => `Description: ${score.description}, Score: ${score.score}`).join('\n')}
+    `;
+      })
+      .join('\n');
+
+    // Construct AI prompt
+    return `
+    Based on the following feedback reports for ${studentName}, generate a performance summary with the following sections:
+    - Key Strengths
+    - Areas for Improvement
+    - Overall Progress
+    - Recommendations
+
+    Feedback:
+    ${feedbackContent}
+
+    Provide the summary with bullet points for each section. The AI should focus on the key themes from the feedback and generate the sections in a natural, helpful way. Do not include any specific scores, only focus on key themes from the content and review comments. Do not include title "Performance for"
+  `;
+  }
+
+  // Make all the users verified
+  if (req.path === '/admin/verifyAllUsers') {
+    switch (req.method) {
+      case 'PUT':
+        let allUsers = [];
+        let page = 0;
+        const limit = 100;
+
+        while (true) {
+          const response = await users.list([
+            Query.limit(limit),
+            Query.offset(page * limit),
+          ]);
+          allUsers = allUsers.concat(response.users);
+
+          if (response.users.length < limit) break;
+          page++;
+        }
+
+        await Promise.all(
+          allUsers.map((user) => users.updateEmailVerification(user.$id, true))
+        );
+
+        return res.json({
+          message: `All ${allUsers.length} users have been verified.`,
+        });
+    }
+  }
+
 };
