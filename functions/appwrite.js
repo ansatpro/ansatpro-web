@@ -1,8 +1,15 @@
-import { Client, Account } from "@appwrite/sdk";
+import { Client, Account, Functions } from "appwrite";
 
-const client = new Client();
-client
-  .setEndpoint("https://cloud.appwrite.io/v1") // Appwrite server endpoint
-  .setProject("your-project-id"); // replace with your project ID
+export const client = new Client();
+
+const PROJECT_ID = "67ebc2ec000c0837dbf2";
+
+client.setEndpoint("https://cloud.appwrite.io/v1").setProject(PROJECT_ID);
 
 export const account = new Account(client);
+export { ID } from "appwrite";
+
+export const FUNCTION1_ID = "67f6365b002fda518353";
+
+// Initialize the Functions service
+export const functions = new Functions(client);
