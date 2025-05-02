@@ -148,7 +148,7 @@ export default function StudentDetail() {
     if (feedbackId) {
       fetchFeedbackData();
     }
-  }, [feedbackId]);
+  }, [feedbackId, sampleFeedbacks]);
 
   // Handle checkbox state change
   const handleConfirmChange = (checked) => {
@@ -228,7 +228,7 @@ export default function StudentDetail() {
           </div>
           
           <p className="text-lg text-muted-foreground mb-6">
-            View the student's feedback: <span className="font-medium">{feedbackData.is_marked ? "Marked" : "Unmarked"}</span>
+            View the student&apos;s feedback: <span className="font-medium">{feedbackData.is_marked ? "Marked" : "Unmarked"}</span>
           </p>
         </header>
         
@@ -318,7 +318,7 @@ export default function StudentDetail() {
                 htmlFor="confirmation" 
                 className="text-sm"
               >
-                I have reviewed the student's details above and confirm I am reviewing the feedback and determining the ANSAT scoring for the correct student.
+                I have reviewed the student&apos;s details above and confirm I am reviewing the feedback and determining the ANSAT scoring for the correct student.
               </Label>
             </div>
             

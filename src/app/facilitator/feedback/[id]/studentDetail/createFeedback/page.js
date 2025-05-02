@@ -330,7 +330,7 @@ export default function ReviewFeedback() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              "{feedbackData.originalFeedback}"
+              &quot;{feedbackData.originalFeedback}&quot;
             </p>
           </CardContent>
         </Card>

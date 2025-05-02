@@ -338,7 +338,7 @@ export default function NotificationPage() {
                     No Read Notifications
                   </h3>
                   <p className="text-center text-muted-foreground">
-                    You haven't read any notifications yet.
+                    You haven&apos;t read any notifications yet.
                   </p>
                   {unreadCount > 0 && (
                     <Button
@@ -358,7 +358,7 @@ export default function NotificationPage() {
                     No Unread Notifications
                   </h3>
                   <p className="text-center text-muted-foreground">
-                    You don't have any unread notifications.
+                    You don&apos;t have any unread notifications.
                   </p>
                   {readNotifications.length > 0 && (
                     <Button

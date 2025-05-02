@@ -824,7 +824,7 @@ export default function RegisterStudentPage() {
           <DialogHeader>
             <DialogTitle className="text-center">CSV Field Mapping</DialogTitle>
             <DialogDescription className="text-center">
-              We've detected {csvData.length} records. Please confirm the field
+              We&apos;ve detected {csvData.length} records. Please confirm the field
               mappings below.
             </DialogDescription>
           </DialogHeader>

@@ -196,7 +196,7 @@ export default function AllFeedback() {
   // Apply filters when any filter criteria changes
   useEffect(() => {
     applyFilters();
-  }, [universityFilter, healthServiceFilter, clinicAreaFilter, dateFilter]);
+  }, [universityFilter, healthServiceFilter, clinicAreaFilter, dateFilter, applyFilters]);
 
   // Handle university filter change
   const handleUniversityChange = (value) => {
