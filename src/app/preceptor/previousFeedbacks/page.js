@@ -18,8 +18,7 @@ import {
     XCircle
 } from 'lucide-react';
 import LoadingScreen from '@/components/preceptorUI/LoadingScreen';
-import { CalendarPlus } from '@/components/ui/calendarplus'; // 你的新版 CalendarPlus
-
+import { CalendarPlus } from '@/components/ui/calendarplus'; 
 export default function PreceptorFeedbacksPage() {
     const [feedbacks, setFeedbacks] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -134,7 +133,7 @@ export default function PreceptorFeedbacksPage() {
                     >
                         <h1 className="text-3xl font-semibold mb-6 font-['Roboto']">Previous Feedback</h1>
 
-                        {/* 搜索栏 + 日期选择器一行 */}
+                        {/* calendar */}
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-4 mb-4">
                             <motion.input
                                 type="text"
@@ -176,7 +175,7 @@ export default function PreceptorFeedbacksPage() {
                             )}
                         </div>
 
-                        {/* 弹出的 CalendarPlus */}
+                        {/* CalendarPlus */}
                         <AnimatePresence>
                             {showCalendar && (
                                 <motion.div
@@ -201,7 +200,7 @@ export default function PreceptorFeedbacksPage() {
                             )}
                         </AnimatePresence>
 
-                        {/* 三个下拉筛选器 */}
+                        {/* filter*/}
                         <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:justify-center">
                             <select value={universityFilter} onChange={e => setUniversityFilter(e.target.value)} onClick={e => e.stopPropagation()}
                                 className="border rounded-full px-4 py-2 w-full max-w-[280px] text-base bg-white shadow-sm focus:ring-2 focus:ring-blue-200">
@@ -227,7 +226,7 @@ export default function PreceptorFeedbacksPage() {
                         </div>
                     </motion.div>
 
-                    {/* Feedback卡片 */}
+                    {/* Feedback */}
                     <div className="space-y-4">
                         {dateFilteredFeedbacks.map((fb, index) => {
                             const isOpen = expandedIndex === index;
