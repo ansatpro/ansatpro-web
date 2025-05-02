@@ -305,7 +305,7 @@ export default function ExportPage() {
                 {showDropdown && searchTerm && searchResults.length === 0 && (
                   <div className="absolute w-full bg-white mt-1 rounded-md border shadow-lg z-10">
                     <div className="p-3 text-center text-gray-500">
-                      No students found matching "{searchTerm}"
+                      No students found matching &quot;{searchTerm}&quot;
                     </div>
                   </div>
                 )}

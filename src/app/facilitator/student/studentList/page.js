@@ -67,6 +67,7 @@ export default function StudentList() {
     clinicAreaFilter,
     startDateFilter,
     endDateFilter,
+    applyFilters
   ]);
 
   // Function to handle university filter change

@@ -1070,7 +1070,7 @@ export default function StudentDetailPage() {
           <CardTitle className="text-xl">Export Options</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <p className="text-muted-foreground">Choose an export option for {student.studentName}'s reports:</p>
+          <p className="text-muted-foreground">Choose an export option for {student.studentName}&apos;s reports:</p>
 
           <div className="flex flex-col md:flex-row gap-4 flex-wrap">
             {/* AI Summary Button - Different color */}
