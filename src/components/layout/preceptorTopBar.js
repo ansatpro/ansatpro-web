@@ -120,10 +120,13 @@ export default function PreceptorTopBar() {
         <div className="flex items-center gap-2">
           <Link href="/preceptor/profile" className="hover:bg-gray-100 p-2 rounded-full">
             {avatarUrl ? (
-              <img
+              <Image
                 src={avatarUrl}
                 alt="Avatar"
-                className="w-8 h-8 rounded-full object-cover"
+                width={32}
+                height={32}
+                className="rounded-full object-cover"
+                unoptimized
               />
             ) : (
               <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { account, storage } from "@/app/appwrite";
 import PreceptorLayout from "@/components/layout/preceptorLayout";
+import Image from "next/image"; 
 
 // Helper: Add cache buster
 function addCacheBuster(url) {
@@ -85,9 +86,6 @@ export default function PreceptorProfilePage() {
     window.dispatchEvent(new Event("avatarRefresh"));
     console.log("✅ avatarRefresh event dispatched!");
 
-
-
-
     const rawUrl = storage.getFileView(
       process.env.NEXT_PUBLIC_STORAGE_BUCKET_ID,
       uploaded.$id
@@ -122,10 +120,13 @@ export default function PreceptorProfilePage() {
             <div className="relative mb-4">
               <label className="cursor-pointer group">
                 {avatarUrl && (
-                  <img
+                  <Image
                     src={avatarUrl}
                     alt="Avatar"
+                    width={96}
+                    height={96}
                     className="w-24 h-24 rounded-full object-cover border-2 border-gray-300 group-hover:opacity-80 transition"
+                    unoptimized
                   />
                 )}
                 <input
