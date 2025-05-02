@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,68 +58,32 @@ export default function StudentList() {
     ...new Set(students.map((student) => student.clinicArea)),
   ].filter(Boolean);
 
-  // Apply filters whenever any filter changes
-  useEffect(() => {
-    applyFilters();
-  }, [
-    universityFilter,
-    healthServiceFilter,
-    clinicAreaFilter,
-    startDateFilter,
-    endDateFilter,
-  ]);
-
-  // Function to handle university filter change
-  const handleUniversityChange = (value) => {
-    setUniversityFilter(value);
-  };
-
-  // Function to handle health service filter change
-  const handleHealthServiceChange = (value) => {
-    setHealthServiceFilter(value);
-  };
-
-  // Function to handle clinic area filter change
-  const handleClinicAreaChange = (value) => {
-    setClinicAreaFilter(value);
-  };
-
-  // Function to handle start date change
-  const handleStartDateChange = (e) => {
-    setStartDateFilter(e.target.value);
-  };
-
-  // Function to handle end date change
-  const handleEndDateChange = (e) => {
-    setEndDateFilter(e.target.value);
-  };
-
-  // Check if date is within range
-  const isWithinDateRange = (studentStartDate, studentEndDate) => {
-    if (!startDateFilter && !endDateFilter) return true;
-
-    const studentStart = new Date(studentStartDate);
-    const studentEnd = new Date(studentEndDate);
-
-    if (startDateFilter && endDateFilter) {
-      const filterStart = new Date(startDateFilter);
-      const filterEnd = new Date(endDateFilter);
-
-      // Check if the student's period overlaps with the filter period
-      return studentStart <= filterEnd && studentEnd >= filterStart;
-    } else if (startDateFilter) {
-      const filterStart = new Date(startDateFilter);
-      return studentEnd >= filterStart;
-    } else if (endDateFilter) {
-      const filterEnd = new Date(endDateFilter);
-      return studentStart <= filterEnd;
-    }
-
-    return true;
-  };
-
   // Apply all filters
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
+    // Check if date is within range - moved inside useCallback to avoid dependency issues
+    const isWithinDateRange = (studentStartDate, studentEndDate) => {
+      if (!startDateFilter && !endDateFilter) return true;
+
+      const studentStart = new Date(studentStartDate);
+      const studentEnd = new Date(studentEndDate);
+
+      if (startDateFilter && endDateFilter) {
+        const filterStart = new Date(startDateFilter);
+        const filterEnd = new Date(endDateFilter);
+
+        // Check if the student's period overlaps with the filter period
+        return studentStart <= filterEnd && studentEnd >= filterStart;
+      } else if (startDateFilter) {
+        const filterStart = new Date(startDateFilter);
+        return studentEnd >= filterStart;
+      } else if (endDateFilter) {
+        const filterEnd = new Date(endDateFilter);
+        return studentStart <= filterEnd;
+      }
+
+      return true;
+    };
+
     const filtered = students.filter((student) => {
       const matchesUniversity =
         universityFilter === "all" || student.university === universityFilter;
@@ -149,6 +113,36 @@ export default function StudentList() {
     });
 
     setFilteredResults(filtered);
+  }, [students, universityFilter, healthServiceFilter, clinicAreaFilter, startDateFilter, endDateFilter, searchTerm]);
+
+  // Apply filters whenever any filter changes
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
+
+  // Function to handle university filter change
+  const handleUniversityChange = (value) => {
+    setUniversityFilter(value);
+  };
+
+  // Function to handle health service filter change
+  const handleHealthServiceChange = (value) => {
+    setHealthServiceFilter(value);
+  };
+
+  // Function to handle clinic area filter change
+  const handleClinicAreaChange = (value) => {
+    setClinicAreaFilter(value);
+  };
+
+  // Function to handle start date change
+  const handleStartDateChange = (e) => {
+    setStartDateFilter(e.target.value);
+  };
+
+  // Function to handle end date change
+  const handleEndDateChange = (e) => {
+    setEndDateFilter(e.target.value);
   };
 
   // Search for an individual student

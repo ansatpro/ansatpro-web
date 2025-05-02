@@ -1,3 +1,9 @@
+/*
+ * This is the main component for the preceptor feedback form page.
+ * It handles the creation and submission of feedback for students.
+ * The component includes form fields for feedback content, discussion flags, and date selection.
+ */
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -16,6 +22,11 @@ import { cn } from "@/lib/utils";
 import { useRouter } from 'next/navigation';
 import PreceptorLayout from "@/components/layout/preceptorLayout";
 
+/*
+ * The main component that manages the feedback form.
+ * It handles state for user input, student selection, and form submission.
+ * The component includes validation and error handling for form submission.
+ */
 export default function PreceptorFeedbackForm() {
     const router = useRouter();
     const [user, setUser] = useState(null);
@@ -28,6 +39,11 @@ export default function PreceptorFeedbackForm() {
     const [status, setStatus] = useState(null);
     const [calendarOpen, setCalendarOpen] = useState(false); // Control popover open state
 
+    /*
+     * Effect hook to load user data and selected student information.
+     * It verifies the authentication and student selection status.
+     * The hook runs once when the component mounts.
+     */
     useEffect(() => {
         const loadUser = async () => {
             try {
@@ -54,6 +70,11 @@ export default function PreceptorFeedbackForm() {
         loadUser();
     }, []);
 
+    /*
+     * Function to handle form submission.
+     * It validates the form data and processes the feedback submission.
+     * The function includes error handling and status updates.
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -88,6 +109,11 @@ export default function PreceptorFeedbackForm() {
         }
     };
 
+    /*
+     * Main render function that displays the feedback form.
+     * It includes input fields for feedback content, discussion flags, and date selection.
+     * The form includes validation and error messages.
+     */
     return (
         <PreceptorLayout>
             <main className="p-8 pb-24 md:pb-8">
@@ -121,7 +147,7 @@ export default function PreceptorFeedbackForm() {
                     {/* Feedback Form */}
                     <form onSubmit={handleSubmit} className="space-y-8">
                         <div>
-                            <h2 className="text-lg font-semibold mb-4 font-['Roboto']">Provide feedback on student's performance</h2>
+                            <h2 className="text-lg font-semibold mb-4 font-['Roboto']">Provide feedback on student&apos;s performance</h2>
                             <Textarea
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
