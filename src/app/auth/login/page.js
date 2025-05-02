@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { account, functions } from "../../appwrite";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -277,4 +277,12 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading login form...</div>}>
+      <LoginPage />
+    </Suspense>
+  );
+}
+
+// export default LoginPage;
