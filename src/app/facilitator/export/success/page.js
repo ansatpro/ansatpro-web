@@ -1,16 +1,24 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
 
 export default function ExportSuccessPage() {
   const router = useRouter();
+  const [docId, setDocId] = useState(null);
 
-  // Get the docId of the selected student from localStorage
-  const selectedStudent = JSON.parse(localStorage.getItem("ansatpro_selected_student"));
-  const docId = selectedStudent?.docId;
+  // Move localStorage access to useEffect to ensure it only runs on client-side
+  useEffect(() => {
+    try {
+      const selectedStudent = JSON.parse(localStorage.getItem("ansatpro_selected_student"));
+      setDocId(selectedStudent?.docId);
+    } catch (error) {
+      console.error("Error accessing localStorage:", error);
+    }
+  }, []);
 
   const handleAddAnother = () => {
     if (docId) {

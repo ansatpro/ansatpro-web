@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -179,7 +179,7 @@ export default function AllFeedback() {
   // Update filtered results when feedback data changes
   useEffect(() => {
     setFilteredResults(feedbacks);
-    setCurrentPage(1); // 重置到第一页当数据改变时
+    setCurrentPage(1); // reset to 1st page
   }, [feedbacks]);
 
   // Get unique filter values from feedback data
@@ -193,33 +193,8 @@ export default function AllFeedback() {
     ...new Set(feedbacks.map((feedback) => feedback.clinicArea)),
   ];
 
-  // Apply filters when any filter criteria changes
-  useEffect(() => {
-    applyFilters();
-  }, [universityFilter, healthServiceFilter, clinicAreaFilter, dateFilter, applyFilters]);
-
-  // Handle university filter change
-  const handleUniversityChange = (value) => {
-    setUniversityFilter(value);
-  };
-
-  // Handle health service filter change
-  const handleHealthServiceChange = (value) => {
-    setHealthServiceFilter(value);
-  };
-
-  // Handle clinic area filter change
-  const handleClinicAreaChange = (value) => {
-    setClinicAreaFilter(value);
-  };
-
-  // Handle date filter change
-  const handleDateFilterChange = (value) => {
-    setDateFilter(value);
-  };
-
   // Apply all filter conditions
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let results = feedbacks;
 
     // Apply university filter
@@ -289,6 +264,31 @@ export default function AllFeedback() {
 
     setFilteredResults(results);
     setCurrentPage(1); // reset to first page when filters change
+  }, [universityFilter, healthServiceFilter, clinicAreaFilter, dateFilter, feedbacks]);
+
+  // Apply filters when any filter criteria changes
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
+
+  // Handle university filter change
+  const handleUniversityChange = (value) => {
+    setUniversityFilter(value);
+  };
+
+  // Handle health service filter change
+  const handleHealthServiceChange = (value) => {
+    setHealthServiceFilter(value);
+  };
+
+  // Handle clinic area filter change
+  const handleClinicAreaChange = (value) => {
+    setClinicAreaFilter(value);
+  };
+
+  // Handle date filter change
+  const handleDateFilterChange = (value) => {
+    setDateFilter(value);
   };
 
   // Search feedback

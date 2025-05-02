@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -18,40 +18,6 @@ export default function StudentDetail() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [feedbackData, setFeedbackData] = useState(null);
-
-  // Preset feedback data (used as fallback)
-  const sampleFeedbacks = [
-    {
-      id: "F89012",
-      studentName: "Olivia Martinez",
-      ismarked: "Marked",
-      is_marked: true,
-      university: "Johns Hopkins University",
-      healthService: "Community Clinic",
-      clinicArea: "Family Medicine",
-      date: "2023-07-10",
-      content: "Olivia demonstrated excellent patient care skills and empathy. Her clinical notes were thorough and well-organized. Need to work on time management during busy clinic hours.",
-      preceptor: "Dr. Johnson",
-      studentId: "ST12345",
-      startDate: "2023-05-01",
-      endDate: "2023-08-30"
-    },
-    {
-      id: "F89013",
-      studentName: "Michael Brown",
-      ismarked: "Unmarked",
-      is_marked: false,
-      university: "Stanford University",
-      healthService: "Memorial Hospital",
-      clinicArea: "Cardiology",
-      date: "2023-08-05",
-      content: "Michael shows promising clinical reasoning skills. He effectively communicates with patients and staff. Needs to improve documentation completeness and timeliness.",
-      preceptor: "Dr. Williams",
-      studentId: "ST67890",
-      startDate: "2023-06-15",
-      endDate: "2023-09-15"
-    }
-  ];
 
   // Fetch feedback and student data
   useEffect(() => {
@@ -117,6 +83,40 @@ export default function StudentDetail() {
         console.log("Using fallback data");
         await new Promise(resolve => setTimeout(resolve, 800));
         
+        // Preset feedback data (moved inside useEffect)
+        const sampleFeedbacks = [
+          {
+            id: "F89012",
+            studentName: "Olivia Martinez",
+            ismarked: "Marked",
+            is_marked: true,
+            university: "Johns Hopkins University",
+            healthService: "Community Clinic",
+            clinicArea: "Family Medicine",
+            date: "2023-07-10",
+            content: "Olivia demonstrated excellent patient care skills and empathy. Her clinical notes were thorough and well-organized. Need to work on time management during busy clinic hours.",
+            preceptor: "Dr. Johnson",
+            studentId: "ST12345",
+            startDate: "2023-05-01",
+            endDate: "2023-08-30"
+          },
+          {
+            id: "F89013",
+            studentName: "Michael Brown",
+            ismarked: "Unmarked",
+            is_marked: false,
+            university: "Stanford University",
+            healthService: "Memorial Hospital",
+            clinicArea: "Cardiology",
+            date: "2023-08-05",
+            content: "Michael shows promising clinical reasoning skills. He effectively communicates with patients and staff. Needs to improve documentation completeness and timeliness.",
+            preceptor: "Dr. Williams",
+            studentId: "ST67890",
+            startDate: "2023-06-15",
+            endDate: "2023-09-15"
+          }
+        ];
+        
         // Find feedback
         const feedback = sampleFeedbacks.find(f => f.id === feedbackId);
         
@@ -148,15 +148,15 @@ export default function StudentDetail() {
     if (feedbackId) {
       fetchFeedbackData();
     }
-  }, [feedbackId, sampleFeedbacks]);
+  }, [feedbackId]);
 
   // Handle checkbox state change
-  const handleConfirmChange = (checked) => {
+  const handleConfirmChange = useCallback((checked) => {
     setConfirmed(checked);
-  };
+  }, []);
 
   // Handle next button click
-  const handleNextClick = () => {
+  const handleNextClick = useCallback(() => {
     if (confirmed && feedbackData) {
       // Decide where to go next based on feedback status
       if (feedbackData.is_marked) {
@@ -167,12 +167,12 @@ export default function StudentDetail() {
         router.push(`/facilitator/feedback/${feedbackId}/studentDetail/createFeedback`);
       }
     }
-  };
+  }, [confirmed, feedbackData, feedbackId, router]);
 
   // Handle back navigation
-  const handleBackClick = () => {
+  const handleBackClick = useCallback(() => {
     router.push("/facilitator/feedback");
-  };
+  }, [router]);
 
   // Format date for display
   const formatDate = (dateString) => {
@@ -322,11 +322,13 @@ export default function StudentDetail() {
               </Label>
             </div>
             
-            {confirmed && (
-              <Button onClick={handleNextClick} className="mt-4">
-                {feedbackData.is_marked ? "Review Feedback" : "Create Feedback"}
-              </Button>
-            )}
+            <Button 
+              onClick={handleNextClick} 
+              className="mt-4"
+              disabled={!confirmed}
+            >
+              {feedbackData.is_marked ? "Review Feedback" : "Create Feedback"}
+            </Button>
           </div>
         </div>
       </main>

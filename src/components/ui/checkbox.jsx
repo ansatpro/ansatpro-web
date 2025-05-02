@@ -18,7 +18,7 @@ import { cn } from "../../../functions/utils"
  * @param {string} props.className - Additional CSS classes
  * @returns {JSX.Element} Checkbox component
  */
-function Checkbox({
+const Checkbox = React.memo(function Checkbox({
   className,
   ...props
 }) {
@@ -37,6 +37,8 @@ function Checkbox({
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   );
-}
+});
+
+Checkbox.displayName = "Checkbox";
 
 export { Checkbox }

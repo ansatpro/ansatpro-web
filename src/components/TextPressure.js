@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 /**
  * @function TextPressure
@@ -111,31 +111,38 @@ const TextPressure = ({
 
     /**
      * @function setSize
-     * @description Calculates and sets appropriate font size and scaling
+     * @description Calculates and sets the font size based on container dimensions
      */
-    const setSize = () => {
+    const setSize = useCallback(() => {
         if (!containerRef.current || !titleRef.current) return;
 
-        const { width: containerW, height: containerH } = containerRef.current.getBoundingClientRect();
+        const containerRect = containerRef.current.getBoundingClientRect();
+        const titleRect = titleRef.current.getBoundingClientRect();
 
-        let newFontSize = containerW / (chars.length / 2);
-        newFontSize = Math.max(newFontSize, minFontSize);
+        // Default scale factor (1 = 100%)
+        let scaleFactor = 1;
 
-        setFontSize(newFontSize);
-        setScaleY(1);
-        setLineHeight(1);
+        if (scale) {
+            // Calculate how much to scale based on container width
+            scaleFactor = containerRect.width / titleRect.width;
 
-        requestAnimationFrame(() => {
-            if (!titleRef.current) return;
-            const textRect = titleRef.current.getBoundingClientRect();
+            // Scale more conservatively to prevent overflow
+            scaleFactor *= 0.9;
 
-            if (scale && textRect.height > 0) {
-                const yRatio = containerH / textRect.height;
-                setScaleY(yRatio);
-                setLineHeight(yRatio);
-            }
-        });
-    };
+            // Apply minimum font size
+            const newFontSize = Math.max(
+                minFontSize,
+                parseInt(window.getComputedStyle(titleRef.current).fontSize) * scaleFactor
+            );
+
+            // Update font size
+            titleRef.current.style.fontSize = `${newFontSize}px`;
+
+            // Split and restore text nodes for animation
+            charsRef.current = text.split('');
+            setChars(charsRef.current);
+        }
+    }, [minFontSize, scale, text]);
 
     /**
      * @function useEffect
@@ -145,7 +152,7 @@ const TextPressure = ({
         setSize();
         window.addEventListener('resize', setSize);
         return () => window.removeEventListener('resize', setSize);
-    }, [scale, text]);
+    }, [scale, text, setSize]);
 
     /**
      * @function useEffect
