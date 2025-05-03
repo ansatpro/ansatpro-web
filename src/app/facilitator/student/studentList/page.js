@@ -18,12 +18,22 @@ import {
   GetAllStudents,
   DeleteStudent,
 } from "../../../../../functions/HowToConnectToFunction";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function StudentList() {
   const router = useRouter();
   const [students, setStudents] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [studentToDelete, setStudentToDelete] = useState(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -160,13 +170,13 @@ export default function StudentList() {
     setFilteredResults(students);
   };
 
-  const handleDelete = async (studentId) => {
-    try {
-      // Find student to delete
-      const studentToDelete = students.find(
-        (student) => student.studentId === studentId
-      );
+  const confirmDelete = (student) => {
+    setStudentToDelete(student);
+    setShowDeleteDialog(true);
+  };
 
+  const handleDelete = async () => {
+    try {
       if (!studentToDelete) return;
 
       const documentID = studentToDelete.documentID;
@@ -174,15 +184,16 @@ export default function StudentList() {
 
       // Remove the student from both lists
       const updatedStudents = students.filter(
-        (student) => student.studentId !== studentId
+        (student) => student.studentId !== studentToDelete.studentId
       );
 
       setStudents(updatedStudents);
       setFilteredResults(
-        filteredResults.filter((student) => student.studentId !== studentId)
+        filteredResults.filter((student) => student.studentId !== studentToDelete.studentId)
       );
 
-      console.log(`Deleted student with ID: ${studentId}`);
+      console.log(`Deleted student with ID: ${studentToDelete.studentId}`);
+      setShowDeleteDialog(false);
     } catch (error) {
       console.error("Error deleting student:", error);
     }
@@ -421,7 +432,7 @@ export default function StudentList() {
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => handleDelete(student.studentId)}
+                        onClick={() => confirmDelete(student)}
                       >
                         Delete
                       </Button>
@@ -433,6 +444,32 @@ export default function StudentList() {
           </table>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {studentToDelete?.firstName} {studentToDelete?.lastName} (ID: {studentToDelete?.studentId})? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-6 flex space-x-2 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
