@@ -820,42 +820,42 @@ export default function RegisterStudentPage() {
 
       {/* CSV Mapping Dialog */}
       <Dialog open={showCsvDialog} onOpenChange={setShowCsvDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
-          <DialogHeader>
-            <DialogTitle className="text-center">CSV Field Mapping</DialogTitle>
-            <DialogDescription className="text-center">
+        <DialogContent className="sm:max-w-[90vw] md:max-w-[80vw] lg:max-w-[1200px] max-h-[90vh] overflow-y-auto bg-white">
+          <DialogHeader className="pb-6">
+            <DialogTitle className="text-center text-2xl font-bold">CSV Field Mapping</DialogTitle>
+            <DialogDescription className="text-center text-base">
               We&apos;ve detected {csvData.length} records. Please confirm the field
               mappings below.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-8">
             {/* Field Mapping Table */}
-            <div className="border rounded-md">
-              <Table>
+            <div className="border rounded-lg shadow-sm">
+              <Table className="w-full">
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-1/4">Required Field</TableHead>
-                    <TableHead className="w-3/4">CSV Column</TableHead>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="w-1/4 text-base font-bold py-4">Required Field</TableHead>
+                    <TableHead className="w-3/4 text-base font-bold py-4">CSV Column</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {Object.entries(requiredFields).map(([field, _]) => (
-                    <TableRow key={field}>
-                      <TableCell className="font-medium">
+                    <TableRow key={field} className="border-b hover:bg-muted/20">
+                      <TableCell className="font-medium text-base py-3">
                         {field}
                         {field !== "additionalFacilitator" && (
                           <span className="text-red-500 ml-1">*</span>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-3">
                         <Select
                           value={fieldMapping[field] || "not_mapped"}
                           onValueChange={(value) =>
                             handleMappingChange(field, value)
                           }
                         >
-                          <SelectTrigger className="bg-white w-full">
+                          <SelectTrigger className="bg-white w-full h-10 text-base">
                             <SelectValue placeholder="Select a column" />
                           </SelectTrigger>
                           <SelectContent className="bg-white">
@@ -877,45 +877,49 @@ export default function RegisterStudentPage() {
             </div>
 
             {/* Data Preview */}
-            <div>
-              <h3 className="text-lg font-medium mb-2 text-center">
+            <div className="border rounded-lg shadow-sm p-4">
+              <h3 className="text-xl font-bold mb-4 text-center">
                 Data Preview
               </h3>
-              <div className="border rounded-md overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
+              <div className="border rounded-lg overflow-x-auto max-h-[350px]">
+                <Table className="w-full">
+                  <TableHeader className="sticky top-0 bg-white">
+                    <TableRow className="bg-muted/50">
                       {Object.keys(requiredFields).map((field) => (
-                        <TableHead key={field}>{field}</TableHead>
+                        <TableHead key={field} className="text-base font-bold py-3">{field}</TableHead>
                       ))}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {previewData.map((row, index) => (
-                      <TableRow key={index}>
+                      <TableRow key={index} className="border-b hover:bg-muted/20">
                         {Object.keys(requiredFields).map((field) => (
-                          <TableCell key={field}>{row[field] || "-"}</TableCell>
+                          <TableCell key={field} className="py-3">{row[field] || "-"}</TableCell>
                         ))}
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground mt-3 text-right">
                 Showing {previewData.length} of {csvData.length} records.
               </p>
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="mt-8 space-x-4 pt-4 border-t">
             <Button
               variant="outline"
               onClick={() => setShowCsvDialog(false)}
-              className="bg-white"
+              className="bg-white h-10 px-6"
             >
               Cancel
             </Button>
-            <Button onClick={handleCsvSubmit} disabled={isLoading}>
+            <Button 
+              onClick={handleCsvSubmit} 
+              disabled={isLoading}
+              className="h-10 px-6"
+            >
               {isLoading ? "Processing..." : "Import Data"}
             </Button>
           </DialogFooter>
