@@ -228,7 +228,9 @@ export default function RegisterPage() {
 
       // Send Verify Email and redirect to login page first
       try {
-        await account.createVerification("http://localhost:3000/auth/login");
+        // Temporary URL for testing
+        const tempUrl = "https://ansatpro-web.vercel.app";
+        await account.createVerification(tempUrl + "/auth/login");
         // Navigate to login page only after verification email is sent
         router.push("/auth/login?registered=true");
       } catch (error) {
