@@ -12,7 +12,7 @@
 3.  Login Page Path: src/app/auth/login/page.js <br>
 
 Signup Page Path: src/app/auth/register/page.js
-
+  
 
 
 
