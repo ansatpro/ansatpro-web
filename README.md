@@ -1,65 +1,114 @@
-## Testing the functionalities
+# ANSAT-PRO 
 
-1. `npm install`
+Welcome to **ANSAT-PRO** – your comprehensive platform for managing nursing student assessments, feedback, and scores. This manual will guide you step-by-step on how to navigate and utilize the platform effectively.
 
-   If you encounter error with shadcn/ui, try this command:
-   `npx shadcn@latest init`
+---
 
-2. Edit the appwrite.js file
+## 📖 Table of Contents
 
-   File Path: src/app/appwrite.js
+- [ANSAT-PRO User Manual](#ansat-pro-user-manual)
+  - [📖 Table of Contents](#-table-of-contents)
+  - [🚀 Getting Started](#-getting-started)
+  - [🔐 Logging In](#-logging-in)
+  - [🧭 Dashboard Overview (Facilitator)](#-dashboard-overview-facilitator)
+  - [🧭 Dashboard Overview (Preceptor)](#-dashboard-overview-preceptor)
+  - [🎓 Managing Students (Facilitator)](#-managing-students-facilitator)
+  - [✍️ Reviewing Feedback (Facilitator)](#️-reviewing-feedback-facilitator)
+  - [⚙️ Settings](#️-settings)
+  - [📩 Support](#-support)
 
-3. Login Page Path: src/app/auth/login/page.js <br>
+---
 
-Signup Page Path: src/app/auth/register/page.js
+## 🚀 Getting Started
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+To use ANSAT-PRO:
 
-## Getting Started
+- Visit [https://ansatpro-web.vercel.app/](https://ansatpro-web.vercel.app/)
+- Use your facilitator or preceptor account to log in.
+- If you are new, please sign up to create an account using a valid work email.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🔐 Logging In
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. Go to the **Login** page.
+2. Enter your registered **email** and **password**.
+   ![Login Screenshot](./images/login.png)
+3. Click **Login** to access your dashboard.
+4. Forgot your password? Click on "Forgot password" to reset it.
+   ![Forgot Password Screenshot](./images/forgot-password.png)
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🧭 Dashboard Overview (Facilitator)
 
-## Learn More
+Once logged in, you'll see the main dashboard:
+![Facilitator Dashboard Screenshot](./images/facilitator-dashboard.png)
 
-To learn more about Next.js, take a look at the following resources:
+- **Register Students** – Register and view your assigned students.
+  ![Register Student Screenshot](./images/register-student.png)
+- **Review Feedback** – Access and complete pending feedback forms.
+  ![Review Feedback Screenshot](./images/review-feedback.png)
+- **Export Reports** – View and export summaries of feedback and scores.
+  ![Export Reports Screenshot](./images/export-reports.png)
+- **Notifications** – Messages and discussion requests from preceptors regarding feedback.
+  ![Notifications Screenshot](./images/notifications.png)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🧭 Dashboard Overview (Preceptor)
 
-## Deploy on Vercel
+Once logged in, you'll see the main dashboard:
+![Preceptor Dashboard Screenshot](./images/preceptor-dashboard.png)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Add Feedback** – Submit new feedback for students.
+  ![Add Feedback Screenshot](./images/add-feedback.png)
+- **View Previous Feedback** – Access past feedback entries.
+  ![View Previous Feedback Screenshot](./images/view-previous-feedback.png)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
 
-## User Manual
+## 🎓 Managing Students (Facilitator)
 
-For step-by-step instructions on how to use the application, please refer to the [USER_MANUAL.md](./docs/USER_MANUAL.md) file.
+1. Navigate to **Students** from the sidebar.
+2. View detailed profiles from the student list.
+   ![Student List Screenshot](./images/student-list.png)
+3. Register a single student or use bulk registration.
+   ![Register Student Screenshot](./images/register-student.png)
+4. Use filters in the student list to search by name, status, or rotation.
 
-It includes:
+---
 
-- How to log in and register
-- Dashboard overviews for facilitators and preceptors
-- How to add, view, and review feedback
-- Exporting reports
-- Managing student lists and settings
+## ✍️ Reviewing Feedback (Facilitator)
 
-Make sure to check the manual to fully understand the available features and how to navigate the platform efficiently.
+![Reviewing Feedback Screenshot](./images/reviewing-feedback.png)
+
+1. Go to the **Feedback** page.
+2. View AI-generated feedback items and past facilitator input.
+3. You can edit or add feedback manually.
+4. Use the rating interface to score each ANSAT item.
+5. Submit once complete — your review is saved and available for export.
+
+---
+
+## ⚙️ Settings
+
+![Settings Screenshot](./images/settings.png)
+
+- Click Settings in the left sidebar.
+- View your profile information.
+- To change your password, click the Change button from the dashboard.
+
+---
+
+## 📩 Support
+
+For help or technical issues:
+
+- Support options are also available in the Settings dashboard.
+- Email the team at: **support@ansatpro.com**
+- Or contact your system administrator.
+
+---
+
+Thank you for using ANSAT-PRO – streamlining student evaluation with clarity and efficiency.
