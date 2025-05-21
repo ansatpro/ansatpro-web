@@ -8,6 +8,19 @@ npm run test
 # or
 npm test
 ```
+## Test Details
+Our acceptance process includes verifying the ANSAT Pro web application's functionality, performance, responsiveness, browser compatibility, security, and content accuracy. 
+### Backend and Frontend Test
+#### Backend Testing
+We used Vitest to validate our Appwrite backend integration through a three-tiered approach:
+Unit Testing: Validated individual backend functions, API endpoints, and database operations
+Integration Testing: Verified communication between system components, authentication flows, and module interactions
+ Error Handling: Tested input validation, error responses, and edge case handling
+#### Frontend Testing
+Our frontend testing combined Vitest for unit tests and Selenium for end-to-end automation:
+Unit Testing: Verified components, hooks, contexts, and utility functions
+End-to-End Testing: Validated complete user journeys, form validation, navigation, and authentication
+UI/UX Testing: Ensured responsive design across devices and consistent functionality across major browsers
 
 ## Writing Tests
 - Import the necessary functions from Vitest, such as `test` and `expect`.
@@ -30,3 +43,4 @@ const sum = (a, b) => a + b;
 test('sum', () => {
   expect(sum(1, 2)).toBe(3);
 });
+
