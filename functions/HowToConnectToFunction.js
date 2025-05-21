@@ -168,7 +168,7 @@ const DeleteStudent = async (documentID) => {
 // Get studentsWithAllDetails
 const GetAllStudentsWithDetails = async () => {
   const user = await account.get();
-  console.log(user);
+  // console.log(user);
   const res = await functions.createExecution(
     FUNCTION1_ID,
     JSON.stringify({ created_by: user.$id }),
