@@ -33,10 +33,10 @@ To use ANSAT-PRO:
 
 1. Go to the **Login** page.
 2. Enter your registered **email** and **password**.
-   ![Login Screenshot](../images/login.png)
+   ![Login Screenshot](./images/login.png)
 3. Click **Login** to access your dashboard.
 4. Forgot your password? Click on "Forgot password" to reset it.
-   ![Forgot Password Screenshot](../images/forgot-password.png)
+   ![Forgot Password Screenshot](./images/forgot-password.png)
 
 ---
 
