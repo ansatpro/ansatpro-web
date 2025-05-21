@@ -4,9 +4,9 @@
  */
 
 // filepath: /Users/yunho/capstone/ansatpro-web/src/__tests__/utils/test-utils.js
-import { render } from '@testing-library/react';
-import { NotificationsProvider } from '@/context/NotificationsContext';
-import { NavigationProvider } from '@/context/NavigationContext';
+import { render } from "@testing-library/react";
+import { NotificationsProvider } from "@/context/NotificationsContext";
+import { NavigationProvider } from "@/context/NavigationContext";
 
 /**
  * Custom render function that wraps components with all necessary providers
@@ -17,9 +17,7 @@ import { NavigationProvider } from '@/context/NavigationContext';
 export function renderWithProviders(ui, options = {}) {
   return render(
     <NavigationProvider>
-      <NotificationsProvider>
-        {ui}
-      </NotificationsProvider>
+      <NotificationsProvider>{ui}</NotificationsProvider>
     </NavigationProvider>,
     options
   );
@@ -32,17 +30,17 @@ export function renderWithProviders(ui, options = {}) {
 export function mockAppwriteAccount() {
   return {
     get: vi.fn().mockResolvedValue({
-      $id: 'user-id',
-      name: 'Test User',
-      email: 'test@example.com',
+      $id: "user-id",
+      name: "Test User",
+      email: "test@example.com",
       emailVerification: true,
-      labels: ['Facilitator']
+      labels: ["Facilitator"],
     }),
-    createJWT: vi.fn().mockResolvedValue({ jwt: 'mock-jwt-token' }),
+    createJWT: vi.fn().mockResolvedValue({ jwt: "mock-jwt-token" }),
     createEmailPasswordSession: vi.fn(),
     deleteSession: vi.fn(),
     createVerification: vi.fn(),
-    updateVerification: vi.fn()
+    updateVerification: vi.fn(),
   };
 }
 
@@ -54,10 +52,10 @@ export function mockAppwriteFunctions() {
   return {
     createExecution: vi.fn().mockResolvedValue({
       responseBody: JSON.stringify({
-        status: 'success',
-        data: { role: 'facilitator' }
-      })
-    })
+        status: "success",
+        data: { role: "facilitator" },
+      }),
+    }),
   };
 }
 
@@ -68,7 +66,7 @@ export function mockAppwriteFunctions() {
 export function mockAppwriteStorage() {
   return {
     getFile: vi.fn(),
-    getFileView: vi.fn().mockReturnValue('https://example.com/avatar.jpg')
+    getFileView: vi.fn().mockReturnValue("https://example.com/avatar.jpg"),
   };
 }
 
@@ -87,10 +85,10 @@ export function mockLocalStorage() {
       delete store[key];
     }),
     clear: vi.fn(() => {
-      Object.keys(store).forEach(key => {
+      Object.keys(store).forEach((key) => {
         delete store[key];
       });
-    })
+    }),
   };
 }
 
@@ -99,9 +97,9 @@ export function mockLocalStorage() {
  * This is needed for components that use media queries
  */
 export function mockMatchMedia() {
-  Object.defineProperty(window, 'matchMedia', {
+  Object.defineProperty(window, "matchMedia", {
     writable: true,
-    value: vi.fn().mockImplementation(query => ({
+    value: vi.fn().mockImplementation((query) => ({
       matches: false,
       media: query,
       onchange: null,
@@ -123,7 +121,7 @@ export function mockIntersectionObserver() {
   mockIntersectionObserver.mockReturnValue({
     observe: () => null,
     unobserve: () => null,
-    disconnect: () => null
+    disconnect: () => null,
   });
   window.IntersectionObserver = mockIntersectionObserver;
 }
@@ -135,7 +133,7 @@ export function mockIntersectionObserver() {
  * @returns {Promise} Promise that resolves after the specified time
  */
 export function wait(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -145,8 +143,9 @@ export function wait(ms) {
  * @returns {string} Random string
  */
 export function randomString(length = 10) {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
   for (let i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
@@ -160,10 +159,10 @@ export function randomString(length = 10) {
 export function generateTestUser() {
   const uuid = randomString(8);
   return {
-    firstName: 'Test',
-    lastName: 'User',
+    firstName: "Test",
+    lastName: "User",
     email: `testuser_${uuid}@example.com`,
-    password: 'TestPassword123!',
-    role: 'facilitator'
+    password: "TestPassword123!",
+    role: "facilitator",
   };
 }

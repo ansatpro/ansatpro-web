@@ -194,15 +194,15 @@ Test utilities provide helper functions and mock implementations to facilitate t
 
 Current test coverage by category:
 
-| Category | Files | Coverage |
-|----------|-------|----------|
-| Components | 3/25 | 12% |
-| Hooks | 1/4 | 25% |
-| Context | 2/3 | 67% |
-| Utilities | 1/5 | 20% |
-| Auth | 1/2 | 50% |
-| API Integration | 4/8 | 50% |
-| End-to-End | 7 flows | N/A |
+| Category        | Files   | Coverage |
+| --------------- | ------- | -------- |
+| Components      | 3/25    | 12%      |
+| Hooks           | 1/4     | 25%      |
+| Context         | 2/3     | 67%      |
+| Utilities       | 1/5     | 20%      |
+| Auth            | 1/2     | 50%      |
+| API Integration | 4/8     | 50%      |
+| End-to-End      | 7 flows | N/A      |
 
 ## Future Improvements
 
