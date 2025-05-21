@@ -46,7 +46,7 @@ export default function FacilitatorTopBar() {
         createdAt: notification.messageTime,
       }));
 
-      console.log("finalNotification:", finalNotification);
+      // console.log("finalNotification:", finalNotification);
 
       // Check if any notification is unread
       const hasUnread = res.some(

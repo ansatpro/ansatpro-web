@@ -3,7 +3,6 @@
  * This file contains tests for the backend API endpoints
  */
 
-// filepath: /Users/yunho/capstone/ansatpro-web/src/__tests__/api/api.test.js
 import { expect, test, describe, beforeAll } from "vitest";
 import fetch from "node-fetch";
 import { account, functions, ID } from "@/app/appwrite";

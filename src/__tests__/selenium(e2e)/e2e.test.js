@@ -4,7 +4,6 @@
  * using Selenium WebDriver.
  */
 
-// filepath: /Users/yunho/capstone/ansatpro-web/src/__tests__/selenium/e2e.test.js
 import { expect, test, describe, beforeAll, afterAll } from "vitest";
 import { Builder, By, until } from "selenium-webdriver";
 import chrome from "selenium-webdriver/chrome";

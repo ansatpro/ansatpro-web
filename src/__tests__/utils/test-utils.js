@@ -3,7 +3,6 @@
  * This file contains common utilities used across tests
  */
 
-// filepath: /Users/yunho/capstone/ansatpro-web/src/__tests__/utils/test-utils.js
 import { render } from "@testing-library/react";
 import { NotificationsProvider } from "@/context/NotificationsContext";
 import { NavigationProvider } from "@/context/NavigationContext";
