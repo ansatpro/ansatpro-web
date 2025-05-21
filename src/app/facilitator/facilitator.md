@@ -2,67 +2,72 @@
 
 ```
 src/app/facilitator/
-├── facilitator.md
-├── layout.js
-├── home/
-│   └── page.js
-├── student/
-│   ├── page.js
-│   ├── studentList/
-│   │   └── page.js
-│   ├── studentRegister/
-│   │   └── page.js
-│   └── success/
-│       └── page.js
-├── feedback/
-│   ├── page.js
-│   └── [id]/
-│       ├── layout.js
-│       ├── studentDetail/
-│       │   ├── page.js
-│       │   └── createFeedback/
-│       │       ├── page.js
-│       │       └── success/
-│       │           └── page.js
-│       └── feedbackDetail/
-│           └── page.js
-├── notification/
-│   └── page.js
-├── export/
-│   ├── page.js
-│   ├── success/
-│   │   └── page.js
-│   └── [id]/
-│       ├── layout.js
-│       └── studentDetail/
-│           ├── page.js
-│           └── aiSummary/
-│               ├── layout.js
-│               └── page.js
-└── settings/
-    └── page.js
+├── facilitator.md  # Project structure documentation
+├── layout.js                 # Defines common layout for all facilitator pages, including navigation and auth checks
+├── home/                     # Home module
+│   └── page.js               
+├── student/                  # Student management module
+│   ├── page.js               
+│   ├── studentList/          # Student list functionality
+│   │   └── page.js           
+│   ├── studentRegister/      # Student registration functionality
+│   │   └── page.js           
+│   └── success/              # Success page
+│       └── page.js           
+├── feedback/                 # Feedback module
+│   ├── page.js               
+│   └── [id]/                 # Dynamic routes for specific feedback records
+│       ├── layout.js         # Layout wrapper for specific student feedback routes
+│       ├── studentDetail/    # Student detail view
+│       │   ├── page.js       
+│       │   └── createFeedback/ # Create feedback functionality
+│       │       ├── page.js   
+│       │       └── success/  # Feedback submission success page
+│       │           └── page.js 
+│       └── feedbackDetail/   # Feedback detail view
+│           └── page.js       
+├── notification/             # Notification module
+│   └── page.js               
+├── export/                   # Data export module
+│   ├── page.js               
+│   ├── success/              # Export success page
+│   │   └── page.js           
+│   └── [id]/                 # Dynamic routes for specific student export of all feedback
+│       ├── layout.js         
+│       └── studentDetail/    # Student detail export view
+│           ├── page.js      
+│           └── aiSummary/    # AI summary generation
+│               ├── layout.js 
+│               └── page.js   
+└── settings/                 # Settings module
+    └── page.js               
 ```
 
-## File Descriptions
+## Key Features
 
-- `layout.js`: Layout component for the facilitator module
-- `home/page.js`: Dashboard page for facilitators
-- `student/page.js`: Main student management page
-- `student/studentList/page.js`: Page for listing and managing all students
-- `student/studentRegister/page.js`: Page for registering new students
-- `student/success/page.js`: Success confirmation page for student operations
-- `feedback/page.js`: Main feedback management page
-- `feedback/[id]/layout.js`: Layout for dynamic feedback routes
-- `feedback/[id]/studentDetail/page.js`: Student detail view for feedback
-- `feedback/[id]/studentDetail/createFeedback/page.js`: Page for creating new feedback
-- `feedback/[id]/studentDetail/createFeedback/success/page.js`: Success confirmation for feedback creation
-- `feedback/[id]/feedbackDetail/page.js`: Detailed view of specific feedback
-- `notification/page.js`: Notification management page
-- `export/page.js`: Main export page
-- `export/success/page.js`: Success confirmation for export operations
-- `export/[id]/layout.js`: Layout for dynamic export routes
-- `export/[id]/studentDetail/page.js`: Student detail export page
-- `export/[id]/studentDetail/aiSummary/layout.js`: Layout for AI summary
-- `export/[id]/studentDetail/aiSummary/page.js`: AI-generated summary page
-- `settings/page.js`: User settings page
+### 1. Student Management
+- Registration and enrollment process for new students
+- Advanced search functionality with multiple parameters for locating specific students
+- Comprehensive filtering system with multiple criteria (status, cohort, performance)
+- Secure student record deletion with confirmation safeguards
+
+### 2. Feedback System
+- Implementation of structured assessment framework aligned with ANSAT standards
+- Detailed assessment marking interface with rubric-based evaluation tools
+- Longitudinal tracking system for monitoring student performance across multiple assessments
+- Status-based feedback browser with filtering and sorting capabilities
+
+### 3. Data Exports
+- Configurable export functionality with customizable parameters for student data and assessments
+- High-fidelity PDF document generation with consistent formatting
+- AI-powered performance analysis providing objective insights and personalised recommendations
+
+### 4. Notification System
+- Real-time notification infrastructure for assessment submissions and approaching deadlines
+- Read status tracking and management for all system notifications
+- Action-oriented notification handling with integrated response capabilities
+
+### 5. Settings Management
+- Comprehensive user profile information display and management
+- Secure password modification system 
 
