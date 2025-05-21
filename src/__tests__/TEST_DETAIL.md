@@ -14,6 +14,10 @@ This document provides an overview of the testing approach, test coverage, and g
 8. [Test Utilities](#test-utilities)
 9. [Coverage Report](#coverage-report)
 10. [Future Improvements](#future-improvements)
+11. [Mocking Strategy](#mocking-strategy)
+12. [Continuous Integration](#continuous-integration)
+13. [Troubleshooting Common Test Issues](#troubleshooting-common-test-issues)
+14. [Contributing to Tests](#contributing-to-tests)
 
 ## Testing Overview
 
@@ -27,6 +31,7 @@ The ANSAT Pro web application uses a comprehensive testing strategy that include
 - Maintain high test coverage for core components
 - Use mock data to isolate components and services
 - Ensure tests run quickly and reliably
+- Follow Test-Driven Development (TDD) principles when possible
 
 ## Test Categories
 
@@ -38,7 +43,9 @@ The ANSAT Pro web application uses a comprehensive testing strategy that include
 ### End-to-End Tests
 - **Purpose**: Test complete user flows and interactions with the application
 - **Tools**: Selenium WebDriver, Chrome driver
-- **Location**: `/src/__tests__/selenium/`
+- **Location**: `/src/__tests__/selenium(e2e)/`
+  - Basic flows: `e2e.test.js`
+  - Advanced flows: `advanced-e2e.test.js`
 
 ### API Integration Tests
 - **Purpose**: Test integration with backend services and APIs
@@ -95,6 +102,7 @@ Unit tests cover individual components, hooks, context providers, and utility fu
 - `Button.test.js`: Tests the Button component's rendering and interactions
 - `ClientSideJWTRefresher.test.js`: Tests JWT refresher component functionality
 - `TextPressure.test.js`: Tests TextPressure component rendering and state
+- `NavigationContext.test.js`: Tests navigation bar functionality and context
 
 ### Hook Tests
 - `useAutoRefreshJWT.test.js`: Tests JWT token refresh hook functionality
@@ -186,6 +194,11 @@ Test utilities provide helper functions and mock implementations to facilitate t
 - `mockLocalStorage`: Mocks localStorage for tests
 - `mockAppwriteServices`: Mocks Appwrite SDK services
 - `createMockNavigator`: Creates a mock navigation context
+- `mockMatchMedia`: Mocks window.matchMedia for responsive design tests
+- `mockIntersectionObserver`: Mocks IntersectionObserver API
+- `wait`: Helper function to wait for specific time periods
+- `randomString`: Generates random strings for test data
+- `generateTestUser`: Creates test user objects with random data
 
 ### Location
 - `/src/__tests__/utils/test-utils.js`
@@ -217,6 +230,67 @@ Current test coverage by category:
 9. **Snapshot Testing**: Add snapshot tests for UI components
 10. **Mobile Testing**: Add tests specifically for mobile views and interactions
 
+## Mocking Strategy
+
+Our tests use various mocking approaches to isolate components and services:
+
+### Service Mocks
+- **Appwrite SDK**: Mocked using factory functions that return expected responses
+- **Authentication**: JWT tokens are mocked with valid structure but fake signatures
+- **API Responses**: Predefined JSON responses stored in test files
+
+### Component Mocks
+- **Context Providers**: Wrapped with customizable mock values
+- **Route Components**: Mocked with memory router for navigation testing
+- **Third-party Components**: Replaced with simplified versions that track interactions
+
+### Example Mock Implementation
+```javascript
+// Mock Appwrite authentication service
+export const mockAppwriteAccount = () => ({
+  get: vi.fn().mockResolvedValue({
+    $id: "user-id",
+    name: "Test User",
+    email: "test@example.com",
+    emailVerification: true,
+    labels: ["Facilitator"],
+  }),
+  createJWT: vi.fn().mockResolvedValue({ jwt: "mock-jwt-token" }),
+  createEmailPasswordSession: vi.fn(),
+  deleteSession: vi.fn(),
+  createVerification: vi.fn(),
+  updateVerification: vi.fn(),
+});
+```
+
+## Continuous Integration
+
+Our test suite is integrated with our CI/CD pipeline:
+
+### GitHub Actions Workflow
+- **Unit Tests**: Run on every push and pull request
+- **API Tests**: Run on every push to main branch
+- **E2E Tests**: Run on every release candidate
+
+### CI/CD Integration
+- Tests must pass before merging to main branch
+- Coverage reports are uploaded to GitHub Actions artifacts
+- Test failures trigger notifications to development team
+
+## Troubleshooting Common Test Issues
+
+### Flaky Tests
+- **Issue**: Tests pass inconsistently
+- **Solution**: Check for race conditions, add proper waits, and ensure test isolation
+
+### Authentication Failures
+- **Issue**: API tests fail with unauthorized errors
+- **Solution**: Verify test environment variables and JWT token configuration
+
+### Selenium Connection Issues
+- **Issue**: WebDriver cannot connect to browser
+- **Solution**: Check Chrome version compatibility and WebDriver path
+
 ## Contributing to Tests
 
 When contributing new features or fixing bugs, please follow these guidelines:
@@ -228,3 +302,6 @@ When contributing new features or fixing bugs, please follow these guidelines:
 5. Use descriptive test names that explain what is being tested
 6. Avoid testing implementation details; focus on behavior
 7. Follow the existing test structure and naming conventions
+8. Include both positive and negative test cases
+9. Mock external dependencies to keep tests reliable
+10. Document any special test setup requirements
