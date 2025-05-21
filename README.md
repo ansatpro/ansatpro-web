@@ -1,20 +1,17 @@
 ## Testing the functionalities
 
 1. `npm install`
-    
-    If you encounter error with shadcn/ui, try this command:
-    `npx shadcn@latest init`
+
+   If you encounter error with shadcn/ui, try this command:
+   `npx shadcn@latest init`
 
 2. Edit the appwrite.js file
 
-    File Path: src/app/appwrite.js
+   File Path: src/app/appwrite.js
 
-3.  Login Page Path: src/app/auth/login/page.js <br>
+3. Login Page Path: src/app/auth/login/page.js <br>
 
 Signup Page Path: src/app/auth/register/page.js
-  
-
-
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
@@ -52,3 +49,17 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## User Manual
+
+For step-by-step instructions on how to use the application, please refer to the [USER_MANUAL.md](./docs/USER_MANUAL.md) file.
+
+It includes:
+
+- How to log in and register
+- Dashboard overviews for facilitators and preceptors
+- How to add, view, and review feedback
+- Exporting reports
+- Managing student lists and settings
+
+Make sure to check the manual to fully understand the available features and how to navigate the platform efficiently.
