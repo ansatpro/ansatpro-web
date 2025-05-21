@@ -28,6 +28,7 @@ In this project, Appwrite Functions are primarily used for **user authentication
 | `preceptor_related`      | Handles preceptor workflows like feedback and AI analysis                                        | JWT Required     |
 | `user_metadata_function` | Handles all user's common functions like add avatar, add user information into metadata table... | JWT Required     |
 | `guest_request`          | Handles guest user registration and access requests                                              | No Auth Required |
+| `function 1`          | Handles facilitator workflows                                            | JWT Required |
 
 > More functions may be added as the project evolves.
 
