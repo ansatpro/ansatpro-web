@@ -23,11 +23,11 @@ In this project, Appwrite Functions are primarily used for **user authentication
 
 ## 📚 Available Functions
 
-| Function Name         | Description                                        | Auth Requirement |
-|:-------------------------|:---------------------------------------------------|:------------------|
-| `preceptor_related`       | Handles preceptor workflows like feedback and AI analysis | JWT Required     |
-| `user_metadata_function` | Handles all user's common functions like add avatar, add user information into metadata table... | JWT Required |
-| `guest_request` | Handles guest user registration and access requests | No Auth Required |
+| Function Name            | Description                                                                                      | Auth Requirement |
+| :----------------------- | :----------------------------------------------------------------------------------------------- | :--------------- |
+| `preceptor_related`      | Handles preceptor workflows like feedback and AI analysis                                        | JWT Required     |
+| `user_metadata_function` | Handles all user's common functions like add avatar, add user information into metadata table... | JWT Required     |
+| `guest_request`          | Handles guest user registration and access requests                                              | No Auth Required |
 
 > More functions may be added as the project evolves.
 
@@ -104,3 +104,21 @@ For changes to take effect, always re-deploy after updating the function code.
 - To **separate frontend and backend concerns**, keeping the Next.js project lightweight.
 - To allow **scalable serverless execution** without worrying about managing servers.
 - To **securely access databases** and other Appwrite resources with minimal attack surface.
+
+
+
+---
+
+## 📁 `functions/` Folder Structure
+
+| File/Folder                 | Description                                                              |
+| :-------------------------- | :----------------------------------------------------------------------- |
+| `function1/`                | Appwrite Functions related to **facilitators**.                          |
+| `guest_request/`            | Functions accessible **without JWT** for handling public guest requests. |
+| `preceptor_related/`        | Appwrite Functions for **preceptors**, including feedback and access.    |
+| `user_metadata_function/`   | Functions for managing and updating **user metadata and roles**.         |
+| `appwrite.js`               | Exports Appwrite client instance and related API wrappers.               |
+| `functions_README.md`       | Documentation for all functions in the `functions/` directory.           |
+| `HowToConnectToFunction.js` | Frontend example for how **facilitators** call Appwrite Functions.       |
+| `utils.js`                  | Utility/helper functions used by multiple function modules.              |
+
