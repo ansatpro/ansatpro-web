@@ -5,19 +5,20 @@ This document provides an overview of the testing approach, test coverage, and g
 ## Table of Contents
 
 1. [Testing Overview](#testing-overview)
-2. [Test Categories](#test-categories)
-3. [Testing Environment Setup](#testing-environment-setup)
-4. [Running Tests](#running-tests)
-5. [Unit Tests](#unit-tests)
-6. [End-to-End Tests](#end-to-end-tests)
-7. [API Integration Tests](#api-integration-tests)
-8. [Test Utilities](#test-utilities)
-9. [Coverage Report](#coverage-report)
-10. [Future Improvements](#future-improvements)
-11. [Mocking Strategy](#mocking-strategy)
-12. [Continuous Integration](#continuous-integration)
-13. [Troubleshooting Common Test Issues](#troubleshooting-common-test-issues)
-14. [Contributing to Tests](#contributing-to-tests)
+2. [Test Directory Structure](#test-directory-structure)
+3. [Test Categories](#test-categories)
+4. [Testing Environment Setup](#testing-environment-setup)
+5. [Running Tests](#running-tests)
+6. [Unit Tests](#unit-tests)
+7. [End-to-End Tests](#end-to-end-tests)
+8. [API Integration Tests](#api-integration-tests)
+9. [Test Utilities](#test-utilities)
+10. [Coverage Report](#coverage-report)
+11. [Future Improvements](#future-improvements)
+12. [Mocking Strategy](#mocking-strategy)
+13. [Continuous Integration](#continuous-integration)
+14. [Troubleshooting Common Test Issues](#troubleshooting-common-test-issues)
+15. [Contributing to Tests](#contributing-to-tests)
 
 ## Testing Overview
 
@@ -32,6 +33,43 @@ The ANSAT Pro web application uses a comprehensive testing strategy that include
 - Use mock data to isolate components and services
 - Ensure tests run quickly and reliably
 - Follow Test-Driven Development (TDD) principles when possible
+
+## Test Directory Structure
+
+The test directory is organized to mirror the application structure, allowing for easy navigation and correlation between tests and the code they're testing.
+
+### Tests Directory Structure (`src/__tests__/`)
+
+- **`api/`**: Tests for API interactions and backend service integration
+  - `api.test.js`: Tests for API endpoints using mock responses
+  - `real-api.test.js`: Tests for API endpoints using actual API calls
+
+- **`auth/`**: Tests for authentication functionality
+  - `LoginLogout.test.js`: Tests login and logout flows
+
+- **`components/`**: Tests for React UI components
+  - `Button.test.js`: Tests Button component rendering and interactions
+  - `ClientSideJWTRefresher.test.js`: Tests JWT refresh component functionality
+  - `NavigationContext.test.js`: Tests navigation context in components
+  - `TextPressure.test.js`: Tests TextPressure component rendering and state
+
+- **`notifications/`**: Tests for notification system
+  - `NotificationHandling.test.js`: Tests notification display and management functionality
+
+- **`selenium(e2e)/`**: End-to-end tests using Selenium WebDriver
+  - `e2e.test.js`: Basic user flow tests (login, navigation, etc.)
+  - `advanced-e2e.test.js`: Complex user flows (student registration, report generation, etc.)
+
+- **`utils/`**: Test utilities and helper functions
+  - `test-utils.js`: Common utilities used across tests (mock functions, render helpers, etc.)
+
+- **Root test files**:
+  - `NotificationsContext.test.js`: Tests for notification context provider
+  - `README.md`: Documentation for writing tests
+  - `TEST_DETAIL.md`: Comprehensive test documentation (this file)
+  - `useAutoRefreshJWT.test.js`: Tests for JWT refresh hook
+  - `utils.test.js`: Tests for general utility functions like class name handling
+
 
 ## Test Categories
 
@@ -51,6 +89,8 @@ The ANSAT Pro web application uses a comprehensive testing strategy that include
 - **Purpose**: Test integration with backend services and APIs
 - **Tools**: Vitest, Appwrite SDK, Node-fetch
 - **Location**: `/src/__tests__/api/`
+  - Mock tests: `api.test.js`
+  - Real API tests: `real-api.test.js`
 
 ## Testing Environment Setup
 
@@ -290,18 +330,3 @@ Our test suite is integrated with our CI/CD pipeline:
 ### Selenium Connection Issues
 - **Issue**: WebDriver cannot connect to browser
 - **Solution**: Check Chrome version compatibility and WebDriver path
-
-## Contributing to Tests
-
-When contributing new features or fixing bugs, please follow these guidelines:
-
-1. Write tests for new features before implementation (TDD approach)
-2. Update existing tests when modifying functionality
-3. Ensure all tests pass before submitting a PR
-4. Keep tests focused, fast, and independent of each other
-5. Use descriptive test names that explain what is being tested
-6. Avoid testing implementation details; focus on behavior
-7. Follow the existing test structure and naming conventions
-8. Include both positive and negative test cases
-9. Mock external dependencies to keep tests reliable
-10. Document any special test setup requirements
