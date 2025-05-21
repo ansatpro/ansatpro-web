@@ -73,6 +73,20 @@ Authentication is fully managed by Appwrite. Key implementation features:
 
 ---
 
+
+## 6. 📡 Deployment
+
+You can view the following link to get the details of how to deploy the whole website through vercel:
+
+[`vercel_deploy_guide`](https://docs.google.com/document/d/1BJ0mslXzW320X138OfFSK-4PIl_TWynN1MgbijUk5bI/edit?tab=t.0#heading=h.gqmveof3xfmw)
+
+And you can get the details of how to deploy appwrite function through: 
+> [`./appwrite_functions_deploy_guide.md`](./appwrite_functions_deploy_guide.md)  
+
+
+---
+
+
 ## 6. 🧪 Testing
 
 A detailed test plan and test cases are provided in:
