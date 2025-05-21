@@ -33,28 +33,38 @@ To use ANSAT-PRO:
 
 1. Go to the **Login** page.
 2. Enter your registered **email** and **password**.
+   ![Login Screenshot](./images/login.png)
 3. Click **Login** to access your dashboard.
 4. Forgot your password? Click on "Forgot password" to reset it.
+   ![Forgot Password Screenshot](./images/forgot-password.png)
 
 ---
 
 ## 🧭 Dashboard Overview (Facilitator)
 
 Once logged in, you'll see the main dashboard:
+![Facilitator Dashboard Screenshot](./images/facilitator-dashboard.png)
 
 - **Register Students** – Register and view your assigned students.
-- **Review Feedbacks** – Access and complete pending feedback forms.
+  ![Register Student Screenshot](./images/register-student.png)
+- **Review Feedback** – Access and complete pending feedback forms.
+  ![Review Feedback Screenshot](./images/review-feedback.png)
 - **Export Reports** – View and export summaries of feedback and scores.
+  ![Export Reports Screenshot](./images/export-reports.png)
 - **Notifications** – Messages and discussion requests from preceptors regarding feedback.
+  ![Notifications Screenshot](./images/notifications.png)
 
 ---
 
 ## 🧭 Dashboard Overview (Preceptor)
 
 Once logged in, you'll see the main dashboard:
+![Preceptor Dashboard Screenshot](./images/preceptor-dashboard.png)
 
 - **Add Feedback** – Submit new feedback for students.
+  ![Add Feedback Screenshot](./images/add-feedback.png)
 - **View Previous Feedback** – Access past feedback entries.
+  ![View Previous Feedback Screenshot](./images/view-previous-feedback.png)
 
 ---
 
@@ -62,12 +72,16 @@ Once logged in, you'll see the main dashboard:
 
 1. Navigate to **Students** from the sidebar.
 2. View detailed profiles from the student list.
+   ![Student List Screenshot](./images/student-list.png)
 3. Register a single student or use bulk registration.
+   ![Register Student Screenshot](./images/register-student.png)
 4. Use filters in the student list to search by name, status, or rotation.
 
 ---
 
 ## ✍️ Reviewing Feedback (Facilitator)
+
+![Reviewing Feedback Screenshot](./images/reviewing-feedback.png)
 
 1. Go to the **Feedback** page.
 2. View AI-generated feedback items and past facilitator input.
@@ -78,6 +92,8 @@ Once logged in, you'll see the main dashboard:
 ---
 
 ## ⚙️ Settings
+
+![Settings Screenshot](./images/settings.png)
 
 - Click Settings in the left sidebar.
 - View your profile information.
