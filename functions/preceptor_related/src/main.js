@@ -1,9 +1,38 @@
 import { Client, Account, Databases, Query, ID } from 'node-appwrite';
 import Groq from "groq-sdk";
 
+/**
+ * @fileoverview Appwrite cloud function for managing preceptor feedback in a nursing assessment platform.
+ * 
+ * Provides role-based access for authenticated preceptors to:
+ * - Retrieve feedback entries with associated student and AI information.
+ * - Add new feedback entries and corresponding AI assessment items.
+ * - Perform fuzzy name-based student search.
+ * - Analyze free-text feedback using Groq AI to match nursing competency standards.
+ * 
+ * Requires valid JWT for user identity verification and API key for administrative access.
+ * 
+ * Author: Haozhi Lian
+ * Student ID: 24155751
+ */
+
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
+
+/**
+ * Main handler for preceptor-related feedback operations.
+ * Accepts requests with specific `action` types and routes them accordingly.
+ *
+ * @async
+ * @function
+ * @param {Object} param0
+ * @param {import('node-appwrite').Models.FunctionRequest} param0.req - Incoming HTTP request containing JWT, action type, and optional payload.
+ * @param {import('node-appwrite').Models.FunctionResponse} param0.res - HTTP response object used to send JSON responses.
+ * @param {Function} param0.log - Logging utility for diagnostics.
+ * 
+ * @returns {Promise<void>} JSON response containing result data or error message.
+ */
 
 export default async ({ req, res, log }) => {
   const { jwt, action, payload } = JSON.parse(req.body || '{}');
@@ -50,7 +79,10 @@ export default async ({ req, res, log }) => {
   }
 
   try {
-    // Action: Get preceptor feedback with student info for a specific preceptor
+    /**
+     * Retrieves all feedback submitted by the current preceptor,
+     * enriched with corresponding student data and AI-generated feedback item descriptions.
+     */
     if (action === 'getPreceptorFeedbackWithStudent') {
       const feedbacks = await adminDatabase.listDocuments(
         process.env.DB_ID,
@@ -72,7 +104,10 @@ export default async ({ req, res, log }) => {
             student = {
               student_id: studentDoc.student_id,
               first_name: studentDoc.first_name,
-              last_name: studentDoc.last_name
+              last_name: studentDoc.last_name,
+              university_id: studentDoc.university_id,
+              health_service_id: studentDoc.health_service_id,
+              clinic_area_id: studentDoc.clinic_area_id
             };
           } catch {
             student = {
@@ -152,8 +187,12 @@ export default async ({ req, res, log }) => {
       });
     }
 
-    // Action: Add preceptor feedback
+    /**
+     * Creates a new preceptor feedback entry in the database.
+     * Also creates related AI feedback items and generates a notification for the facilitator if flagged.
+     */
     if (action === 'addPreceptorFeedback') {
+
       const {
         ai_item_list, // Example: { '2.4': false, '3.1': true }
         ...feedbackPayload
@@ -217,7 +256,10 @@ export default async ({ req, res, log }) => {
       return res.json({ status: 'success', data: feedbackDoc });
     }
 
-    // Action: Search students by fuzzy search (simplified for preceptors only)
+    /**
+     * Searches student records using a case-insensitive fuzzy match on the student's full name.
+     * Limited to 10 results for performance and clarity.
+     */
     if (action === 'searchStudents') {
       const queryText = payload.query?.toLowerCase();
 
@@ -243,7 +285,10 @@ export default async ({ req, res, log }) => {
       });
     }
 
-    // Action: Generate AI feedback analysis based on standards
+    /**
+     * Uses Groq's LLM to analyze the submitted feedback text
+     * and identify nursing standards that clearly match its content.
+     */
     if (action === 'getAiFeedbackPreceptor') {
       const { text } = payload || {};
 

@@ -1,16 +1,10 @@
 import { Client, Databases, ID, Users, Query } from 'node-appwrite';
-import Groq from 'groq-sdk';
 
 // This Appwrite function will be executed every time your function is triggered
 export default async ({ req, res, log, error }) => {
-  // You can use the Appwrite SDK to interact with other services
-  // For this example, we're using the Users service
+
   const project_API_key = process.env.project_API_key;
 
-  // const client = new Client()
-  //   .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
-  //   .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
-  //   .setKey(req.headers['x-appwrite-key'] ?? '');
   const client = new Client()
     .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
     .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
@@ -18,8 +12,9 @@ export default async ({ req, res, log, error }) => {
   const users = new Users(client);
 
   const DB_ID = process.env.db_id;
-  const COLLECTION_ID_USERS_METADATA = process.env.users_metadata;
   const COLLECTION_ID_STUDENTS = process.env.collection_id_students;
+  const COLLECTION_ID_EMAIL_VERIFICATION_TOKENS =process.env.email_verification_tokens;
+  const COLLECTION_ID_NOTIFICATIONS = process.env.notifications;
   const COLLECTION_ID_PRECEPTOR_FEEDBACKS = process.env.preceptor_feedbacks;
   const COLLECTION_ID_PRECEPTOR_AI_FEEDBACK_ITEMS =
     process.env.preceptor_ai_feedback_items;
@@ -27,11 +22,8 @@ export default async ({ req, res, log, error }) => {
   const COLLECTION_ID_FACILITATOR_REVIEWS = process.env.facilitator_reviews;
   const COLLECTION_ID_FACILITATOR_REVIEW_SCORES =
     process.env.facilitator_review_scores;
-  const COLLECTION_ID_EMAIL_VERIFICATION_TOKENS =
-    process.env.email_verification_tokens;
-  const COLLECTION_ID_NOTIFICATIONS = process.env.notifications;
   const GROQ_API_KEY = process.env.GROQ_API_KEY;
-
+  
   const db = new Databases(client);
 
   try {
@@ -43,11 +35,8 @@ export default async ({ req, res, log, error }) => {
     error('Could not list users: ' + err.message);
   }
 
-  // The req object contains the request data
   // basic connection
   if (req.path === '/ping') {
-    // Use res object to respond with text(), json(), or binary()
-    // Don't forget to return a response!
     return res.text('Pong');
   }
 
@@ -398,242 +387,6 @@ export default async ({ req, res, log, error }) => {
     }
   }
 
-  // get all students with all details  original one, keep for a while
-  if (req.path === '/facilitator/get/studentsWithAllDetails1') {
-    log('hi', req);
-    switch (req.method) {
-      case 'GET':
-        log('hello', req);
-        const allDocuments_students = [];
-        let offset = 0;
-        const limit = 100;
-        // const { created_by } = JSON.parse(req.body);
-        const created_by = req.bodyJson?.created_by;
-
-        // 1. Get all students created by this facilitator
-        while (true) {
-          const response = await db.listDocuments(
-            DB_ID,
-            COLLECTION_ID_STUDENTS,
-            [
-              Query.equal('created_by', created_by),
-              Query.limit(limit),
-              Query.offset(offset),
-            ]
-          );
-
-          allDocuments_students.push(...response.documents);
-          if (response.documents.length < limit) break;
-          offset += limit;
-        }
-
-        const student_document_ids = allDocuments_students.map(
-          (student) => student.$id
-        );
-
-        // 2. Get all feedbacks for these students
-        let allFeedbackDocuments = [];
-        let offset2 = 0;
-        const limit2 = 100;
-
-        while (true) {
-          const response = await db.listDocuments(
-            DB_ID,
-            COLLECTION_ID_PRECEPTOR_FEEDBACKS,
-            [
-              Query.equal('student_document_id', student_document_ids),
-              Query.limit(limit2),
-              Query.offset(offset2),
-            ]
-          );
-
-          allFeedbackDocuments.push(...response.documents);
-          if (response.documents.length < limit2) break;
-          offset2 += limit2;
-        }
-
-        const feedback_ids = allFeedbackDocuments.map((f) => f.$id);
-
-        // 2.5. Get Preceptor Details
-        const preceptor_ids = [
-          ...new Set(allFeedbackDocuments.map((p) => p.preceptor_id)),
-        ];
-
-        const preceptorDetailsMap = {};
-
-        for (const preceptor_id of preceptor_ids) {
-          try {
-            const preceptor = await users.get(preceptor_id); // You may need to replace 'users.get' with your Appwrite user function
-            preceptorDetailsMap[preceptor_id] = preceptor;
-          } catch (error) {
-            console.error(`Failed to get preceptor ${preceptor_id}`, error);
-            preceptorDetailsMap[preceptor_id] = null;
-          }
-        }
-
-        // 3. Get all feedback items (AI-generated) for these feedbacks
-        let allFeedbackItems = [];
-        let offset3 = 0;
-        const limit3 = 100;
-
-        while (true) {
-          const response = await db.listDocuments(
-            DB_ID,
-            COLLECTION_ID_PRECEPTOR_AI_FEEDBACK_ITEMS,
-            [
-              Query.equal('feedback_id', feedback_ids),
-              Query.limit(limit3),
-              Query.offset(offset3),
-            ]
-          );
-
-          allFeedbackItems.push(...response.documents);
-          if (response.documents.length < limit3) break;
-          offset3 += limit3;
-        }
-
-        const item_ids = allFeedbackItems.map((item) => item.item_id);
-
-        // 4. Get descriptions for those assessment item_ids
-        let allItemDescription = [];
-        let offset4 = 0;
-        const limit4 = 100;
-
-        while (true) {
-          const response = await db.listDocuments(
-            DB_ID,
-            COLLECTION_ID_ASSESSMENT_ITEMS,
-            [
-              Query.equal('item_id', item_ids),
-              Query.limit(limit4),
-              Query.offset(offset4),
-            ]
-          );
-
-          allItemDescription.push(...response.documents);
-          if (response.documents.length < limit4) break;
-          offset4 += limit4;
-        }
-
-        // 5. Create a map of item_id => description
-        const itemDescriptionMap = {};
-        for (const desc of allItemDescription) {
-          itemDescriptionMap[desc.item_id] = desc;
-        }
-
-        // 6. Add description into feedback items
-        const allFeedbackItemsWithDescriptions = allFeedbackItems.map(
-          (item) => ({
-            ...item,
-            item_details: itemDescriptionMap[item.item_id] || null,
-          })
-        );
-
-        // 7. Create a map: feedback_id => [items]
-        const feedbackItemsMap = {};
-        for (const item of allFeedbackItemsWithDescriptions) {
-          const feedbackId = item.feedback_id;
-          if (!feedbackItemsMap[feedbackId]) {
-            feedbackItemsMap[feedbackId] = [];
-          }
-          feedbackItemsMap[feedbackId].push(item);
-        }
-
-        // 8. Get all facilitator reviews linked to feedback
-        let allReviewDocuments = [];
-        let offset5 = 0;
-        const limit5 = 100;
-
-        while (true) {
-          const response = await db.listDocuments(
-            DB_ID,
-            COLLECTION_ID_FACILITATOR_REVIEWS,
-            [
-              Query.equal('preceptor_feedback_document_id', feedback_ids),
-              Query.limit(limit5),
-              Query.offset(offset5),
-            ]
-          );
-
-          allReviewDocuments.push(...response.documents);
-          if (response.documents.length < limit5) break;
-          offset5 += limit5;
-        }
-
-        const review_ids = allReviewDocuments.map((r) => r.$id);
-
-        // 9. Get all facilitator review scores linked to those reviews
-        let allReviewScoresDocuments = [];
-        let offset6 = 0;
-        const limit6 = 100;
-
-        while (true) {
-          const response = await db.listDocuments(
-            DB_ID,
-            COLLECTION_ID_FACILITATOR_REVIEW_SCORES,
-            [
-              Query.equal('review_id', review_ids),
-              Query.limit(limit6),
-              Query.offset(offset6),
-            ]
-          );
-
-          allReviewScoresDocuments.push(...response.documents);
-          if (response.documents.length < limit6) break;
-          offset6 += limit6;
-        }
-
-        // 10. Create a map of review_id => [scores]
-        const reviewScoresMap = {};
-        for (const score of allReviewScoresDocuments) {
-          const reviewId = score.review_id;
-          if (!reviewScoresMap[reviewId]) {
-            reviewScoresMap[reviewId] = [];
-          }
-          reviewScoresMap[reviewId].push(score);
-        }
-
-        // 11. Create a map: feedback_id => review (including scores)
-        const reviewMap = {};
-        for (const review of allReviewDocuments) {
-          reviewMap[review.preceptor_feedback_document_id] = {
-            ...review,
-            review_scores: reviewScoresMap[review.$id] || [],
-          };
-        }
-
-        // 12. Add items + reviews + preceptor name to each feedback
-        const feedbacksWithItemsAndReviews = allFeedbackDocuments.map(
-          (feedback) => ({
-            ...feedback,
-            preceptor_name:
-              preceptorDetailsMap[feedback.preceptor_id]?.name || 'Unknown',
-            ai_feedback_items: feedbackItemsMap[feedback.$id] || [],
-            review: reviewMap[feedback.$id] || null,
-          })
-        );
-
-        // 13. Group feedbacks by student
-        const feedbackMap = {};
-        for (const feedback of feedbacksWithItemsAndReviews) {
-          const studentId = feedback.student_document_id;
-          if (!feedbackMap[studentId]) {
-            feedbackMap[studentId] = [];
-          }
-          feedbackMap[studentId].push(feedback);
-        }
-
-        // 14. Combine students with their feedback list
-        const studentsWithFeedback = allDocuments_students.map((student) => ({
-          ...student,
-          preceptorFeedbackList: feedbackMap[student.$id] || [],
-        }));
-
-        // 15. Return response
-        return res.json(studentsWithFeedback);
-    }
-  }
-
   // for get all students with all details
   if (req.path === '/facilitator/get/studentsWithAllDetails') {
     switch (req.method) {
@@ -886,8 +639,7 @@ export default async ({ req, res, log, error }) => {
       case 'POST':
         try {
           log(req);
-          // const { preceptor_feedback_document_id } = JSON.parse(req.body);
-          // log(preceptor_feedback_document_id);
+
           const {
             preceptor_feedback_document_id,
             facilitator_id,
@@ -914,18 +666,7 @@ export default async ({ req, res, log, error }) => {
           const review_id = response_postReview.$id;
           log(review_id);
 
-          // const response_postReviewScore = await db.createDocument(
-          //   DB_ID,
-          //   COLLECTION_ID_FACILITATOR_REVIEW_SCORES,
-          //   ID.unique(),
-          //   {
-          //     review_id,
-          //     item_id,
-          //     score,
-          //   }
-          // )
 
-          // log(response_postReviewScore);
 
           await Promise.all(
             ratedItems.map(({ itemId, rating }) =>
@@ -971,36 +712,6 @@ export default async ({ req, res, log, error }) => {
   }
 
   // AI Summary
-  // const groq = new Groq({ apiKey: GROQ_API_KEY });
-
-  // async function getGroqChatCompletion(prompt) {
-  //   return groq.chat.completions.create({
-  //     messages: [{ role: 'user', content: prompt }],
-  //     model: 'llama-3.3-70b-versatile',
-  //   });
-  // }
-
-  // if (req.path === '/facilitator/AIsummary') {
-  //   switch (req.method) {
-  //     case 'POST':
-  //       const prompt = req.bodyJson?.prompt;
-  //       try {
-  //         const chatCompletion = await getGroqChatCompletion(prompt);
-
-  //         return res.json({
-  //           message: 'Generate AI Summary Successfully',
-  //           aiAnswer:
-  //             chatCompletion.choices[0]?.message?.content || 'No AI answer',
-  //         });
-  //       } catch (error) {
-  //         console.error('Groq error:', error);
-  //         return res.json({ error: error.message || 'Unknown error' });
-  //       }
-
-  //   }
-  // }
-
-  // AI Summary 1
   const groq = new Groq({ apiKey: GROQ_API_KEY });
 
   async function getGroqChatCompletion(prompt) {
@@ -1094,4 +805,5 @@ export default async ({ req, res, log, error }) => {
         });
     }
   }
+
 };
